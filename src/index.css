@@ -1,0 +1,409 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Source Serif 4 Variable', Georgia, serif;
+  --font-body: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* boje sa letka: crvena, bela, plava */
+  /* svetlo plava: ink za površine (sa belim tekstom), deep za tekst na svetloj podlozi */
+  --color-ink: #1e8fe6;
+  --color-deep: #1673c4;
+  --color-mute: #55779a;
+  --color-paper: #f3f5fa;
+  --color-line: #d7deea;
+  --color-red: #d71e28;
+  --color-red-dark: #b3141d;
+  --color-blue: #1e8fe6;
+}
+
+@layer base {
+  :root {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html {
+    scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  }
+  body {
+    background-color: var(--color-paper);
+    font-family: var(--font-body);
+    color: var(--color-deep);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    line-height: 1.08;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-red);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2rem;
+    /* providna ivica da sva dugmad budu iste visine */
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s,
+      box-shadow 0.3s;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+  .btn:disabled {
+    opacity: 0.7;
+    cursor: progress;
+    transform: none;
+  }
+  /* odsjaj koji prelazi preko dugmeta na hover */
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 40%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.35), transparent);
+    transform: translateX(0) skewX(-20deg);
+    transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .btn:hover::after {
+    transform: translateX(450%) skewX(-20deg);
+  }
+  .btn .arrow {
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .btn:hover .arrow {
+    transform: translateX(5px);
+  }
+
+  .btn-primary {
+    background: var(--color-red);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-red-dark);
+    box-shadow: 0 12px 24px -12px rgb(215 30 40 / 0.6);
+  }
+  .btn-ghost {
+    color: var(--color-deep);
+    border: 1px solid rgb(30 143 230 / 0.45);
+  }
+  .btn-ghost:hover {
+    background: var(--color-ink);
+    color: #fff;
+    border-color: var(--color-ink);
+  }
+  .btn-light {
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.4);
+  }
+  .btn-light:hover {
+    color: var(--color-deep);
+    background: #fff;
+    border-color: #fff;
+  }
+
+  .navlink {
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    color: rgb(22 115 196 / 0.85);
+    transition: color 0.2s;
+  }
+  .navlink::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.25rem;
+    height: 2px;
+    background: var(--color-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .navlink:hover {
+    color: var(--color-deep);
+  }
+  .navlink:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* crveni red naslova na početnom ekranu: crvena slova sa belom "senkom" ispod, kao slojeviti natpis */
+.hero-red {
+  color: var(--color-red);
+  text-shadow:
+    0 0.045em 0 #fff,
+    0 0.09em 0.16em rgb(0 0 0 / 0.22);
+}
+
+/* crvena kartica sa činjenicama: na nižim ekranima stoji u redu, na visokim kao kolona pored pečata */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 560px;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: var(--color-red);
+  box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.55);
+}
+@media (min-width: 640px) {
+  .hero-stats {
+    gap: 1.25rem;
+    padding: 1.1rem 1.4rem;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-stat:last-child {
+    padding-right: 3.25rem; /* mesto za pečat */
+  }
+}
+@media (min-width: 1024px) and (min-height: 861px) {
+  .hero-stats {
+    width: 220px;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 1rem 1.25rem;
+  }
+  .hero-stat {
+    padding-block: 0.625rem;
+  }
+  .hero-stat + .hero-stat {
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+  }
+  .hero-stat:first-child {
+    padding-top: 0;
+  }
+  .hero-stat:last-child {
+    padding-bottom: 0;
+  }
+}
+
+/* stalno sporo okretanje pečata u hero kartici */
+.badge-spin {
+  animation: badge-spin 22s linear infinite;
+}
+@keyframes badge-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee {
+  will-change: transform;
+  animation: slide 40s linear infinite;
+}
+.marquee:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .badge-spin {
+    animation: none;
+  }
+}
+
+/* 3D telefon u sekciji Kontakt (src/components/Phone.jsx) */
+.phone-stage {
+  --w: 240px;
+  --h: 490px;
+  --d: 14px;
+  padding: 10px 40px 0;
+}
+.phone-float {
+  /* perspektiva mora biti na direktnom roditelju telefona */
+  perspective: 1400px;
+  animation:
+    phone-float 5s ease-in-out infinite,
+    phone-buzz 3.2s linear infinite;
+}
+.phone {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  animation: phone-spin 12s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.phone-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 38px;
+  background: #121417;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.12);
+}
+.phone-front {
+  padding: 9px;
+  transform: translateZ(calc(var(--d) / 2));
+}
+.phone-back {
+  padding: 4px;
+  transform: rotateY(180deg) translateZ(calc(var(--d) / 2));
+}
+.phone-side {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  width: var(--d);
+  height: calc(var(--h) - 68px);
+  margin-left: calc(var(--d) / -2);
+  background: linear-gradient(90deg, #0a0b0d, #2a2d33 50%, #0a0b0d);
+}
+.phone-left {
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+.phone-right {
+  transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+.phone-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgb(255 255 255 / 0.55);
+  animation: phone-ring 1.8s ease-out infinite;
+}
+.phone-accept {
+  animation: phone-accept 1.2s ease-in-out infinite;
+}
+.phone-bubble {
+  position: absolute;
+  z-index: 10;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px 9999px 9999px 4px;
+  background: #fff;
+  color: var(--color-red);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.6);
+  opacity: 0;
+  animation: phone-bubble 3.2s ease-out infinite;
+}
+.phone-shadow {
+  display: block;
+  width: 70%;
+  height: 22px;
+  margin: 22px auto 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.45), transparent);
+  animation: phone-shadow 5s ease-in-out infinite;
+}
+
+.phone-stage.is-paused,
+.phone-stage.is-paused * {
+  animation-play-state: paused !important;
+}
+
+@keyframes phone-spin {
+  0% { transform: rotateX(4deg) rotateY(-22deg); }
+  24% { transform: rotateX(4deg) rotateY(22deg); }
+  40%, 58% { transform: rotateX(4deg) rotateY(180deg); }
+  74% { transform: rotateX(4deg) rotateY(338deg); }
+  87% { transform: rotateX(4deg) rotateY(382deg); }
+  100% { transform: rotateX(4deg) rotateY(338deg); }
+}
+@keyframes phone-float {
+  50% { translate: 0 -14px; }
+}
+/* kratko "zujanje" kao kad telefon zvoni */
+@keyframes phone-buzz {
+  0%, 14%, 100% { rotate: 0deg; }
+  2%, 6%, 10% { rotate: -2.5deg; }
+  4%, 8%, 12% { rotate: 2.5deg; }
+}
+@keyframes phone-ring {
+  from { scale: 1; opacity: 0.9; }
+  to { scale: 1.7; opacity: 0; }
+}
+@keyframes phone-accept {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 0 -4px; rotate: -12deg; }
+  50% { translate: 0 0; rotate: 12deg; }
+}
+@keyframes phone-bubble {
+  0% { opacity: 0; scale: 0.4; }
+  6% { opacity: 1; scale: 1.12; }
+  11% { scale: 1; }
+  32% { opacity: 1; translate: 0 -6px; }
+  42%, 100% { opacity: 0; translate: 0 -14px; scale: 0.9; }
+}
+@keyframes phone-shadow {
+  50% { scale: 0.85; opacity: 0.7; }
+}
+
+@media (max-width: 400px) {
+  .phone-stage {
+    padding-inline: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone,
+  .phone-float,
+  .phone-ring,
+  .phone-accept,
+  .phone-bubble,
+  .phone-shadow {
+    animation: none;
+  }
+  .phone {
+    transform: rotateY(-14deg);
+  }
+  .phone-bubble {
+    opacity: 1;
+  }
+}
+
+.footer-link {
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
