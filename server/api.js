@@ -71,7 +71,7 @@ const routes = {
     db.prepare("INSERT INTO logins (user_id, login, success, kind, ip, user_agent) VALUES (?, ?, 1, 'registracija', ?, ?)").run(
       id, normalized, ip(req), req.headers['user-agent'] ?? '',
     )
-    createSession(res, id)
+    createSession(req, res, id)
     // ne čeka se Telegram, da kupac ne čeka na registraciju
     notify(
       'accounts',
@@ -104,7 +104,7 @@ const routes = {
       reportLoginTrouble(login, user)
       fail(401, 'Pogrešan telefon/email ili lozinka.')
     }
-    createSession(res, user.id)
+    createSession(req, res, user.id)
     return { user: publicUser(user) }
   },
 

@@ -49,7 +49,7 @@ export default function ShopPage({ slug, category }) {
       </div>
 
       {/* traka koja ostaje gore: strelica nazad, ime lokala i delovi menija */}
-      <nav aria-label="Delovi menija" className="sticky top-[calc(116px+env(safe-area-inset-top,0px))] z-10 mt-6 border-y border-line bg-paper/95 backdrop-blur">
+      <nav aria-label="Delovi menija" className="sticky top-[calc(116px+env(safe-area-inset-top,0px))] z-10 mt-6 border-y border-line bg-paper">
         <div className="mx-auto flex max-w-[920px] items-center gap-3 px-5 py-2.5 sm:px-6">
           <Link
             href={back}
@@ -140,6 +140,5 @@ function ArrowLeft({ className }) {
 function scrollToSection(i) {
   const el = document.getElementById(sectionId(i))
   if (!el) return
-  if (window.lenis) window.lenis.scrollTo(el, { offset: -184 })
-  else el.scrollIntoView({ behavior: 'smooth' })
+  el.scrollIntoView({ behavior: 'smooth' })
 }

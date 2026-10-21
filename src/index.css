@@ -23,6 +23,13 @@
   }
   html {
     scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
+    /* obican skrol tockom i prstom; klizi samo klik na link ka delu stranice (#usluge, #kontakt...) */
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   body {
     background-color: var(--color-paper);
@@ -157,18 +164,6 @@
   }
 }
 
-/* Lenis smooth scroll */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-
 /* crveni red naslova na početnom ekranu: crvena slova sa belom "senkom" ispod, kao slojeviti natpis */
 .hero-red {
   color: var(--color-red);
@@ -230,17 +225,15 @@ html.lenis body {
   }
 }
 
+/* traka partnera: pomera se za jedan krug (1/--copies dužine) i kreće ispočetka, bez pauze na prelaz mišem */
 @keyframes slide {
   to {
-    transform: translateX(-50%);
+    transform: translateX(calc(-100% / var(--copies, 2)));
   }
 }
 .marquee {
   will-change: transform;
-  animation: slide 40s linear infinite;
-}
-.marquee:hover {
-  animation-play-state: paused;
+  animation: slide 24s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee,

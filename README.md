@@ -1,6 +1,6 @@
 # Beep Beep Dostava Negotin
 
-Vite + React + Tailwind CSS v4 + Framer Motion + GSAP + Lenis.
+Vite + React + Tailwind CSS v4 + Framer Motion (obican skrol pregledaca, bez dodatnog "glatkog" skrola).
 
 ```bash
 npm install

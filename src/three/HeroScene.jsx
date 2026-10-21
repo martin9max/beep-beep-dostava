@@ -12,7 +12,7 @@ const smooth = (a, b, x) => {
 }
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const DRIVE_IN = 7 // koliko metara trokolica prelazi pri ulasku
+const TURN_START = -0.6 // trokolica na početku stoji malo okrenuta (prednji deo ka kameri)
 
 // compact: telefon/tablet, scena ima svoj prostor između teksta i kartice, trokolica je u sredini
 function Scene({ progress, compact }) {
@@ -27,6 +27,7 @@ function Scene({ progress, compact }) {
   const turn = useRef()
   const drive = useRef()
   const parcel = useRef()
+  const driveIn = useRef(7)
   const parts = useRef({})
   const p = useRef(0)
   const start = useRef(null)
@@ -54,14 +55,14 @@ function Scene({ progress, compact }) {
     const target = progress.get() * smooth(0.85, 1, raw)
     p.current = damp(p.current, target, 4, dt)
     const s = p.current
-    const dist = (intro - 1) * DRIVE_IN
+    const dist = (intro - 1) * driveIn.current
     drive.current.position.x = dist
     // malo "propinjanje" pri kočenju
     drive.current.rotation.z = -Math.sin(raw * Math.PI) * 0.02 * (1 - raw)
     parts.current.wheels?.forEach((w) => w && (w.rotation.z = -dist / w.userData.radius))
 
     // 2) skrol: trokolica se okreće od prednje ka zadnjoj strani
-    turn.current.rotation.y = lerp(-0.6, 0.78, smooth(0, 0.45, s))
+    turn.current.rotation.y = lerp(TURN_START, 0.78, smooth(0, 0.45, s))
 
     // 3) zadnja vrata kutije se podižu
     const hatch = smooth(0.42, 0.6, s)
@@ -73,14 +74,16 @@ function Scene({ progress, compact }) {
     const fly = smooth(0.3, 1, k)
     const box = parcel.current
     box.visible = k > 0.001
-    // na uskom ekranu paket ide više pravo ka kameri, da ostane u kadru
+    // paket izlazi iz kutije pa leti pravo ka kameri i blago naviše, ostaje na sredini kadra
+    // (pomeraj je u koordinatama okrenute trokolice: -x i +z zajedno = ka kameri)
     box.position.set(
-      BOX.x + 0.02 - slide * 0.85 - fly * (wide ? 1.4 : compact ? 0.15 : 0.3),
-      BOX.y + 0.31 + fly * (wide ? 0.4 : compact ? 0.05 : 0.75) + Math.sin(t * 1.5) * 0.02 * fly,
-      fly * (wide ? 1.3 : compact ? 0.9 : 1.6),
+      BOX.x + 0.02 - slide * 0.85 - fly * (wide ? 0.2 : compact ? 0.15 : 0.3),
+      BOX.y + 0.31 + fly * (wide ? 0.6 : compact ? 0.75 : 0.75) + Math.sin(t * 1.5) * 0.02 * fly,
+      fly * (wide ? 1.6 : compact ? 1.2 : 1.6),
     )
-    box.rotation.set(fly * 0.12, fly * (far ? 0.95 : 0.8), -fly * 0.06)
-    box.scale.setScalar(0.7 * (1 + fly * (compact ? 0.15 : far ? 0.35 : 0.7)))
+    // paket izlazi uspravno (bez naginjanja) i okreće se tačno licem (nalepnicom) ka kameri
+    box.rotation.set(0, fly * (Math.PI / 2 - turn.current.rotation.y), 0)
+    box.scale.setScalar(0.7 * (1 + fly * (compact ? 0.25 : far ? 0.45 : 0.7)))
 
     // kamera se lagano primiče
     // na telefonu kamera stoji, da trokolica ne izađe iz svog prostora
@@ -93,8 +96,12 @@ function Scene({ progress, compact }) {
 
   // compact: trokolica (oko 2,6 x 1,9 m sa paketom) staje u kadar i po širini i po visini
   const fit = Math.min(viewport.width / 2.8, viewport.height / 2.1)
-  const rigPos = compact ? [0, 0.1 - 0.8 * fit, 0] : wide ? [vw * 0.19, -0.7, 0] : [0, -0.85, 0]
-  const rigScale = compact ? fit : wide ? Math.min(1.3, vw * 0.17) : Math.min(1.1, vw * 0.36)
+  // tricikl stoji na sredini, dole na trotoaru sa fotografije u pozadini
+  const rigPos = compact ? [0, -viewport.height * 0.4, 0] : wide ? [0, -viewport.height * 0.39, 0] : [0, -0.85, 0]
+  const rigScale = compact ? fit * 0.82 : wide ? Math.min(1.35, vw * 0.15) : Math.min(1.1, vw * 0.36)
+  // dolazak počinje tačno iza leve ivice slike i završava na sredini
+  // (put se meri duž pravca u kom je trokolica okrenuta, zato deljenje sa cos)
+  driveIn.current = (viewport.width / 2 + 1.5 * rigScale) / (rigScale * Math.cos(TURN_START))
 
   return (
     <group ref={rig} position={rigPos} scale={rigScale}>

@@ -20,17 +20,17 @@ export function checkPassword(password, stored) {
 
 const sha = (token) => createHash('sha256').update(token).digest('hex')
 
-export function createSession(res, userId) {
+export function createSession(req, res, userId) {
   const token = randomBytes(32).toString('base64url')
   const maxAge = SESSION_DAYS * 24 * 3600
   db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(sha(token), userId, Date.now() + maxAge * 1000)
-  setCookie(res, `${COOKIE}=${token}; Max-Age=${maxAge}`)
+  setCookie(req, res, `${COOKIE}=${token}; Max-Age=${maxAge}`)
 }
 
 export function destroySession(req, res) {
   const token = readCookie(req)
   if (token) db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha(token))
-  setCookie(res, `${COOKIE}=; Max-Age=0`)
+  setCookie(req, res, `${COOKIE}=; Max-Age=0`)
 }
 
 /** Prijavljeni korisnik iz kolačića, ili null. */
@@ -52,9 +52,11 @@ function readCookie(req) {
   return match?.[1]
 }
 
-function setCookie(res, value) {
-  // Secure: kolačić ide samo preko https (na pravom sajtu); lokalno je http
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
+function setCookie(req, res, value) {
+  // Secure kad sajt ide preko https (pravi sajt, i iza proksija hostinga);
+  // preko običnog http (proba na telefonu u kućnoj mreži) bez njega, inače prijava ne bi radila
+  const https = req.socket.encrypted || req.headers['x-forwarded-proto']?.split(',')[0].trim() === 'https'
+  const secure = https ? '; Secure' : ''
   res.setHeader('Set-Cookie', `${value}; Path=/; HttpOnly; SameSite=Lax${secure}`)
 }
 

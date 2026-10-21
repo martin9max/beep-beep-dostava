@@ -11,13 +11,30 @@ const subscribe = (fn) => {
   }
 }
 
+// Pamćenje skrola po stranici: dugme "nazad" vraća tačno tamo gde je kupac bio
+// (npr. iz menija lokala nazad na listu lokala), umesto na vrh stranice.
+const positions = new Map()
+const newKey = () => Math.random().toString(36).slice(2, 10)
+const pageKey = () => history.state?.bbKey
+
+// odmah, bez klizanja (klizanje je samo za linkove ka delovima početne, vidi index.css)
+const scrollToY = (y) => window.scrollTo({ top: y, behavior: 'instant' })
+
+if (typeof window !== 'undefined') {
+  history.scrollRestoration = 'manual'
+  if (!pageKey()) history.replaceState({ ...history.state, bbKey: newKey() }, '')
+  addEventListener('scroll', () => positions.set(pageKey(), scrollY), { passive: true })
+  addEventListener('popstate', () => {
+    const y = positions.get(pageKey()) ?? 0
+    // čeka da React nacrta stranicu, pa tek onda skroluje
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToY(y)))
+  })
+}
+
 export function navigate(to, { replace = false, scroll = true } = {}) {
-  history[replace ? 'replaceState' : 'pushState'](null, '', to)
+  history[replace ? 'replaceState' : 'pushState']({ bbKey: replace ? pageKey() : newKey() }, '', to)
   listeners.forEach((fn) => fn())
-  if (scroll && !to.includes('#')) {
-    if (window.lenis) window.lenis.scrollTo(0, { immediate: true })
-    else window.scrollTo(0, 0)
-  }
+  if (scroll && !to.includes('#')) scrollToY(0)
 }
 
 /** Trenutna putanja i parametri (?k=pica). Pri prerenderu je uvek početna. */

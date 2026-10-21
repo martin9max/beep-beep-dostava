@@ -24,7 +24,15 @@ export default function CartBar() {
             className="btn btn-primary mx-auto flex w-full max-w-[640px] justify-between gap-3 rounded-xl px-5 py-4 shadow-[0_18px_40px_-14px_rgba(215,30,40,.8)]"
           >
             <span className="flex items-center gap-3">
-              <span className="grid h-8 min-w-8 place-items-center rounded-full bg-white px-2 text-sm font-extrabold text-red">{cart.count || '✎'}</span>
+              <motion.span
+                key={cart.count}
+                initial={{ scale: 1.5 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                className="grid h-8 min-w-8 place-items-center rounded-full bg-white px-2 text-sm font-extrabold text-red"
+              >
+                {cart.count || '✎'}
+              </motion.span>
               <span className="text-left leading-tight">
                 Pregled porudžbine
                 <span className="block text-[13px] font-semibold text-white/85">

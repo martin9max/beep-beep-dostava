@@ -87,10 +87,12 @@ export function AddressDialog({ open, onClose }) {
     setError('')
     const onKey = (e) => e.key === 'Escape' && onClose()
     addEventListener('keydown', onKey)
-    window.lenis?.stop()
+    // stranica ispod prozora ne skroluje dok je prozor otvoren
+    const overflow = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
     return () => {
       removeEventListener('keydown', onKey)
-      window.lenis?.start()
+      document.documentElement.style.overflow = overflow
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -56,9 +56,16 @@ export default function Header() {
           <Link href="/korpa" aria-label={`Korpa, ${cart.count} stavki`} className="relative grid h-11 w-11 place-items-center rounded-lg border border-line text-deep transition hover:border-ink">
             <BagIcon />
             {!cart.isEmpty && (
-              <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red px-1 text-[11px] font-extrabold text-white">
+              // "skoči" svaki put kad se doda stavka
+              <motion.span
+                key={cart.count}
+                initial={{ scale: 1.7 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red px-1 text-[11px] font-extrabold text-white"
+              >
                 {cart.count || '•'}
-              </span>
+              </motion.span>
             )}
           </Link>
           <Link href="/naruci" className="btn btn-primary hidden px-5 py-3 text-[15px] lg:inline-flex">

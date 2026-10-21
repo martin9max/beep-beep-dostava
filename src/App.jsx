@@ -1,5 +1,5 @@
-import { MotionConfig } from 'framer-motion'
-import { useSmoothScroll } from './hooks/useSmoothScroll'
+import { MotionConfig, motion } from 'framer-motion'
+import { EASE } from './lib/order'
 import { AuthProvider } from './lib/auth'
 import { CartProvider } from './lib/cart'
 import { useRoute } from './lib/router'
@@ -45,7 +45,6 @@ function Page({ path, query }) {
 }
 
 export default function App() {
-  useSmoothScroll()
   const { path, query } = useRoute()
 
   return (
@@ -64,7 +63,10 @@ export default function App() {
             </main>
           ) : (
             <PageShell>
-              <Page path={path} query={query} />
+              {/* blag prelaz između stranica: nova stranica uđe odozdo umesto da samo "iskoči" */}
+              <motion.div key={path} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
+                <Page path={path} query={query} />
+              </motion.div>
             </PageShell>
           )}
           <Footer />

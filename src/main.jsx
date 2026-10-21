@@ -5,6 +5,10 @@ import '@fontsource-variable/source-serif-4'
 import './index.css'
 import App from './App'
 
+// Ovaj sajt nema service worker. Ako je neki drugi sajt ranije na istoj adresi ostavio svoj
+// (npr. na localhost:5173), on može da servira njegove stare fajlove i ikonicu, pa se uklanja.
+navigator.serviceWorker?.getRegistrations().then((list) => list.forEach((r) => r.unregister()))
+
 const root = document.getElementById('root')
 const app = (
   <StrictMode>

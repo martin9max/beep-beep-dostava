@@ -2,18 +2,23 @@ import { motion } from 'framer-motion'
 import { PARTNERS } from '../data'
 import { EASE } from '../lib/order'
 
-// Logoi iz src/assets/partners; ime fajla je ime partnera.
+// Logoi iz src/assets/partners; ime fajla je ime partnera. Slike su unapred
+// prilagođene obliku polja (288 x 112), originali su u branding/partneri.
 const LOGOS = Object.entries(
   import.meta.glob('../assets/partners/*.{svg,png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' }),
 ).map(([path, src]) => ({ name: path.split('/').pop().replace(/\.[^.]+$/, ''), src }))
 
 const ITEMS = LOGOS.length ? LOGOS : PARTNERS.map((name) => ({ name, src: null }))
 
+// u jednom krugu trake su bar 4 logoa (dok je partnera manje, ponavljaju se)
+const PER_SET = 4
+const SET = Array.from({ length: Math.ceil(PER_SET / ITEMS.length) }, () => ITEMS).flat()
+// isti krug se ponavlja nekoliko puta da traka bude puna i na širokom ekranu
+const COPIES = 4
+
 /** Traka sa logoima partnera koja se beskonačno pomera. */
 export default function Partners({ className = '' }) {
-  // dok je partnera malo, ponavljaju se da traka bude puna; pa se sve duplira da pomeranje bude bez prekida
-  const half = Array.from({ length: Math.ceil(8 / ITEMS.length) }, () => ITEMS).flat()
-  const loop = [...half, ...half]
+  const loop = Array.from({ length: COPIES }, () => SET).flat()
   return (
     <motion.section
       aria-labelledby="partneri"
@@ -26,17 +31,20 @@ export default function Partners({ className = '' }) {
         Naši partneri
       </h2>
       <div className="relative min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
-        <ul className="marquee flex w-max gap-3 sm:gap-4">
+        {/* razmak je desna margina svakog logoa (ne gap), da jedan krug bude tačno 1/COPIES trake i da nema trzaja */}
+        <ul className="marquee flex w-max" style={{ '--copies': COPIES }}>
           {loop.map((partner, i) => (
             <li
               key={i}
               aria-hidden={i >= ITEMS.length || undefined}
-              className={`grid shrink-0 place-items-center rounded-lg border border-line bg-white px-3 ${
-                partner.src ? 'h-14 w-32 sm:h-[72px] sm:w-48' : 'h-12 w-32 sm:h-14 sm:w-40'
+              className={`mr-3 grid shrink-0 place-items-center overflow-hidden rounded-xl border border-line bg-white sm:mr-4 ${
+                partner.src ? '' : 'px-3'
+              } ${
+                partner.src ? 'h-[72px] w-44 sm:h-24 sm:w-64 lg:h-28 lg:w-72' : 'h-12 w-32 sm:h-14 sm:w-40'
               }`}
             >
               {partner.src ? (
-                <img src={partner.src} alt={partner.name} loading="lazy" className="max-h-12 w-auto max-w-full object-contain sm:max-h-16" />
+                <img src={partner.src} alt={partner.name} loading="lazy" className="h-full w-full object-cover" />
               ) : (
                 <span className="text-sm font-semibold text-mute">{partner.name}</span>
               )}

@@ -25,8 +25,7 @@ export default function CheckoutPage() {
   // posle slanja potvrda se vidi od vrha
   useEffect(() => {
     if (!done) return
-    if (window.lenis) window.lenis.scrollTo(0, { immediate: true })
-    else window.scrollTo(0, 0)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }, [done])
 
   if (done) return <Done order={done} />
