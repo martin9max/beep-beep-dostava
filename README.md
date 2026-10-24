@@ -47,11 +47,12 @@ Sajt mora ići preko **https** (kolačić za prijavu je `Secure`). Iza proksija 
 - `/lokal/<ime>` – digitalni meni lokala (`src/pages/ShopPage.jsx`)
 - `/korpa` – korpa iz jednog ili više lokala, adresa i slanje (`src/pages/CheckoutPage.jsx`)
 - **Adresa i cena dostave:** kupac pri registraciji bira mesto (Negotin ili selo, `src/places.js`).
-  Negotin: dostava 400 din se dodaje u ukupno (`DELIVERY` u `src/data.js`). Selo: ukupno je samo cena
-  proizvoda, a cenu dostave javlja dostavljač. Na stranicama za naručivanje ispod zaglavlja stalno stoji
+  Negotin: dostava 400 din. Selo: 120 din po km od Negotina (kilometri po selu su u `src/places.js`, `KM`;
+  cene u `DELIVERY` u `src/data.js`), i to se dodaje u ukupno. Mesto van spiska: cenu javlja dostavljač. Na stranicama za naručivanje ispod zaglavlja stalno stoji
   „Dostava na: … · Promeni adresu“ (`src/components/Address.jsx`); privremena adresa važi samo za tu porudžbinu.
   U admin panelu i Telegram poruci uz adresu ide link za Google mape.
 - **Promptovi za slike:** `PROMPTOVI-ZA-SLIKE.md`
+- **Radio** (dugme u zaglavlju): stanice su u `src/data.js`, `RADIO` (YouTube video ili plejlista po žanru).
 - `/prijava`, `/registracija`, `/nalog` – nalog kupca i istorija porudžbina
 - **Meniji, cene, lokali i kategorije:** `src/catalog.js`. Trenutne cene su PRIMER, zamenite pravim.
   Server računa cenu iz ovog fajla, pa je kupac ne može promeniti.

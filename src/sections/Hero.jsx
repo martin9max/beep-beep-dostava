@@ -13,7 +13,7 @@ const HeroScene = lazy(() => import('../three/HeroScene'))
 
 const LINES = [
   ['Beep Beep dostava', 'text-white'],
-  ['do vaših vrata', 'hero-red'],
+  ['do vaših vrata', 'text-red'],
 ]
 
 const fadeUp = (delay) => ({
@@ -95,9 +95,10 @@ export default function Hero() {
             <div>
               <h1 className="font-body text-[clamp(30px,min(4.6vw,8.2vh),72px)] font-extrabold uppercase leading-[.98] tracking-tight">
                 {LINES.map(([line, color], i) => (
-                  <span key={line} className="-mb-[.1em] block overflow-hidden pb-[.1em]">
+                  // dodatni prostor oko reda da obrub, nagnuta slova i senka ne budu odsečeni
+                  <span key={line} className="-mx-[.12em] -mb-[.2em] block overflow-hidden px-[.12em] pb-[.2em] pt-[.04em]">
                     <motion.span
-                      className={`block ${color}`}
+                      className={`hero-title block ${color}`}
                       initial={{ y: '105%' }}
                       animate={{ y: 0 }}
                       transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease: EASE }}
@@ -108,11 +109,11 @@ export default function Hero() {
                 ))}
               </h1>
               <motion.p className="mt-3 max-w-[46ch] text-[15px] leading-snug text-white/95 sm:mt-4 sm:text-lg sm:leading-relaxed" {...fadeUp(0.5)}>
-                Hrana, lekovi, cveće, torte i sve ostalo, u Negotinu, po selima i šire. Toplo stiže toplo, jer sve putuje u termo kutiji.
+                Prva i prava dostava u Negotinu i okolini. Hrana, lekovi, cveće i sve ostalo.
               </motion.p>
               <motion.div className="pointer-events-auto mt-4 flex gap-3 sm:mt-6" {...fadeUp(0.65)}>
-                <Button as={Link} href="/naruci" arrow className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
-                  Poruči
+                <Button as={Link} href="/registracija" arrow className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
+                  Registracija
                 </Button>
                 <Button as="a" href="#usluge" variant="light" className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
                   Naše usluge

@@ -34,7 +34,6 @@ export function structuredData(siteUrl) {
       { '@type': 'City', name: SITE.city },
       { '@type': 'Place', name: 'Okolna sela Negotina' },
     ],
-    paymentAccepted: 'Gotovina',
     currenciesAccepted: 'RSD',
   }
   const faq = {

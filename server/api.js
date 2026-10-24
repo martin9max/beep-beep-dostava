@@ -3,7 +3,7 @@ import { db } from './db.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
-import { DELIVERY } from '../src/data.js'
+import { deliveryPriceOf } from '../src/data.js'
 import { cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
 
 class HttpError extends Error {
@@ -149,7 +149,7 @@ const routes = {
     const note = text(body.note, 500)
     // cena dostave se računa iz mesta, ne iz browsera
     const zone = zoneOf(place)
-    const delivery = DELIVERY.zones[zone].price
+    const delivery = deliveryPriceOf(place) // Negotin 400 din, selo km × 120 din, ostalo null
     const goods = shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0)
     const total = goods + (delivery ?? 0)
     const customer = `${user.name} ${user.surname}`
@@ -163,7 +163,7 @@ const routes = {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: zone === 'grad' ? DELIVERY.zones.grad.label : place, delivery }))
+    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }))
     return { id: Number(id), total, delivery, place }
   },
 }

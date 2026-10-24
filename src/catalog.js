@@ -54,7 +54,7 @@ export const CATEGORIES = {
     { key: 'pokloni', label: 'Pokloni', emoji: '🎁' },
   ],
   other: [
-    { key: 'dokumenta', label: 'Dokumenta', emoji: '📄' },
+    { key: 'dokumenta', label: 'Dokumenta za pravna lica', emoji: '📄' },
     { key: 'paketi', label: 'Paketi', emoji: '📦' },
   ],
 }
@@ -447,11 +447,11 @@ export const SHOPS = [
     name: 'Beep Beep kurir',
     service: 'other',
     emoji: '🛵',
-    about: 'Preuzmemo bilo šta sa jedne adrese i odnesemo na drugu: dokumenta, ključeve, pakete.',
+    about: 'Preuzmemo bilo šta sa jedne adrese i odnesemo na drugu: dokumenta za pravna lica, ključeve, pakete.',
     request: { label: 'Šta i odakle da preuzmemo?', placeholder: 'npr. ključevi kod komšije, Hajduk Veljkova 12, stan 4. Ili spisak za kupovinu.' },
     menu: [
       { title: 'Usluge', items: [
-        { id: 'dokumenta', name: 'Preuzimanje dokumenata', price: null, cat: 'dokumenta' },
+        { id: 'dokumenta', name: 'Dokumenta za pravna lica', desc: 'Preuzimanje i dostava dokumentacije za firme', price: null, cat: 'dokumenta' },
         { id: 'kljucevi', name: 'Dostava ključeva', price: null, cat: 'kljucevi' },
         { id: 'paket', name: 'Paket do 10 kg', price: null, cat: 'paketi' },
         { id: 'spisak', name: 'Kupovina po spisku', desc: 'Spisak napišite u polju ispod', price: null, cat: 'spisak' },

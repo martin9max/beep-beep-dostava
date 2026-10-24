@@ -22,7 +22,7 @@ export default function OrderPage({ service, category }) {
     <div className="mx-auto max-w-[1120px] px-5 pb-40 pt-8 sm:px-6 md:pt-12">
       <h1 className="text-[clamp(30px,4vw,44px)] font-bold tracking-tight">Šta vam treba?</h1>
       <p className="mt-1 max-w-[60ch] text-deep/75">
-        Izaberite iz jednog ili više lokala, sve stiže u jednoj vožnji. Plaćate gotovinom kad kurir stigne.
+        Izaberite iz jednog ili više lokala, sve stiže u jednoj vožnji.
       </p>
 
       {/* usluge */}

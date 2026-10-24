@@ -139,7 +139,8 @@
 
   .navlink {
     position: relative;
-    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+    padding: 0.5rem 0.6rem;
     font-weight: 600;
     color: rgb(22 115 196 / 0.85);
     transition: color 0.2s;
@@ -165,6 +166,20 @@
 }
 
 /* crveni red naslova na početnom ekranu: crvena slova sa belom "senkom" ispod, kao slojeviti natpis */
+/* naslov na početnom ekranu: debela kosa slova, tamnoplavi obrub i "3D" senka ispod (kao na letku) */
+.hero-title {
+  font-weight: 900;
+  font-style: italic;
+  -webkit-text-stroke: 0.12em #0b1a3a;
+  paint-order: stroke fill;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0.05em 0 #0b1a3a,
+    0.02em 0.09em 0 #0b1a3a,
+    0.03em 0.12em 0 #0b1a3a,
+    0.04em 0.17em 0.16em rgb(0 0 0 / 0.5);
+}
+
 .hero-red {
   color: var(--color-red);
   text-shadow:
@@ -226,6 +241,17 @@
 }
 
 /* traka partnera: pomera se za jedan krug (1/--copies dužine) i kreće ispočetka, bez pauze na prelaz mišem */
+/* radio u zaglavlju: tri trake koje "skaču" dok svira */
+.radio-bar {
+  height: 100%;
+  animation: radio-bar 0.9s ease-in-out infinite;
+  transform-origin: bottom;
+}
+@keyframes radio-bar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
 @keyframes slide {
   to {
     transform: translateX(calc(-100% / var(--copies, 2)));

@@ -213,7 +213,7 @@ function orders() {
         <td>${esc(o.customer)}<br><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></td>
         <td>${esc(o.address)}<br><a href="${esc(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address.replace(/\s*\(.*\)$/, '') + ', Srbija')}`)}" target="_blank" rel="noopener">📍 mapa</a>${o.note ? `<br><small>Napomena: ${esc(o.note)}</small>` : ''}</td>
         <td>${items}${o.shops > 1 ? `<small><b>${o.shops} lokala</b>, dodatna zaustavljanja: ${o.shops - 1}</small>` : ''}</td>
-        <td>${formatDin(o.total)} din<br><small>${o.delivery == null ? 'dostava: javlja dostavljač' : `dostava ${formatDin(o.delivery)} din (grad)`}</small></td><td>${select}</td></tr>`
+        <td>${formatDin(o.total)} din<br><small>${o.delivery == null ? 'dostava: javlja dostavljač' : `dostava ${formatDin(o.delivery)} din (${esc(o.place || 'grad')})`}</small></td><td>${select}</td></tr>`
     }),
   )
 }

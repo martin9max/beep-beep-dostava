@@ -3,6 +3,7 @@ import logo from '../assets/logo.png'
 import { Link, useRoute } from '../lib/router'
 
 const tel = `tel:${PHONE.replace(/\s/g, '')}`
+const whatsapp = `https://wa.me/381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`
 
 export default function Footer() {
   // na podstranicama linkovi ka delovima početne idu preko /
@@ -17,10 +18,27 @@ export default function Footer() {
               Beep Beep <span className="hero-red">Dostava</span>
             </span>
           </a>
-          <p className="mt-4 max-w-[30ch] text-sm leading-relaxed">
-            Brži od kojota, sporiji samo od vaše gladi. Od 2020. godine vozimo po Negotinu, selima i šire.
+          <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed">
+            Prva i prava dostava u Negotinu i okolini. Od 5. decembra 2020. donosimo hranu, lekove, cveće i sve ostalo do
+            vaših vrata, brzo i sa osmehom.
           </p>
+          <a href={tel} className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-bold text-red transition hover:bg-white/90">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+              <path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
+            </svg>
+            {PHONE}
+          </a>
         </div>
+
+        <FooterList title="Naše usluge">
+          {SERVICES.map((service) => (
+            <li key={service.key}>
+              <Link href={`/naruci/${service.key}`} className="footer-link">
+                {service.title}
+              </Link>
+            </li>
+          ))}
+        </FooterList>
 
         <FooterList title="Stranica">
           {NAV.map((link) => (
@@ -32,25 +50,18 @@ export default function Footer() {
           ))}
         </FooterList>
 
-        <FooterList title="Dostavljamo">
-          {SERVICES.map((service) => (
-            <li key={service.key}>
-              <Link href={`/naruci/${service.key}`} className="footer-link">
-                {service.title}
-              </Link>
-            </li>
-          ))}
-        </FooterList>
-
         <FooterList title="Kontakt">
           <li>
-            <a href={tel} className="text-lg font-bold text-white transition-colors hover:text-white/75">
-              {PHONE}
+            <a href={tel} className="footer-link font-semibold text-white">
+              Pozovite: {PHONE}
+            </a>
+          </li>
+          <li>
+            <a href={whatsapp} target="_blank" rel="noopener" className="footer-link">
+              Pišite na WhatsApp
             </a>
           </li>
           <li>Negotin, okolna sela i šire</li>
-          <li>Plaćanje gotovinom</li>
-          {BUSINESS.address && <li>{BUSINESS.address}</li>}
           {BUSINESS.hours && <li>{BUSINESS.hours}</li>}
         </FooterList>
       </div>

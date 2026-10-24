@@ -5,8 +5,8 @@ import Thumb, { hasImage } from '../components/Thumb'
 import { Qty } from '../components/MenuItem'
 import { variantLabel } from '../catalog'
 import { AddressDialog, PinIcon, useDeliveryAddress } from '../components/Address'
-import { fullAddress, zoneOf } from '../places'
-import { DELIVERY, EXTRA_STOP, PHONE } from '../data'
+import { deliveryNote, fullAddress } from '../places'
+import { DELIVERY, EXTRA_STOP, PHONE, deliveryPriceOf } from '../data'
 import { apiCall, useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { formatDin } from '../lib/order'
@@ -140,12 +140,12 @@ export default function CheckoutPage() {
 }
 
 /**
- * Zbir: u Negotinu se dostava (400 din) dodaje u ukupno.
- * Za selo ukupno je samo cena proizvoda, a ispod piše da cenu dostave javlja dostavljač.
+ * Zbir: dostava se dodaje u ukupno (Negotin 400 din, selo km × 120 din).
+ * Samo za mesto van spiska piše da cenu dostave javlja dostavljač.
  */
 function Summary({ cart, place }) {
-  const zone = place ? zoneOf(place) : null
-  const delivery = zone ? DELIVERY.zones[zone].price : null
+  const delivery = place ? deliveryPriceOf(place) : undefined
+  const note = place ? deliveryNote(place, DELIVERY.perKm) : ''
   return (
     <dl className="grid gap-2 text-[15px]">
       <div className="flex justify-between">
@@ -158,9 +158,11 @@ function Summary({ cart, place }) {
           <dd className="font-semibold">plaćate kuriru</dd>
         </div>
       )}
-      {zone === 'grad' && (
-        <div className="flex justify-between">
-          <dt className="text-deep/75">Dostava ({place})</dt>
+      {delivery != null && (
+        <div className="flex justify-between gap-3">
+          <dt className="text-deep/75">
+            Dostava ({place}){note && <span className="block text-[13px] text-mute">{note}</span>}
+          </dt>
           <dd className="font-semibold">{din(delivery)}</dd>
         </div>
       )}
@@ -168,14 +170,14 @@ function Summary({ cart, place }) {
         <dt className="font-bold">Ukupno</dt>
         <dd className="font-serif text-[26px] font-bold">{din(cart.total + (delivery ?? 0))}</dd>
       </div>
-      {zone === 'selo' && (
+      {delivery === null && (
         <p className="rounded-lg bg-[#fff3c4] px-3 py-2 text-sm font-semibold text-[#7a5a00]">
           + dostava za {place}: cenu vam javlja dostavljač kada vas pozove.
         </p>
       )}
-      {!zone && (
+      {delivery === undefined && (
         <p className="text-sm text-mute">
-          Dostava: {din(DELIVERY.zones.grad.price)} u Negotinu. Za sela cenu javlja dostavljač.
+          Dostava: {din(DELIVERY.city)} u Negotinu, za sela {DELIVERY.perKm} din po kilometru.
         </p>
       )}
     </dl>
@@ -258,7 +260,7 @@ function DeliveryForm({ cart, onDone }) {
         <Button type="submit" disabled={busy} arrow className="w-full py-4 text-[17px]">
           {busy ? 'Šaljem...' : 'Pošalji porudžbinu'}
         </Button>
-        <p className="text-center text-sm text-mute">Plaćate gotovinom kuriru. Pozvaćemo vas da potvrdimo porudžbinu.</p>
+        <p className="text-center text-sm text-mute">Pozvaćemo vas da potvrdimo porudžbinu.</p>
       </div>
     </form>
   )

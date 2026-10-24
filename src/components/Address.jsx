@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Button from './Button'
 import Field, { FormError } from './Field'
-import { CITY, VILLAGES, fullAddress, isKnownPlace, zoneOf } from '../places'
-import { DELIVERY } from '../data'
+import { CITY, KM, VILLAGES, fullAddress, isKnownPlace, zoneOf } from '../places'
+import { DELIVERY, deliveryPriceOf } from '../data'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { EASE, formatDin } from '../lib/order'
@@ -26,8 +26,8 @@ export function useDeliveryAddress() {
     isTemp: Boolean(tempAddress),
     setTempAddress,
     zone,
-    // null = cenu javlja dostavljač (selo); undefined = mesto još nije izabrano
-    price: zone ? DELIVERY.zones[zone].price : undefined,
+    // broj = cena dostave; null = cenu javlja dostavljač (mesto van spiska); undefined = mesto nije izabrano
+    price: current?.place ? deliveryPriceOf(current.place) : undefined,
   }
 }
 
@@ -53,11 +53,11 @@ export function PlaceField({ value, onChange, name = 'place' }) {
           <option value="" disabled>
             Izaberite mesto...
           </option>
-          <option value={CITY}>{CITY} (grad), dostava {formatDin(DELIVERY.zones.grad.price)} din</option>
-          <optgroup label="Sela (cenu dostave javlja dostavljač)">
+          <option value={CITY}>{CITY} (grad), dostava {formatDin(DELIVERY.city)} din</option>
+          <optgroup label={`Sela (${DELIVERY.perKm} din po km od Negotina)`}>
             {VILLAGES.map((v) => (
               <option key={v} value={v}>
-                {v}
+                {v} {KM[v] ? `– ${KM[v]} km, ${formatDin(KM[v] * DELIVERY.perKm)} din` : '– cenu javlja dostavljač'}
               </option>
             ))}
           </optgroup>
@@ -192,7 +192,7 @@ export function AddressBar() {
 
   return (
     <div className="border-t border-line bg-white">
-      <div className="mx-auto flex h-11 max-w-[1120px] items-center gap-2 px-5 text-[14px] sm:px-6">
+      <div className="mx-auto flex h-11 max-w-[1320px] items-center gap-2 px-5 text-[14px] sm:px-6">
         <PinIcon className={`h-4 w-4 shrink-0 ${isTemp ? 'text-red' : 'text-deep'}`} />
         {user === undefined ? (
           <span className="h-4 w-40 animate-pulse rounded bg-paper" />

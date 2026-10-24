@@ -5,14 +5,13 @@ import { BUSINESS, PHONE } from '../data'
 
 const digits = PHONE.replace(/\s/g, '')
 const tel = `tel:${digits}`
-// 064... -> +38164... za Viber
-const viber = `viber://chat?number=%2B381${digits.replace(/^0/, '')}`
+// 064... -> 38164... za WhatsApp
+const whatsapp = `https://wa.me/381${digits.replace(/^0/, '')}`
 
 const INFO = [
   ['Gde dostavljamo', 'Negotin, okolna sela i šire'],
-  ['Plaćanje', 'Gotovinom pri isporuci'],
+  ['Dostava', '400 din u Negotinu, sela 120 din/km'],
   ['Radno vreme', BUSINESS.hours],
-  ['Adresa', BUSINESS.address],
 ].filter(([, value]) => value)
 
 export default function Contact() {
@@ -32,10 +31,10 @@ export default function Contact() {
               Kontakt
             </Reveal>
             <Reveal as="h2" delay={0.05} className="text-[clamp(38px,5.6vw,68px)] font-bold tracking-tight">
-              Radije zovete?
+              Radije biste da pozovete?
             </Reveal>
             <Reveal as="p" delay={0.1} className="mt-4 max-w-[38ch] text-lg text-white/90">
-              Recite nam šta i gde. Mi kažemo cenu, vi kažete „može“, i beep beep, već smo na putu.
+              Javite nam šta vam treba i adresu, a mi vam dostavljamo u najkraćem roku.
             </Reveal>
 
             <Reveal delay={0.15}>
@@ -54,8 +53,8 @@ export default function Contact() {
                 <PhoneIcon />
                 Pozovi
               </Button>
-              <Button as="a" href={viber} variant="light" className="flex-1 px-4 py-3.5 sm:min-w-[150px] sm:flex-none sm:px-6">
-                Piši na Viber
+              <Button as="a" href={whatsapp} target="_blank" rel="noopener" variant="light" className="flex-1 px-4 py-3.5 sm:min-w-[150px] sm:flex-none sm:px-6">
+                Piši na WhatsApp
               </Button>
             </Reveal>
 

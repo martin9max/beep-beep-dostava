@@ -103,7 +103,7 @@ export default function AccountPage() {
                   </div>
                 ))}
                 <p className="mt-3 border-t border-line pt-3 text-sm text-mute">
-                  {o.address} · <b className="text-deep">{formatDin(o.total)} din</b>{o.delivery == null && ' + dostava po taksi tarifi'}
+                  {o.address} · <b className="text-deep">{formatDin(o.total)} din</b>{o.delivery == null && ' + dostava (javlja dostavljač)'}
                 </p>
               </li>
             ))}

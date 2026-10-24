@@ -25,12 +25,12 @@ export default function Partners({ className = '' }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.7, ease: EASE }}
-      className={`flex shrink-0 items-center gap-3 overflow-hidden sm:gap-4 ${className}`}
+      className={`flex shrink-0 flex-col gap-2 overflow-hidden ${className}`}
     >
-      <h2 id="partneri" className="w-14 shrink-0 font-body text-[11px] font-semibold leading-tight text-mute sm:w-auto sm:text-sm">
+      <h2 id="partneri" className="px-1 font-body text-xs font-bold uppercase tracking-[.2em] text-red sm:text-sm">
         Naši partneri
       </h2>
-      <div className="relative min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
+      <div className="relative min-w-0 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
         {/* razmak je desna margina svakog logoa (ne gap), da jedan krug bude tačno 1/COPIES trake i da nema trzaja */}
         <ul className="marquee flex w-max" style={{ '--copies': COPIES }}>
           {loop.map((partner, i) => (

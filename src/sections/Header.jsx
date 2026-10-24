@@ -6,6 +6,7 @@ import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { Link, isOrderingPath, useRoute } from '../lib/router'
 import { AddressBar } from '../components/Address'
+import Radio from '../components/Radio'
 import logo from '../assets/logo.png'
 
 export default function Header() {
@@ -25,13 +26,13 @@ export default function Header() {
       transition={{ duration: 0.6, ease: EASE }}
       className="fixed inset-x-0 top-0 z-20 border-b border-line bg-paper pt-[env(safe-area-inset-top,0px)]"
     >
-      <div className="mx-auto flex h-[72px] max-w-[1120px] items-center justify-between gap-x-3 px-5 sm:px-6">
+      <div className="mx-auto flex h-[72px] max-w-[1320px] items-center justify-between gap-x-2 px-4 sm:gap-x-3 sm:px-6">
         {home ? (
-          <Link href="/" onClick={close} className="flex items-center gap-2.5 whitespace-nowrap font-serif text-[18px] font-bold sm:text-[22px]">
+          <Link href="/" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap font-serif text-[16px] font-bold sm:gap-2.5 sm:text-[22px]">
             <Logo />
           </Link>
         ) : (
-          <a href="#pocetna" onClick={close} className="flex items-center gap-2.5 whitespace-nowrap font-serif text-[18px] font-bold sm:text-[22px]">
+          <a href="#pocetna" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap font-serif text-[16px] font-bold sm:gap-2.5 sm:text-[22px]">
             <Logo />
           </a>
         )}
@@ -44,7 +45,8 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <Radio />
           <Link
             href={account.href}
             aria-label={user ? `Moj nalog (${user.name})` : 'Prijava'}
@@ -53,7 +55,7 @@ export default function Header() {
             <UserIcon />
             <span className="max-w-[10ch] truncate">{user === undefined ? '' : account.label}</span>
           </Link>
-          <Link href="/korpa" aria-label={`Korpa, ${cart.count} stavki`} className="relative grid h-11 w-11 place-items-center rounded-lg border border-line text-deep transition hover:border-ink">
+          <Link href="/korpa" aria-label={`Korpa, ${cart.count} stavki`} className="relative grid h-10 w-10 place-items-center rounded-lg border border-line text-deep transition hover:border-ink sm:h-11 sm:w-11">
             <BagIcon />
             {!cart.isEmpty && (
               // "skoči" svaki put kad se doda stavka
@@ -79,7 +81,7 @@ export default function Header() {
             aria-expanded={open}
             aria-controls="mobilni-meni"
             aria-label={open ? 'Zatvori meni' : 'Otvori meni'}
-            className="grid h-11 w-11 place-items-center rounded-lg border border-line xl:hidden"
+            className="grid h-10 w-10 place-items-center rounded-lg border border-line sm:h-11 sm:w-11 xl:hidden"
           >
             <span className="relative block h-3.5 w-5" aria-hidden="true">
               <span className={`absolute left-0 h-0.5 w-5 rounded bg-ink transition-transform duration-300 ${open ? 'top-1.5 rotate-45' : 'top-0'}`} />
@@ -133,7 +135,7 @@ export default function Header() {
 function Logo() {
   return (
     <>
-      <img src={logo} alt="" width="44" height="44" className="h-11 w-11 shrink-0" />
+      <img src={logo} alt="" width="44" height="44" className="h-9 w-9 shrink-0 sm:h-11 sm:w-11" />
       <span>
         Beep Beep <span className="text-red">Dostava</span>
       </span>
