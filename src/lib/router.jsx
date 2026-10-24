@@ -11,6 +11,12 @@ const subscribe = (fn) => {
   }
 }
 
+// Osnovna putanja sajta: '' na pravom domenu, '/beep-beep-dostava' na GitHub Pages
+export const BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
+
+/** Putanja sajta -> adresa u pregledaču ("/naruci" -> "/beep-beep-dostava/naruci" na Pages). */
+export const withBase = (path) => (path.startsWith('/') ? BASE + path : path)
+
 // Pamćenje skrola po stranici: dugme "nazad" vraća tačno tamo gde je kupac bio
 // (npr. iz menija lokala nazad na listu lokala), umesto na vrh stranice.
 const positions = new Map()
@@ -32,7 +38,7 @@ if (typeof window !== 'undefined') {
 }
 
 export function navigate(to, { replace = false, scroll = true } = {}) {
-  history[replace ? 'replaceState' : 'pushState']({ bbKey: replace ? pageKey() : newKey() }, '', to)
+  history[replace ? 'replaceState' : 'pushState']({ bbKey: replace ? pageKey() : newKey() }, '', withBase(to))
   listeners.forEach((fn) => fn())
   if (scroll && !to.includes('#')) scrollToY(0)
 }
@@ -45,7 +51,8 @@ export function useRoute() {
     () => '/',
   )
   const url = new URL(href, 'http://x')
-  return { path: url.pathname.replace(/\/+$/, '') || '/', query: url.searchParams }
+  const path = BASE && url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname
+  return { path: path.replace(/\/+$/, '') || '/', query: url.searchParams }
 }
 
 /** Stranice za naručivanje imaju ispod zaglavlja traku sa adresom dostave (44px). */
@@ -55,7 +62,7 @@ export const isOrderingPath = (path) => /^\/(naruci|lokal|korpa)(\/|$)/.test(pat
 export function Link({ href, onClick, ...rest }) {
   return (
     <a
-      href={href}
+      href={withBase(href)}
       onClick={(e) => {
         onClick?.(e)
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return

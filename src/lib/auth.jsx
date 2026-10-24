@@ -4,6 +4,10 @@ const AuthContext = createContext(null)
 
 /** Poziv API-ja; greška sa servera postaje Error sa porukom za korisnika. */
 export async function apiCall(path, { method = 'GET', body } = {}) {
+  // probna verzija na GitHub Pages nema server
+  if (import.meta.env.VITE_STATIC_DEMO) {
+    throw new Error('Ovo je probna verzija sajta: registracija, prijava i porudžbine rade na pravom sajtu.')
+  }
   let res
   try {
     res = await fetch(path, {

@@ -18,7 +18,7 @@ const app = (
 
 // u produkciji je HTML početne stranice već unapred napravljen (prerender), pa ga React samo "oživi";
 // na ostalim stranicama (/naruci, /prijava...) taj HTML ne odgovara, pa se crta ispočetka
-if (root.hasChildNodes() && location.pathname === '/') hydrateRoot(root, app)
+if (root.hasChildNodes() && location.pathname.replace(/\/$/, '') === import.meta.env.BASE_URL.replace(/\/$/, '')) hydrateRoot(root, app)
 else {
   root.replaceChildren()
   createRoot(root).render(app)

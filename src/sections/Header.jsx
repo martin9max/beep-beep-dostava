@@ -4,7 +4,7 @@ import { NAV } from '../data'
 import { EASE } from '../lib/order'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
-import { Link, isOrderingPath, useRoute } from '../lib/router'
+import { Link, isOrderingPath, useRoute, withBase } from '../lib/router'
 import { AddressBar } from '../components/Address'
 import Radio from '../components/Radio'
 import logo from '../assets/logo.png'
@@ -39,7 +39,7 @@ export default function Header() {
 
         <nav aria-label="Glavna navigacija" className="hidden gap-0.5 xl:flex">
           {NAV.map((link) => (
-            <a key={link.href} href={home + link.href} className="navlink">
+            <a key={link.href} href={home ? withBase(home + link.href) : link.href} className="navlink">
               {link.label}
             </a>
           ))}
@@ -113,7 +113,7 @@ export default function Header() {
               </li>
               {NAV.map((link) => (
                 <li key={link.href}>
-                  <a href={home + link.href} onClick={close} className="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white">
+                  <a href={home ? withBase(home + link.href) : link.href} onClick={close} className="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white">
                     {link.label}
                   </a>
                 </li>

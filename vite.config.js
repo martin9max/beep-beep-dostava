@@ -15,6 +15,8 @@ const backend = {
 }
 
 export default defineConfig({
+  // VITE_BASE=/beep-beep-dostava/ pri buildu za GitHub Pages; inače sajt je na korenu domena
+  base: process.env.VITE_BASE || '/',
   plugins: [react(), tailwindcss(), backend],
   // dostupno i sa telefona u istoj Wi-Fi mreži (http://IP-računara:5173)
   server: { host: true },

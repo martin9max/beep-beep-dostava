@@ -6,7 +6,7 @@ let logoImage
 export function getLogo() {
   if (!logoImage) {
     logoImage = new Image()
-    logoImage.src = '/icon-192.png'
+    logoImage.src = `${import.meta.env.BASE_URL}icon-192.png`
   }
   return logoImage
 }

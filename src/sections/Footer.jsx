@@ -1,6 +1,6 @@
 import { BUSINESS, NAV, PHONE, SERVICES } from '../data'
 import logo from '../assets/logo.png'
-import { Link, useRoute } from '../lib/router'
+import { Link, useRoute, withBase } from '../lib/router'
 
 const tel = `tel:${PHONE.replace(/\s/g, '')}`
 const whatsapp = `https://wa.me/381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`
@@ -12,7 +12,7 @@ export default function Footer() {
     <footer className="relative overflow-hidden bg-ink text-white/90">
       <div className="mx-auto grid max-w-[1120px] gap-10 px-6 pb-10 pt-16 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <a href={`${home}#pocetna`} className="inline-flex items-center gap-2.5 font-serif text-[22px] font-bold text-white">
+          <a href={home ? withBase('/#pocetna') : '#pocetna'} className="inline-flex items-center gap-2.5 font-serif text-[22px] font-bold text-white">
             <img src={logo} alt="" width="44" height="44" className="h-11 w-11" />
             <span>
               Beep Beep <span className="hero-red">Dostava</span>
@@ -43,7 +43,7 @@ export default function Footer() {
         <FooterList title="Stranica">
           {NAV.map((link) => (
             <li key={link.href}>
-              <a href={home + link.href} className="footer-link">
+              <a href={home ? withBase(home + link.href) : link.href} className="footer-link">
                 {link.label}
               </a>
             </li>

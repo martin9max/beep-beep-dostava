@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PHONE } from '../data'
 
 // logo u većoj rezoluciji (iz public/), da bude oštar na ekranu telefona
-const LOGO = '/icon-192.png'
+const LOGO = `${import.meta.env.BASE_URL}icon-192.png`
 
 /**
  * 3D telefon (samo CSS) koji zvoni i okreće se: spreda dolazni poziv od Beep Beep dostave,
