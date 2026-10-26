@@ -57,7 +57,7 @@ Sajt mora ići preko **https** (kolačić za prijavu je `Secure`). Iza proksija 
 - **Meniji, cene, lokali i kategorije:** `src/catalog.js`. Trenutne cene su PRIMER, zamenite pravim.
   Server računa cenu iz ovog fajla, pa je kupac ne može promeniti.
 - **Slike:** `src/assets/photos/kategorije/<key>.jpg` (npr. `pica.jpg`, `dvesprata.jpg`) i
-  `src/assets/photos/lokali/<slug>.jpg` (npr. `picerija-kastelo.jpg`). Dok ih nema, prikazuje se emoji.
+  `src/assets/photos/lokali/<slug>.jpg` (npr. `picerija-castelo.jpg`). Dok ih nema, prikazuje se emoji.
 
 ## Struktura
 

@@ -12,6 +12,6 @@ Dok slike ne postoje, prikazuje se siva zamena sa opisom.
 Za stranicu "Naruči":
 
 - kategorije/<key>.jpg – slika kategorije (key iz src/catalog.js: burger, pica, palacinke, cokoladne, dvesprata...)
-- lokali/<slug>.jpg    – naslovna slika lokala (picerija-kastelo, kafanica, life-picerija, pastizza, la-moara...)
+- lokali/<slug>.jpg    – naslovna slika lokala (picerija-castelo, kafanica, life-picerija, pastizza, la-moara...)
 
 Dok ih nema, prikazuje se emoji na obojenoj pozadini. Najbolje kvadratne slike (kategorije) i široke (lokali).

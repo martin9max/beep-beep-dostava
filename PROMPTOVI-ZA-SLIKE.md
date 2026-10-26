@@ -131,12 +131,12 @@ Za lokale **nemojte koristiti AI**: kupac treba da prepozna pravi lokal. Najbolj
 
 | Fajl | Lokal |
 |---|---|
-| `lokali/picerija-kastelo.jpg` | Picerija Kastelo |
+| `lokali/picerija-castelo.jpg` | Picerija Castelo |
 | `lokali/kafanica.jpg` | Kafanica |
 | `lokali/life-picerija.jpg` | Life picerija |
 | `lokali/pastizza.jpg` | Pastizza |
 | `lokali/la-moara.jpg` | La Moara |
-| `lokali/cvecara-cuca.jpg` | Cvećara Cuca |
+| `lokali/cvecara.jpg` | Cvećara |
 
 Za opšte „lokale“ (market, apoteka, poslastičarnica, pokloni, kurir) može AI, istim stilom kao usluge (fotorealistično, 16:9):
 

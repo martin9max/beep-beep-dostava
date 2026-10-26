@@ -12,7 +12,7 @@ const PARAGRAPHS = [
 
 // broj se "odbrojava" od nule kad sekcija uđe u ekran
 const FACTS = [
-  { value: '5.12.2020.', label: 'krenuli smo sa radom' },
+  { value: '05.12.\n2020.', label: 'krenuli smo sa radom' },
   { count: 10000, suffix: '+', label: 'zadovoljnih klijenata' },
   { value: '5,0', label: 'ocena na Google-u' },
 ]
@@ -50,7 +50,7 @@ export default function About() {
               {FACTS.map((fact) => (
                 <div key={fact.label} className="flex flex-col-reverse">
                   <dt className="text-sm leading-snug text-mute">{fact.label}</dt>
-                  <dd className="font-serif text-[clamp(22px,2.6vw,30px)] font-bold tabular-nums text-red">
+                  <dd className="whitespace-pre-line font-serif text-[clamp(22px,2.6vw,30px)] font-bold leading-tight tabular-nums text-red">
                     {fact.count ? <CountUp to={fact.count} suffix={fact.suffix} /> : fact.value}
                   </dd>
                 </div>

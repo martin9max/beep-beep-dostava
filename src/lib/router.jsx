@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// Mali ruter bez dodatnih biblioteka: /naruci, /lokal/picerija-kastelo, /prijava...
+// Mali ruter bez dodatnih biblioteka: /naruci, /lokal/picerija-castelo, /prijava...
 const listeners = new Set()
 const subscribe = (fn) => {
   listeners.add(fn)
@@ -31,6 +31,9 @@ if (typeof window !== 'undefined') {
   if (!pageKey()) history.replaceState({ ...history.state, bbKey: newKey() }, '')
   addEventListener('scroll', () => positions.set(pageKey(), scrollY), { passive: true })
   addEventListener('popstate', () => {
+    // klik na link ka delu stranice (#usluge, #kontakt...) takođe pravi "popstate", ali bez našeg
+    // ključa: tu pregledač sam skroluje do tog dela i ne sme da ga vraćamo na vrh
+    if (!pageKey()) return
     const y = positions.get(pageKey()) ?? 0
     // čeka da React nacrta stranicu, pa tek onda skroluje
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToY(y)))

@@ -62,8 +62,8 @@ export const CATEGORIES = {
 export const SHOPS = [
   // ---------------- HRANA ----------------
   {
-    slug: 'picerija-kastelo',
-    name: 'Picerija Kastelo',
+    slug: 'picerija-castelo',
+    name: 'Picerija Castelo',
     service: 'food',
     emoji: '🍕',
     about: 'Pice iz peći, sendviči i pasta.',
@@ -74,7 +74,7 @@ export const SHOPS = [
         items: [
           { id: 'margarita', name: 'Margarita', desc: 'Pelat, sir, origano', price: [['32 cm', 650], ['50 cm', 1300]] },
           { id: 'kapricoza', name: 'Kapričoza', desc: 'Pelat, sir, šunka, pečurke', price: [['32 cm', 790], ['50 cm', 1550]] },
-          { id: 'kastelo', name: 'Kastelo specijal', desc: 'Pelat, sir, kulen, slanina, jaje, ljuta papričica', price: [['32 cm', 890], ['50 cm', 1750]] },
+          { id: 'castelo', name: 'Castelo specijal', desc: 'Pelat, sir, kulen, slanina, jaje, ljuta papričica', price: [['32 cm', 890], ['50 cm', 1750]] },
           { id: 'cetiri-sira', name: 'Četiri sira', desc: 'Pavlaka, gauda, gorgonzola, mocarela, parmezan', price: [['32 cm', 920], ['50 cm', 1800]] },
           { id: 'vegetarijana', name: 'Vegetarijana', desc: 'Pelat, sir, paprika, tikvice, masline, kukuruz', price: [['32 cm', 760], ['50 cm', 1480]] },
         ],
@@ -365,11 +365,11 @@ export const SHOPS = [
 
   // ---------------- CVEĆE ----------------
   {
-    slug: 'cvecara-cuca',
-    name: 'Cvećara Cuca',
+    slug: 'cvecara',
+    name: 'Cvećara po izboru',
     service: 'flowers',
     emoji: '💐',
-    about: 'Buketi, ruže i saksijsko cveće. Uz buket može i čestitka sa vašom porukom.',
+    about: 'Buketi, ruže i saksijsko cveće iz cvećare u Negotinu. Uz buket može i čestitka sa vašom porukom.',
     request: { label: 'Poruka na čestitki', placeholder: 'npr. Srećan rođendan, mama! Voli te Ana' },
     menu: [
       { title: 'Buketi', cat: 'buketi', items: [
