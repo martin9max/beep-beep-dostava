@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import Field, { FormError } from '../components/Field'
-import Thumb, { hasImage } from '../components/Thumb'
+import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { Qty } from '../components/MenuItem'
 import { variantLabel } from '../catalog'
 import { AddressDialog, PinIcon, useDeliveryAddress } from '../components/Address'
@@ -60,7 +60,9 @@ export default function CheckoutPage() {
           {cart.shops.map(({ shop, lines, request }, i) => (
             <section key={shop.slug} className="overflow-hidden rounded-2xl border border-line bg-white">
               <header className="flex items-center gap-3 border-b border-line px-5 py-3.5">
-                {hasImage(`lokali/${shop.slug}`) && (
+                {logoOf(shop) ? (
+                  <img src={logoOf(shop)} alt="" className="h-11 w-[113px] shrink-0 rounded-lg object-cover" />
+                ) : hasImage(`lokali/${shop.slug}`) && (
                   <Thumb src={`lokali/${shop.slug}`} emoji={shop.emoji} className="h-11 w-11 shrink-0 rounded-lg" emojiClass="text-2xl" />
                 )}
                 <div className="min-w-0 flex-1">
@@ -140,7 +142,7 @@ export default function CheckoutPage() {
 }
 
 /**
- * Zbir: dostava se dodaje u ukupno (Negotin 400 din, selo km × 120 din).
+ * Zbir: dostava se dodaje u ukupno (Negotin 500 din, selo km × 120 din).
  * Samo za mesto van spiska piše da cenu dostave javlja dostavljač.
  */
 function Summary({ cart, place }) {

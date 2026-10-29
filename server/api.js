@@ -149,7 +149,7 @@ const routes = {
     const note = text(body.note, 500)
     // cena dostave se računa iz mesta, ne iz browsera
     const zone = zoneOf(place)
-    const delivery = deliveryPriceOf(place) // Negotin 400 din, selo km × 120 din, ostalo null
+    const delivery = deliveryPriceOf(place) // Negotin 500 din, selo km × 120 din, ostalo null
     const goods = shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0)
     const total = goods + (delivery ?? 0)
     const customer = `${user.name} ${user.surname}`

@@ -6,7 +6,7 @@ import { useCanvasTexture, drawLogo, drawPhone, drawBird, drawBeep, drawWeave, d
 // Električna trokolica Beep Beep dostave (Ligier Pulse 3), napravljena kodom po fotografijama.
 // Mere su u metrima, prednji točak gleda ka +x, tlo je na y = 0.
 
-const VEHICLE_PHONE = '064 44 77 277' // broj kako piše na kutiji trokolice
+const VEHICLE_PHONE = '064 44 77 2 77' // broj kako piše na kutiji trokolice
 
 export const REAR_R = 0.28
 export const FRONT_R = 0.26

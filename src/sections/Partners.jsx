@@ -27,7 +27,7 @@ export default function Partners({ className = '' }) {
       transition={{ delay: 0.6, duration: 0.7, ease: EASE }}
       className={`flex shrink-0 flex-col gap-2 overflow-hidden ${className}`}
     >
-      <h2 id="partneri" className="px-1 font-body text-xs font-bold uppercase tracking-[.2em] text-red sm:text-sm">
+      <h2 id="partneri" className="px-1 text-center font-body text-xs font-bold uppercase tracking-[.2em] text-red sm:text-sm">
         Naši partneri
       </h2>
       <div className="relative min-w-0 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">

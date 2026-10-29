@@ -1,13 +1,13 @@
 import { deliveryPrice } from './places.js'
 
-export const PHONE = '064 44 77 277'
+export const PHONE = '064 44 77 2 77'
 
 // podaci za pretraživače (SEO) i deljenje linka
 export const SITE = {
   name: 'Beep Beep Dostava Negotin',
   title: 'Beep Beep Dostava Negotin | Hrana, lekovi, cveće, torte i sve ostalo do vrata',
   description:
-    'Beep Beep dostava od 2020. godine: hrana, piće, namirnice, lekovi, cveće, torte i pokloni. Negotin, okolna sela i šire, sve u termo kutiji. Pozovite 064 44 77 277.',
+    'Beep Beep dostava od 2020. godine: hrana, piće, namirnice, lekovi, cveće, torte i pokloni. Negotin, okolna sela i šire, sve u termo kutiji. Pozovite 064 44 77 2 77.',
   city: 'Negotin',
   postalCode: '19300',
 }
@@ -22,7 +22,7 @@ export const BUSINESS = {
 // cena dostave: u Negotinu fiksno, za sela po kilometru (kilometri su u places.js, KM);
 // za mesto van spiska cenu javlja dostavljač
 export const DELIVERY = {
-  city: 400, // din, dostava u Negotinu
+  city: 500, // din, dostava u Negotinu
   perKm: 120, // din po km do sela
 }
 export const deliveryPriceOf = (place) => deliveryPrice(place, DELIVERY)
@@ -30,10 +30,10 @@ export const deliveryPriceOf = (place) => deliveryPrice(place, DELIVERY)
 // Radio u zaglavlju: YouTube video (type: 'video') ili plejlista (type: 'playlist').
 // Ako neka stanica prestane da radi, zamenite id (deo linka posle v= ili list=).
 export const RADIO = [
-  { key: 'moderna', label: 'Moderna', emoji: '🎧', type: 'playlist', id: 'PLDoNWpWHi2nJ2lhB2GWBQN_72wIGETXBp' }, // novi hitovi 2026
-  { key: 'strana', label: 'Strana', emoji: '🌍', type: 'video', id: 'h-0jQ7cis4w' }, // POP Hits Mix Radio, 24/7
-  { key: 'jazz', label: 'Jazz', emoji: '🎷', type: 'video', id: 'ovEwMim9Hks' }, // Smooth Jazz Radio, 24/7
-  { key: 'folk', label: 'Folk', emoji: '🎤', type: 'video', id: 'aJgu2xSo-t0' }, // Grand Radio, 24/7
+  { key: 'moderna', label: 'Moderna', desc: 'Novi domaći hitovi', emoji: '🎧', type: 'playlist', id: 'PLDoNWpWHi2nJ2lhB2GWBQN_72wIGETXBp' }, // novi hitovi 2026
+  { key: 'strana', label: 'Strana', desc: 'Pop hitovi iz sveta, uživo', emoji: '🌍', type: 'video', id: 'h-0jQ7cis4w' }, // POP Hits Mix Radio, 24/7
+  { key: 'ambijent', label: 'Ambijent', desc: 'Vlado Georgiev, Lexington i domaći pop', emoji: '🎶', type: 'playlist', id: 'PL_L-kKESJ9rW7GxUondAIaUCPO0NUok6R' }, // domaći pop: Vlado Georgiev, Lexington, Saša Kovačević, Željko Samardžić... (oko 200 pesama)
+  { key: 'folk', label: 'Folk', desc: 'Narodna i folk, uživo', emoji: '🎤', type: 'video', id: 'aJgu2xSo-t0' }, // Grand Radio, 24/7
 ]
 
 export const NAV = [
@@ -140,7 +140,7 @@ export const FAQ_GROUPS = [
   [
     'Cena i plaćanje',
     [
-      ['Koliko košta dostava?', 'U Negotinu dostava košta 400 dinara. Za sela se plaća 120 dinara po kilometru od Negotina, a tačnu cenu vidite pri naručivanju, čim izaberete selo.'],
+      ['Koliko košta dostava?', 'U Negotinu dostava košta 500 dinara. Za sela se plaća 120 dinara po kilometru od Negotina, a tačnu cenu vidite pri naručivanju, čim izaberete selo.'],
       ['Može li više adresa u jednoj vožnji?', 'Može. Kurir staje gde god treba, a svako dodatno zaustavljanje se posebno naplaćuje.'],
     ],
   ],

@@ -4,16 +4,17 @@
   --font-serif: 'Source Serif 4 Variable', Georgia, serif;
   --font-body: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
 
-  /* boje sa letka: crvena, bela, plava */
-  /* svetlo plava: ink za površine (sa belim tekstom), deep za tekst na svetloj podlozi */
-  --color-ink: #1e8fe6;
-  --color-deep: #1673c4;
-  --color-mute: #55779a;
-  --color-paper: #f3f5fa;
-  --color-line: #d7deea;
-  --color-red: #d71e28;
-  --color-red-dark: #b3141d;
-  --color-blue: #1e8fe6;
+  /* boje po želji vlasnika (kao na njegovom predlogu): jaka kraljevsko plava i jarko crvena */
+  /* ink za površine (sa belim tekstom), deep za tekst na svetloj podlozi, navy za podnožje */
+  --color-ink: #1446b8;
+  --color-deep: #0d2f80;
+  --color-navy: #0a2668;
+  --color-mute: #4c5f8c;
+  --color-paper: #f1f4fb;
+  --color-line: #d5ddf0;
+  --color-red: #e3131c;
+  --color-red-dark: #bb0f16;
+  --color-blue: #1446b8;
 }
 
 @layer base {
@@ -116,11 +117,11 @@
   }
   .btn-primary:hover {
     background: var(--color-red-dark);
-    box-shadow: 0 12px 24px -12px rgb(215 30 40 / 0.6);
+    box-shadow: 0 12px 24px -12px rgb(227 19 28 / 0.6);
   }
   .btn-ghost {
     color: var(--color-deep);
-    border: 1px solid rgb(30 143 230 / 0.45);
+    border: 1px solid rgb(20 70 184 / 0.45);
   }
   .btn-ghost:hover {
     background: var(--color-ink);
@@ -142,7 +143,7 @@
     white-space: nowrap;
     padding: 0.5rem 0.6rem;
     font-weight: 600;
-    color: rgb(22 115 196 / 0.85);
+    color: rgb(255 255 255 / 0.85);
     transition: color 0.2s;
   }
   .navlink::after {
@@ -158,7 +159,7 @@
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .navlink:hover {
-    color: var(--color-deep);
+    color: #fff;
   }
   .navlink:hover::after {
     transform: scaleX(1);
@@ -425,4 +426,62 @@
   color: #fff;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/* oblaci na početnom ekranu: polako plove s desna na levo */
+.hero-cloud {
+  left: 100%;
+  animation: hero-cloud 90s linear infinite;
+}
+@keyframes hero-cloud {
+  to {
+    transform: translateX(calc(-100vw - 260px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-cloud {
+    animation: none;
+    left: 60%;
+  }
+}
+
+/* blago lebdenje gore-dole (logo sa pticom u "O nama") */
+.hero-float {
+  animation: hero-float 5s ease-in-out infinite;
+}
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1.5deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-float {
+    animation: none;
+  }
+}
+
+/* ikonica radija u zaglavlju treperi crveno (dok radio ne svira) */
+.radio-blink {
+  animation: radio-blink 1.2s ease-in-out infinite;
+}
+@keyframes radio-blink {
+  0%,
+  100% {
+    color: #fff;
+    filter: none;
+  }
+  50% {
+    color: #ff2b35;
+    filter: drop-shadow(0 0 6px rgb(255 43 53 / 0.9));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .radio-blink {
+    animation: none;
+    color: #ff2b35;
+  }
 }

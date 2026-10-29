@@ -15,7 +15,9 @@ const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matche
 const TURN_START = -0.6 // trokolica na početku stoji malo okrenuta (prednji deo ka kameri)
 
 // compact: telefon/tablet, scena ima svoj prostor između teksta i kartice, trokolica je u sredini
-function Scene({ progress, compact }) {
+// trikeSize: veličina trokolice (1 = puna); lower: koliko je spuštena (deo visine kadra), da stoji na putu sa fotografije
+// onArrive: poziva se jednom, malo pre nego što trokolica zakoči (za zvuk dolaska)
+function Scene({ progress, compact, trikeSize, lower, onArrive }) {
   const { size, camera, viewport, invalidate } = useThree()
   const wide = !compact && size.width / size.height > 1.05
   // u compact režimu ide putanjom kao na širokom ekranu (blaži let paketa, kamera bliže)
@@ -32,10 +34,15 @@ function Scene({ progress, compact }) {
   const p = useRef(0)
   const start = useRef(null)
   const skipIntro = useRef(reduceMotion())
+  const arrived = useRef(false)
 
   useEffect(() => {
     camera.lookAt(0, 0.1, 0)
   }, [camera])
+
+  // prvi frejm odmah kad platno dobije veličinu (na telefonu je na početku prazno, pa bi scena
+  // inače čekala prvi skrol, i trokolica bi ulazila tek tada)
+  useEffect(() => invalidate(), [size.width, size.height, invalidate])
 
   // scena se crta samo kad se nešto menja (skrol ili ulazak), ne 60-120 puta u sekundi bez potrebe
   useEffect(() => progress.on('change', () => invalidate()), [progress, invalidate])
@@ -49,6 +56,11 @@ function Scene({ progress, compact }) {
     // 1) ulazak: trokolica dolazi sa strane i koči
     const raw = skipIntro.current ? 1 : clamp((t - start.current - 0.2) / 2.4, 0, 1)
     const intro = 1 - Math.pow(1 - raw, 3)
+    // zvuk dolaska: oko 0,7 s pre nego što stane (zvuk traje pola sekunde i završi se tačno pri kočenju)
+    if (!arrived.current && !skipIntro.current && raw > 0.62) {
+      arrived.current = true
+      onArrive?.()
+    }
 
     // skrol animacija čeka da trokolica uđe i stane (inače brz skrol na telefonu
     // otvori vrata i izbaci paket dok trokolica još ulazi)
@@ -97,8 +109,12 @@ function Scene({ progress, compact }) {
   // compact: trokolica (oko 2,6 x 1,9 m sa paketom) staje u kadar i po širini i po visini
   const fit = Math.min(viewport.width / 2.8, viewport.height / 2.1)
   // tricikl stoji na sredini, dole na trotoaru sa fotografije u pozadini
-  const rigPos = compact ? [0, -viewport.height * 0.4, 0] : wide ? [0, -viewport.height * 0.39, 0] : [0, -0.85, 0]
-  const rigScale = compact ? fit * 0.82 : wide ? Math.min(1.35, vw * 0.15) : Math.min(1.1, vw * 0.36)
+  const rigPos = compact
+    ? [0, -viewport.height * (0.4 + lower), 0]
+    : wide
+      ? [0, -viewport.height * (0.39 + lower), 0]
+      : [0, -0.85 - viewport.height * lower, 0]
+  const rigScale = trikeSize * (compact ? fit * 0.82 : wide ? Math.min(1.35, vw * 0.15) : Math.min(1.1, vw * 0.36))
   // dolazak počinje tačno iza leve ivice slike i završava na sredini
   // (put se meri duž pravca u kom je trokolica okrenuta, zato deljenje sa cos)
   driveIn.current = (viewport.width / 2 + 1.5 * rigScale) / (rigScale * Math.cos(TURN_START))
@@ -141,13 +157,13 @@ function BlobShadow() {
   )
 }
 
-export default function HeroScene({ progress, active = true, compact = false }) {
+export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
   return (
     <Canvas frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
       <ambientLight intensity={0.35} />
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
-      <Scene progress={progress} compact={compact} />
+      <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
       <Environment resolution={256}>
         <Lightformer intensity={3} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[10, 4, 1]} />

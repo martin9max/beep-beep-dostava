@@ -1,8 +1,8 @@
 import { useRef } from 'react'
-import { ALL_ITEMS, CATEGORIES, SHOPS, shopCategories } from '../catalog'
+import { CATEGORIES, SHOPS, shopCategories } from '../catalog'
 import { SERVICES } from '../data'
 import { Link, navigate } from '../lib/router'
-import Thumb, { hasImage } from '../components/Thumb'
+import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { usePageTitle } from './PageShell'
 
 const TAB_LABELS = { food: 'Hrana', market: 'Namirnice', meds: 'Lekovi', flowers: 'Cveće', gifts: 'Torte i pokloni', other: 'Ostalo' }
@@ -98,7 +98,7 @@ function CategoryRow({ categories, selected, onPick }) {
           type="button"
           onClick={() => scroll(dir)}
           aria-label={dir < 0 ? 'Prethodne kategorije' : 'Sledeće kategorije'}
-          className={`absolute top-[32px] hidden h-10 w-10 place-items-center rounded-full border border-line bg-white text-deep shadow-[0_8px_20px_-10px_rgba(22,115,196,.6)] transition hover:border-ink hover:text-ink lg:grid ${
+          className={`absolute top-[32px] hidden h-10 w-10 place-items-center rounded-full border border-line bg-white text-deep shadow-[0_8px_20px_-10px_rgba(13,47,128,.6)] transition hover:border-ink hover:text-ink lg:grid ${
             dir < 0 ? '-left-5' : '-right-5'
           }`}
         >
@@ -112,29 +112,21 @@ function CategoryRow({ categories, selected, onPick }) {
 }
 
 function ShopCard({ shop, category }) {
-  const cats = CATEGORIES[shop.service].filter((c) => shopCategories(shop).has(c.key))
-  const count = category ? ALL_ITEMS.filter((r) => r.shop === shop && r.cat === category.key).length : null
   return (
     <li>
       <Link
         href={`/lokal/${shop.slug}${category ? `?k=${category.key}` : ''}`}
-        className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_30px_-20px_rgba(22,115,196,.55)]"
+        className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_30px_-20px_rgba(13,47,128,.55)]"
       >
-        {hasImage(`lokali/${shop.slug}`) && (
+        {logoOf(shop) ? (
+          <img src={logoOf(shop)} alt={`${shop.name}, logo`} loading="lazy" decoding="async" className="aspect-[288/112] w-full border-b border-line object-cover" />
+        ) : hasImage(`lokali/${shop.slug}`) && (
           <Thumb src={`lokali/${shop.slug}`} emoji={shop.emoji} alt="" className="aspect-[16/9]" emojiClass="text-6xl transition-transform duration-500 group-hover:scale-110" />
         )}
         <div className="flex flex-1 flex-col p-5">
           <h3 className="text-[22px] font-bold">{shop.name}</h3>
-          <p className="mt-1 text-[15px] leading-snug text-mute">{shop.about}</p>
-          <p className="mt-3 flex flex-wrap gap-1.5">
-            {cats.slice(0, 5).map((c) => (
-              <span key={c.key} className="rounded-full bg-paper px-2.5 py-0.5 text-[12px] font-semibold text-deep/80">
-                {c.emoji} {c.label}
-              </span>
-            ))}
-          </p>
           <span className="mt-auto flex items-center gap-1.5 pt-4 text-[15px] font-bold text-red">
-            {count ? `${count} ${stavke(count)} · ` : ''}Otvori meni
+            Otvori meni
             <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M2 8h11M9 4l4 4-4 4" />
             </svg>
@@ -145,4 +137,3 @@ function ShopCard({ shop, category }) {
   )
 }
 
-const stavke = (n) => (n % 10 === 1 && n % 100 !== 11 ? 'stavka' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'stavke' : 'stavki')

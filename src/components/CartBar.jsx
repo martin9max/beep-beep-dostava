@@ -21,7 +21,7 @@ export default function CartBar() {
         >
           <Link
             href="/korpa"
-            className="btn btn-primary mx-auto flex w-full max-w-[640px] justify-between gap-3 rounded-xl px-5 py-4 shadow-[0_18px_40px_-14px_rgba(215,30,40,.8)]"
+            className="btn btn-primary mx-auto flex w-full max-w-[640px] justify-between gap-3 rounded-xl px-5 py-4 shadow-[0_18px_40px_-14px_rgba(227,19,28,.8)]"
           >
             <span className="flex items-center gap-3">
               <motion.span

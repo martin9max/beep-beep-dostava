@@ -10,7 +10,6 @@ const whatsapp = `https://wa.me/381${digits.replace(/^0/, '')}`
 
 const INFO = [
   ['Gde dostavljamo', 'Negotin, okolna sela i šire'],
-  ['Dostava', '400 din u Negotinu, sela 120 din/km'],
   ['Radno vreme', BUSINESS.hours],
 ].filter(([, value]) => value)
 

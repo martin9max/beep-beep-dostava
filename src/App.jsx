@@ -2,6 +2,7 @@ import { MotionConfig, motion } from 'framer-motion'
 import { EASE } from './lib/order'
 import { AuthProvider } from './lib/auth'
 import { CartProvider } from './lib/cart'
+import { RadioProvider } from './lib/radio'
 import { useRoute } from './lib/router'
 import Header from './sections/Header'
 import Hero from './sections/Hero'
@@ -18,6 +19,7 @@ import ShopPage from './pages/ShopPage'
 import CheckoutPage from './pages/CheckoutPage'
 import AccountPage from './pages/AccountPage'
 import NotFound from './pages/NotFound'
+import RadioPage from './pages/RadioPage'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 
 /** Koja stranica se prikazuje za koju adresu. */
@@ -39,6 +41,8 @@ function Page({ path, query }) {
       return <RegisterPage next={next} />
     case 'nalog':
       return <AccountPage />
+    case 'radio':
+      return <RadioPage />
     default:
       return <NotFound />
   }
@@ -51,26 +55,28 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <AuthProvider>
         <CartProvider>
-          <Header />
-          {path === '/' ? (
-            <main>
-              <Hero />
-              <About />
-              <Services />
-              <Reviews />
-              <Faq />
-              <Contact />
-            </main>
-          ) : (
-            <PageShell>
-              {/* blag prelaz između stranica: nova stranica uđe odozdo umesto da samo "iskoči" */}
-              <motion.div key={path} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
-                <Page path={path} query={query} />
-              </motion.div>
-            </PageShell>
-          )}
-          <Footer />
-          <CartBar />
+          <RadioProvider>
+            <Header />
+            {path === '/' ? (
+              <main>
+                <Hero />
+                <About />
+                <Services />
+                <Reviews />
+                <Faq />
+                <Contact />
+              </main>
+            ) : (
+              <PageShell>
+                {/* blag prelaz između stranica: nova stranica uđe odozdo umesto da samo "iskoči" */}
+                <motion.div key={path} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
+                  <Page path={path} query={query} />
+                </motion.div>
+              </PageShell>
+            )}
+            <Footer />
+            <CartBar />
+          </RadioProvider>
         </CartProvider>
       </AuthProvider>
     </MotionConfig>

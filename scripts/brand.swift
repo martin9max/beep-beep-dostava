@@ -144,7 +144,7 @@ text("NEGOTIN I OKOLNA SELA", 22, .heavy, .white, X + 22, 120, kern: 2)
 text("BEEP BEEP", 88, .black, .white, X - 4, 168, kern: -1.5)
 text("DOSTAVA", 88, .black, red, X - 4, 258, kern: -1.5)
 text("Dostava svega što vam je potrebno,\ndo vaših vrata.", 32, .semibold, NSColor.white.withAlphaComponent(0.85), X, 372, width: 620)
-text("064 44 77 277", 58, .black, .white, X, 452, kern: 1)
+text("064 44 77 2 77", 58, .black, .white, X, 452, kern: 1)
 NSGraphicsContext.current = nil
 save(og.makeImage()!, "public/og-image.png")
 

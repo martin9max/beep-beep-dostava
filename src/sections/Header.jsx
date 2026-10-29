@@ -4,7 +4,7 @@ import { NAV } from '../data'
 import { EASE } from '../lib/order'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
-import { Link, isOrderingPath, useRoute, withBase } from '../lib/router'
+import { Link, SectionLink, isOrderingPath, useRoute } from '../lib/router'
 import { AddressBar } from '../components/Address'
 import Radio from '../components/Radio'
 import logo from '../assets/logo.png'
@@ -24,24 +24,24 @@ export default function Header() {
       initial={{ y: -80 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: EASE }}
-      className="fixed inset-x-0 top-0 z-20 border-b border-line bg-paper pt-[env(safe-area-inset-top,0px)]"
+      className="fixed inset-x-0 top-0 z-20 border-b border-white/10 bg-ink text-white pt-[env(safe-area-inset-top,0px)]"
     >
       <div className="mx-auto flex h-[72px] max-w-[1320px] items-center justify-between gap-x-2 px-4 sm:gap-x-3 sm:px-6">
         {home ? (
-          <Link href="/" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap font-serif text-[16px] font-bold sm:gap-2.5 sm:text-[22px]">
+          <Link href="/" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[15px] min-[400px]:text-[17px] sm:gap-2.5 sm:text-[25px]">
             <Logo />
           </Link>
         ) : (
-          <a href="#pocetna" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap font-serif text-[16px] font-bold sm:gap-2.5 sm:text-[22px]">
+          <a href="#pocetna" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[15px] min-[400px]:text-[17px] sm:gap-2.5 sm:text-[25px]">
             <Logo />
           </a>
         )}
 
         <nav aria-label="Glavna navigacija" className="hidden gap-0.5 xl:flex">
           {NAV.map((link) => (
-            <a key={link.href} href={home ? withBase(home + link.href) : link.href} className="navlink">
+            <SectionLink key={link.href} hash={link.href} className="navlink">
               {link.label}
-            </a>
+            </SectionLink>
           ))}
         </nav>
 
@@ -50,12 +50,12 @@ export default function Header() {
           <Link
             href={account.href}
             aria-label={user ? `Moj nalog (${user.name})` : 'Prijava'}
-            className="hidden h-11 items-center gap-2 rounded-lg border border-line px-3 font-semibold text-deep transition hover:border-ink sm:flex"
+            className="hidden h-11 items-center gap-2 rounded-lg border border-white/35 px-3 font-semibold text-white transition hover:bg-white/10 sm:flex"
           >
             <UserIcon />
             <span className="max-w-[10ch] truncate">{user === undefined ? '' : account.label}</span>
           </Link>
-          <Link href="/korpa" aria-label={`Korpa, ${cart.count} stavki`} className="relative grid h-10 w-10 place-items-center rounded-lg border border-line text-deep transition hover:border-ink sm:h-11 sm:w-11">
+          <Link href="/korpa" aria-label={`Korpa, ${cart.count} stavki`} className="relative grid h-10 w-10 place-items-center rounded-lg border border-white/35 text-white transition hover:bg-white/10 sm:h-11 sm:w-11">
             <BagIcon />
             {!cart.isEmpty && (
               // "skoči" svaki put kad se doda stavka
@@ -81,12 +81,12 @@ export default function Header() {
             aria-expanded={open}
             aria-controls="mobilni-meni"
             aria-label={open ? 'Zatvori meni' : 'Otvori meni'}
-            className="grid h-10 w-10 place-items-center rounded-lg border border-line sm:h-11 sm:w-11 xl:hidden"
+            className="grid h-10 w-10 place-items-center rounded-lg border border-white/35 sm:h-11 sm:w-11 xl:hidden"
           >
             <span className="relative block h-3.5 w-5" aria-hidden="true">
-              <span className={`absolute left-0 h-0.5 w-5 rounded bg-ink transition-transform duration-300 ${open ? 'top-1.5 rotate-45' : 'top-0'}`} />
-              <span className={`absolute left-0 top-1.5 h-0.5 w-5 rounded bg-ink transition-opacity duration-200 ${open ? 'opacity-0' : ''}`} />
-              <span className={`absolute left-0 h-0.5 w-5 rounded bg-ink transition-transform duration-300 ${open ? 'top-1.5 -rotate-45' : 'top-3'}`} />
+              <span className={`absolute left-0 h-0.5 w-5 rounded bg-white transition-transform duration-300 ${open ? 'top-1.5 rotate-45' : 'top-0'}`} />
+              <span className={`absolute left-0 top-1.5 h-0.5 w-5 rounded bg-white transition-opacity duration-200 ${open ? 'opacity-0' : ''}`} />
+              <span className={`absolute left-0 h-0.5 w-5 rounded bg-white transition-transform duration-300 ${open ? 'top-1.5 -rotate-45' : 'top-3'}`} />
             </span>
           </button>
         </div>
@@ -103,7 +103,7 @@ export default function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: EASE }}
-            className="overflow-hidden border-t border-line xl:hidden"
+            className="overflow-hidden border-t border-white/15 xl:hidden"
           >
             <ul className="grid gap-1 px-5 py-3">
               <li>
@@ -113,13 +113,13 @@ export default function Header() {
               </li>
               {NAV.map((link) => (
                 <li key={link.href}>
-                  <a href={home ? withBase(home + link.href) : link.href} onClick={close} className="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white">
+                  <SectionLink hash={link.href} onClick={close} className="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white/10">
                     {link.label}
-                  </a>
+                  </SectionLink>
                 </li>
               ))}
-              <li className="border-t border-line pt-1 sm:hidden">
-                <Link href={account.href} onClick={close} className="flex items-center gap-2 rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white">
+              <li className="border-t border-white/15 pt-1 sm:hidden">
+                <Link href={account.href} onClick={close} className="flex items-center gap-2 rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white/10">
                   <UserIcon />
                   {user ? `Moj nalog (${user.name})` : 'Prijava / registracija'}
                 </Link>
@@ -135,9 +135,11 @@ export default function Header() {
 function Logo() {
   return (
     <>
-      <img src={logo} alt="" width="44" height="44" className="h-9 w-9 shrink-0 sm:h-11 sm:w-11" />
+      <img src={logo} alt="" width="44" height="44" className="h-10 w-10 shrink-0 sm:h-12 sm:w-12" />
       <span>
-        Beep Beep <span className="text-red">Dostava</span>
+        <span className="hero-title font-body uppercase text-white">
+          Beep Beep <span className="text-red">Dostava</span>
+        </span>
       </span>
     </>
   )

@@ -20,7 +20,7 @@ export default function Reviews() {
     <section id="recenzije" className="py-[72px] md:py-[110px]">
       <div className="mx-auto max-w-[1120px] px-6">
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-2">
-          <SectionTitle>Šta kažu mušterije</SectionTitle>
+          <SectionTitle>Šta kažete Vi</SectionTitle>
           <Reveal className="mb-12 flex items-center gap-3">
             <b className="font-serif text-4xl leading-none">{RATING.score}</b>
             <span>
@@ -33,7 +33,7 @@ export default function Reviews() {
         <ul className="grid gap-6 md:grid-cols-3">
           {REVIEWS.map((review, i) => (
             <Reveal key={review.name} as="li" delay={i * 0.12} className="h-full">
-              <figure className="flex h-full flex-col rounded border border-line bg-white p-7 shadow-[0_24px_40px_-32px_rgba(22,115,196,.5)]">
+              <figure className="flex h-full flex-col rounded border border-line bg-white p-7 shadow-[0_24px_40px_-32px_rgba(13,47,128,.5)]">
                 <Stars className="mb-5" />
                 <blockquote className="flex-1 text-lg leading-relaxed">„{review.text}“</blockquote>
                 <figcaption className="mt-6 flex items-center gap-3 border-t border-line pt-5">
@@ -51,7 +51,7 @@ export default function Reviews() {
         </ul>
 
         <Reveal className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded bg-ink px-6 py-5 text-white sm:px-8">
-          <p className="text-lg font-semibold">Vozili smo i vama? Recite i drugima kako je bilo.</p>
+          <p className="text-lg font-semibold">Vaš utisak i iskustvo sa nama</p>
           <Button as="a" href={REVIEWS_URL} target="_blank" rel="noopener noreferrer" arrow className="px-6 py-3.5">
             Ostavi recenziju
           </Button>

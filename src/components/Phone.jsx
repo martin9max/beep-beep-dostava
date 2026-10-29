@@ -32,7 +32,7 @@ export default function Phone({ href }) {
         <div className="phone">
           {/* prednja strana: dolazni poziv */}
           <div className="phone-face phone-front">
-            <div className="flex h-full flex-col items-center overflow-hidden rounded-[30px] bg-[linear-gradient(170deg,#5ab4f5,#1e8fe6_50%,#1673c4)] px-5 pb-7 pt-3 text-white">
+            <div className="flex h-full flex-col items-center overflow-hidden rounded-[30px] bg-[linear-gradient(170deg,#2f67d8,#1446b8_50%,#0d2f80)] px-5 pb-7 pt-3 text-white">
               <div className="flex w-full items-center justify-between text-[11px] font-semibold text-white/80">
                 <span>12:30</span>
                 <span className="h-[22px] w-[74px] rounded-full bg-black" />

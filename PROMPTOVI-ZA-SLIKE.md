@@ -153,3 +153,26 @@ Za opšte „lokale“ (market, apoteka, poslastičarnica, pokloni, kurir) može
 ## 4. Slika „O nama“ (nije obavezno)
 
 `about.jpg` (format **4:5**) – najbolje **prava fotografija vašeg dostavljača** sa trokolicom. Ljudi više veruju pravoj slici nego AI-ju.
+
+---
+
+## 5. Pozadina početnog ekrana (ulica po kojoj vozi trokolica)
+
+Dok ove slike nema, na početnom ekranu je nacrtana ulica (`src/sections/HeroStreet.jsx`). Kad sliku ubacite, ona se prikaže umesto crteža, a 3D trokolica vozi preko nje.
+
+- **Fajl:** `src/assets/photos/hero-bg.jpg`
+- **Model:** *Phoenix* ili *Lucid Realism*, stil *Photography* ili *Cinematic*
+- **Format:** **16:9** (npr. 1472 × 832 ili veće). Na telefonu se seče po sredini, pa važno mora biti u sredini.
+- **Kompozicija:** prazan put **dole preko cele širine** (tu stoji trokolica), **nebo gore levo** bez detalja (tu je naslov).
+
+**Prompt:**
+```
+Wide cinematic photograph of a charming small town main street in Eastern Serbia at golden hour, an empty asphalt road running horizontally across the bottom third of the frame with a white dashed center line, a clean stone sidewalk behind it, a row of cozy ground floor shops with red and white striped awnings: a pizzeria with pizzas in the shop window, a pharmacy with a glowing green cross sign, a flower shop with colorful bouquets in buckets outside, a pastry shop with cakes in a glass display, a small grocery store with fresh fruit crates on the sidewalk, old two and three story European buildings with balconies and flower boxes above the shops, warm lights in some windows, vintage street lamps, a few green trees, clear deep royal blue sky with a few soft white clouds, calm open sky in the upper left part of the image, eye level camera, photorealistic, sharp details, vibrant natural colors with royal blue, red and white accents, 4k
+```
+
+**Negative prompt** (uz onaj gore, za sve slike, dodajte još):
+```
+cars, motorcycles, scooters, bicycles, vehicles on the road, people in the foreground, crowd, readable signs, shop names, night, rain, fog, wide angle distortion
+```
+
+Ako slika ispadne previše tamna ili natpisi na radnjama budu čudna slova, generišite ponovo. Natpise ne tražite, AI ih piše pogrešno.

@@ -108,36 +108,36 @@ function page(tab, deleted) {
 <meta name="robots" content="noindex">
 <title>Beep Beep admin</title>
 <style>
-  :root { --red:#d71e28; --blue:#1673c4; --line:#d7deea; --paper:#f3f5fa; color-scheme: light; }
+  :root { --red:#e3131c; --blue:#1446b8; --navy:#0a2668; --text:#0d2f80; --mute:#4c5f8c; --line:#d5ddf0; --paper:#f1f4fb; color-scheme: light; }
   * { box-sizing: border-box }
-  body { margin:0; font:15px/1.5 system-ui, sans-serif; background:var(--paper); color:#1b2b3d }
-  header { background:var(--blue); color:#fff; padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap }
-  header b { font-size:18px } header a { color:#fff }
+  body { margin:0; font:15px/1.5 system-ui, sans-serif; background:var(--paper); color:var(--text) }
+  header { background:linear-gradient(90deg,var(--navy),var(--blue)); color:#fff; padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap }
+  header b { font-size:18px; font-style:italic; text-transform:uppercase; letter-spacing:.02em } header b span { color:var(--red); text-shadow:0 1px 0 #fff } header a { color:#fff }
   main { max-width:1200px; margin:0 auto; padding:20px 16px 60px }
   .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:18px }
   .stat { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px }
   .stat b { display:block; font-size:26px; color:var(--blue) }
   nav { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap }
-  nav a { padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#1b2b3d; text-decoration:none; font-weight:600 }
+  nav a { padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--text); text-decoration:none; font-weight:600 }
   nav a.on { background:var(--red); border-color:var(--red); color:#fff }
   .wrap { overflow-x:auto; background:#fff; border:1px solid var(--line); border-radius:10px }
   table { border-collapse:collapse; width:100%; min-width:720px }
   th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top }
-  th { background:#f8f9fc; font-size:13px; color:#55779a }
+  th { background:#f7f9fd; font-size:13px; color:var(--mute) }
   .ok { color:#1d7a46; font-weight:700 } .no { color:var(--red); font-weight:700 }
   .items { margin:0; padding-left:18px } .items li { margin:0 }
-  .shop { font-weight:700; margin-top:4px } .req { color:#55779a; font-style:italic }
+  .shop { font-weight:700; margin-top:4px } .req { color:var(--mute); font-style:italic }
   select, button { font:inherit; padding:4px 6px }
-  .empty { padding:30px; text-align:center; color:#55779a }
+  .empty { padding:30px; text-align:center; color:var(--mute) }
   .st-nova { background:#fff3c4 }
   .notice { background:#dff5dc; border:1px solid #a9dea2; color:#1d6a3a; padding:10px 14px; border-radius:10px; margin:0 0 14px }
   .del { background:none; border:1px solid var(--red); color:var(--red); border-radius:6px; padding:4px 10px; cursor:pointer; font-weight:600 }
   .del:hover { background:var(--red); color:#fff }
-  .on { color:#1d7a46; font-weight:700 } .off { color:#55779a } .st-otkazana { opacity:.55 }
+  .on { color:#1d7a46; font-weight:700 } .off { color:var(--mute) } .st-otkazana { opacity:.55 }
 </style>
 </head>
 <body>
-<header><b>Beep Beep admin</b><a href="/">← sajt</a></header>
+<header><b>Beep Beep <span>admin</span></b><a href="/">← sajt</a></header>
 <main>
   <div class="stats">${stats.map(([l, n]) => `<div class="stat"><b>${n}</b>${esc(l)}</div>`).join('')}</div>
   ${deleted ? `<p class="notice">Nalog <b>${esc(deleted)}</b> je obrisan iz baze. Njegove porudžbine su ostale u listi porudžbina.</p>` : ''}

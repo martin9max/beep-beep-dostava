@@ -43,7 +43,7 @@ export function useCanvasTexture(width, height, draw, { color = true } = {}) {
 export const SERIF = '"Source Serif 4 Variable", Georgia, serif'
 export const SANS = '"Figtree Variable", sans-serif'
 export const RED = '#d71e28'
-export const BLUE = '#1e8fe6'
+export const BLUE = '#1446b8'
 export const INK = '#1673c4'
 
 /** Natpis "BeepBeep dostava" kao na trokolici: plavo + crveno, sa linijama brzine. */
@@ -173,7 +173,7 @@ export function drawPlate(c, w, h, top, bottom) {
   c.beginPath()
   c.roundRect(w * 0.06, w * 0.06, w * 0.88, h - w * 0.12, w * 0.05)
   c.fill()
-  c.fillStyle = '#1e8fe6'
+  c.fillStyle = '#1446b8'
   c.fillRect(w * 0.06, w * 0.06, w * 0.12, h * 0.42)
   c.fillStyle = '#111'
   c.textAlign = 'center'

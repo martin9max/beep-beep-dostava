@@ -1,6 +1,6 @@
 import { BUSINESS, NAV, PHONE, SERVICES } from '../data'
 import logo from '../assets/logo.png'
-import { Link, useRoute, withBase } from '../lib/router'
+import { Link, SectionLink, useRoute } from '../lib/router'
 
 const tel = `tel:${PHONE.replace(/\s/g, '')}`
 const whatsapp = `https://wa.me/381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`
@@ -9,15 +9,17 @@ export default function Footer() {
   // na podstranicama linkovi ka delovima početne idu preko /
   const home = useRoute().path === '/' ? '' : '/'
   return (
-    <footer className="relative overflow-hidden bg-ink text-white/90">
+    <footer className="relative overflow-hidden bg-navy text-white/90">
       <div className="mx-auto grid max-w-[1120px] gap-10 px-6 pb-10 pt-16 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <a href={home ? withBase('/#pocetna') : '#pocetna'} className="inline-flex items-center gap-2.5 font-serif text-[22px] font-bold text-white">
+          <SectionLink hash="#pocetna" className="inline-flex items-center gap-2.5 font-serif text-[22px] font-bold text-white">
             <img src={logo} alt="" width="44" height="44" className="h-11 w-11" />
             <span>
-              Beep Beep <span className="hero-red">Dostava</span>
+              <span className="hero-title font-body uppercase text-white">
+                Beep Beep <span className="text-red">Dostava</span>
+              </span>
             </span>
-          </a>
+          </SectionLink>
           <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed">
             Prva i prava dostava u Negotinu i okolini. Od 5. decembra 2020. donosimo hranu, lekove, cveće i sve ostalo do
             vaših vrata, brzo i sa osmehom.
@@ -43,9 +45,9 @@ export default function Footer() {
         <FooterList title="Stranica">
           {NAV.map((link) => (
             <li key={link.href}>
-              <a href={home ? withBase(home + link.href) : link.href} className="footer-link">
+              <SectionLink hash={link.href} className="footer-link">
                 {link.label}
-              </a>
+              </SectionLink>
             </li>
           ))}
         </FooterList>

@@ -8,7 +8,17 @@
 //   price: 650                       jedna cena u dinarima
 //   price: [['32 cm', 650], ['50 cm', 1250]]   više veličina
 //   price: null                      "po računu" (market, apoteka), kurir plati pa vi vratite
-// Lokal sa `request` ima i polje gde kupac sam napiše šta mu treba.
+// Lokal sa `request` ima i polje gde kupac sam napiše šta mu treba (na dnu menija i u korpi;
+// sa `checkoutOnly: true` samo u korpi).
+//
+// Deo menija može imati i (sve je neobavezno):
+//   emoji: '🍕'                      ikonica pored naslova i na traci sa delovima menija
+//   note: '32 cm / 48 cm'            sitan tekst ispod naslova (veličine, gramaža, salata po izboru)
+//   extras: ['masline', 'jaje']      dodaci po želji; kupac ih upiše u napomenu za lokal
+// Stavka može imati weight: '360 g' (prikazuje se pored naziva).
+// Lokal sa realMenu: true ima pravi meni (u razvoju se ne prikazuje napomena "meni je primer").
+// stripe: ['#178a45', '#fff', '#e3131c'] je traka u bojama lokala na vrhu njegovog menija.
+// logo: 'Pastizza' je ime fajla u src/assets/partners; logo stoji na kartici lokala i na vrhu menija.
 //
 // Slike: src/assets/photos/kategorije/<key>.jpg i src/assets/photos/lokali/<slug>.jpg
 // (dok ih nema, prikazuje se emoji na obojenoj pozadini).
@@ -62,6 +72,131 @@ export const CATEGORIES = {
 export const SHOPS = [
   // ---------------- HRANA ----------------
   {
+    // pravi meni sa cenovnika u lokalu (fotografija, oktobar 2026)
+    slug: 'pastizza',
+    name: 'Pastizza',
+    realMenu: true,
+    // logo iz src/assets/partners/Pastizza.jpg (isti kao u traci "Naši partneri")
+    logo: 'Pastizza',
+    // zelena, bela, crvena kao na njihovom cenovniku (traka na vrhu menija kad nema logoa)
+    stripe: ['#178a45', '#ffffff', '#e3131c'],
+    service: 'food',
+    emoji: '🍝',
+    about: 'Zapečeni i tost sendviči, pica, paste, pasta salate i palačinke.',
+    request: {
+      label: 'Dodaci, salata po izboru ili napomena',
+      // polje je samo u korpi, na kraju poručivanja (ne na dnu menija)
+      checkoutOnly: true,
+      placeholder: 'npr. salata uz sendvič: urnebes. Na pici dodatno masline i feferoni. Palačinka sa bananom.',
+    },
+    menu: [
+      {
+        title: 'Zapečeni sendviči',
+        emoji: '🥪',
+        cat: 'sendvic',
+        note: 'Salata po izboru: ruska, pileća, goveđa ili urnebes',
+        items: [
+          { id: 'pz-zap-sunka', name: 'Sendvič šunka', weight: '360 g', price: 260 },
+          { id: 'pz-zap-tuna', name: 'Sendvič tuna', weight: '360 g', price: 270 },
+          { id: 'pz-zap-pecenica', name: 'Sendvič pečenica', weight: '360 g', price: 300 },
+          { id: 'pz-zap-vrat', name: 'Sendvič suvi vrat', weight: '360 g', price: 300 },
+          { id: 'pz-zap-prsa', name: 'Sendvič pileća prsa', weight: '360 g', price: 300 },
+          { id: 'pz-zap-kulen', name: 'Sendvič kulen', weight: '360 g', price: 310 },
+          { id: 'pz-zap-pastizza', name: 'Sendvič Pastizza', weight: '400 g', price: 360 },
+          { id: 'pz-zap-dimljeno', name: 'Sendvič dimljeno meso', weight: '360 g', price: 380 },
+          { id: 'pz-zap-piletina', name: 'Sendvič sa piletinom', weight: '360 g', price: 360 },
+          { id: 'pz-zap-batak', name: 'Sendvič dimljeni batak', weight: '450 g', price: 430 },
+        ],
+      },
+      {
+        title: 'Tost sendviči',
+        emoji: '🍞',
+        cat: 'sendvic',
+        note: 'Salata po izboru: ruska, pileća, goveđa ili urnebes',
+        items: [
+          { id: 'pz-tost-sunka', name: 'Tost šunka', weight: '350 g', price: 250 },
+          { id: 'pz-tost-pecenica', name: 'Tost pečenica', weight: '350 g', price: 290 },
+          { id: 'pz-tost-vrat', name: 'Tost suvi vrat', weight: '350 g', price: 290 },
+          { id: 'pz-tost-prsa', name: 'Tost pileća prsa', weight: '350 g', price: 290 },
+          { id: 'pz-tost-kulen', name: 'Tost kulen', weight: '350 g', price: 300 },
+          { id: 'pz-tost-dimljeno', name: 'Tost dimljeno meso', weight: '350 g', price: 370 },
+        ],
+      },
+      {
+        title: 'Pica',
+        emoji: '🍕',
+        cat: 'pica',
+        note: '32 cm / 48 cm',
+        extras: ['pavlaka', 'masline', 'kukuruz', 'feferoni', 'parmezan', 'jaje'],
+        items: [
+          { id: 'pz-margherita', name: 'Margherita', desc: 'pelat, kačkavalj', price: [['32 cm', 900], ['48 cm', 1400]] },
+          { id: 'pz-capricciosa', name: 'Capricciosa', desc: 'pelat, pečurke, kačkavalj, šunka', price: [['32 cm', 1000], ['48 cm', 1550]] },
+          { id: 'pz-vegetariana', name: 'Vegetariana', desc: 'pelat, pečurke, kačkavalj, mix povrće, masline', price: [['32 cm', 950], ['48 cm', 1450]] },
+          { id: 'pz-prsa', name: 'Prsa', desc: 'pelat, pečurke, kačkavalj, pileća prsa, jaje', price: [['32 cm', 1050], ['48 cm', 1650]] },
+          { id: 'pz-roma', name: 'Roma', desc: 'pelat, pečurke, kačkavalj, šunka, suvi vrat, susam', price: [['32 cm', 1100], ['48 cm', 1750]] },
+          { id: 'pz-salami', name: 'Salami', desc: 'pelat, kačkavalj, kulen', price: [['32 cm', 1050], ['48 cm', 1750]] },
+          { id: 'pz-quattro', name: 'Quattro', desc: 'pelat, pečurke, kačkavalj, suvi vrat, slanina, kulen, jaje', price: [['32 cm', 1150], ['48 cm', 1900]] },
+          { id: 'pz-chicken', name: 'Chicken', desc: 'pelat, kačkavalj, dimljena piletina, susam', price: [['32 cm', 1100], ['48 cm', 1800]] },
+          { id: 'pz-pica-pastizza', name: 'Pastizza', desc: 'pelat, pečurke, kačkavalj, paprika, domaće dimljeno meso, ivice sa kačkavaljem', price: [['32 cm', 1200], ['48 cm', 2000]] },
+          { id: 'pz-parce', name: 'Pizza parče', price: 270 },
+          { id: 'pz-parce-salata', name: 'Pizza parče sa salatom', desc: 'salata po izboru: ruska, pileća, goveđa ili urnebes', price: 290 },
+        ],
+      },
+      {
+        title: 'Paste',
+        emoji: '🍝',
+        cat: 'pasta',
+        note: '300 g / 450 g',
+        extras: ['piletina', 'pančeta', 'parmezan', 'pečurke', 'dimljena piletina'],
+        items: [
+          { id: 'pz-pesto', name: 'Piletina pesto', desc: 'pileće belo meso, neutralna pavlaka, pesto sos, parmezan', price: [['300 g', 450], ['450 g', 550]] },
+          { id: 'pz-bolognese', name: 'Pasta bolognese', desc: 'juneće meso, luk, šargarepa, paradajz sos, parmezan', price: [['300 g', 450], ['450 g', 550]] },
+          { id: 'pz-carbonara', name: 'Pasta carbonara', desc: 'pančeta, neutralna pavlaka, jaje, parmezan', price: [['300 g', 450], ['450 g', 550]] },
+          { id: 'pz-pasta-sunka', name: 'Pasta šunka', desc: 'šunka, neutralna pavlaka, parmezan', price: [['300 g', 450], ['450 g', 550]] },
+          { id: 'pz-funghi', name: 'Piletina funghi', desc: 'pileće belo meso, neutralna pavlaka, pečurke, parmezan', price: [['300 g', 450], ['450 g', 550]] },
+          { id: 'pz-pasta-pastizza', name: 'Pasta Pastizza', desc: 'dimljeni batak, neutralna pavlaka, susam, kačkavalj', price: [['300 g', 450], ['450 g', 550]] },
+        ],
+      },
+      {
+        title: 'Pasta salate',
+        emoji: '🥗',
+        cat: 'salata',
+        note: '400 g',
+        items: [
+          { id: 'pz-salata-tuna', name: 'Pasta salata tunjevina', weight: '400 g', desc: 'testenina, tunjevina, kukuruz, ajvar, kiseli krastavci, soja sos', price: 450 },
+          { id: 'pz-salata-piletina', name: 'Pasta salata piletina', weight: '400 g', desc: 'testenina, pileće belo meso, pavlaka, susam', price: 450 },
+        ],
+      },
+      {
+        title: 'Palačinke slatke',
+        emoji: '🥞',
+        cat: 'palacinke',
+        extras: ['plazma', 'kokos', 'banana', 'krem', 'džem', 'nutela'],
+        items: [
+          { id: 'pz-pal-krem', name: 'Palačinka sa kremom', price: 240 },
+          { id: 'pz-pal-dzem', name: 'Palačinka sa džemom', price: 230 },
+          { id: 'pz-pal-nutela', name: 'Palačinka sa nutelom', price: 270 },
+          { id: 'pz-pal-krem-plazma', name: 'Palačinka krem-plazma', price: 280 },
+          { id: 'pz-pal-nutela-plazma', name: 'Palačinka nutela-plazma', price: 300 },
+        ],
+      },
+      {
+        title: 'Palačinke slane',
+        emoji: '🫓',
+        cat: 'palacinke',
+        items: [
+          { id: 'pz-pal-sunka', name: 'Palačinka sa šunkom', price: 330 },
+          { id: 'pz-pal-pecenica', name: 'Palačinka sa pečenicom', price: 380 },
+          { id: 'pz-pal-vrat', name: 'Palačinka sa suvim vratom', price: 380 },
+          { id: 'pz-pal-kulen', name: 'Palačinka sa kulenom', price: 380 },
+          { id: 'pz-pal-capricciosa', name: 'Palačinka Capricciosa', price: 360 },
+          { id: 'pz-pal-pastizza', name: 'Palačinka Pastizza', price: 420 },
+          { id: 'pz-pal-piletina', name: 'Palačinka sa piletinom', price: 400 },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'picerija-castelo',
     name: 'Picerija Castelo',
     service: 'food',
@@ -112,6 +247,7 @@ export const SHOPS = [
   {
     slug: 'kafanica',
     name: 'Kafanica',
+    logo: 'Kafanica',
     service: 'food',
     emoji: '🍖',
     about: 'Roštilj, domaća kuvana jela i doručak.',
@@ -208,48 +344,9 @@ export const SHOPS = [
     ],
   },
   {
-    slug: 'pastizza',
-    name: 'Pastizza',
-    service: 'food',
-    emoji: '🍝',
-    about: 'Italijanska kuhinja: pasta, pica i deserti.',
-    menu: [
-      {
-        title: 'Pasta',
-        cat: 'pasta',
-        items: [
-          { id: 'pz-karbonara', name: 'Špagete karbonara', price: 760 },
-          { id: 'pz-pesto', name: 'Penne pesto', desc: 'Bosiljak, pinjoli, parmezan, piletina', price: 790 },
-          { id: 'pz-quattro', name: 'Njoke četiri sira', price: 820 },
-          { id: 'pz-lazanje', name: 'Lazanje', desc: 'Bolonjeze sos, bešamel', price: 850 },
-        ],
-      },
-      {
-        title: 'Pice',
-        cat: 'pica',
-        items: [
-          { id: 'pz-prsuta', name: 'Pica pršuta', desc: 'Pelat, mocarela, pršuta, rukola', price: [['32 cm', 920], ['50 cm', 1790]] },
-          { id: 'pz-tuna', name: 'Tuna', desc: 'Pelat, mocarela, tunjevina, luk', price: [['32 cm', 880], ['50 cm', 1700]] },
-        ],
-      },
-      {
-        title: 'Salate',
-        cat: 'salata',
-        items: [{ id: 'pz-kaprese', name: 'Kaprese', desc: 'Paradajz, mocarela, bosiljak', price: 590 }],
-      },
-      {
-        title: 'Deserti',
-        cat: 'desert',
-        items: [
-          { id: 'tiramisu', name: 'Tiramisu', price: 420 },
-          { id: 'panakota', name: 'Panakota', desc: 'Sa šumskim voćem', price: 380 },
-        ],
-      },
-    ],
-  },
-  {
     slug: 'la-moara',
     name: 'La Moara',
+    logo: 'La Moara',
     service: 'food',
     emoji: '🥞',
     about: 'Slatke i slane palačinke, vafli i doručak.',

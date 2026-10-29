@@ -1,6 +1,6 @@
 import Reveal from '../components/Reveal'
 import SectionTitle from '../components/SectionTitle'
-import Photo from '../components/Photo'
+import ptica from '../assets/beep-beep-ptica.webp'
 import { animate, motion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
@@ -57,14 +57,26 @@ export default function About() {
               ))}
             </Reveal>
           </div>
-          {/* fotografija se otkriva odozgo nadole kad uđe u ekran */}
+          {/* logo sa pticom "BEEP! BEEP!" (providna pozadina) na mestu fotografije: uskoči kad uđe u ekran, pa blago lebdi */}
           <motion.div
-            initial={{ clipPath: 'inset(0 0 100% 0)' }}
-            whileInView={{ clipPath: 'inset(0 0 0% 0)' }}
+            initial={{ opacity: 0, scale: 0.8, rotate: -6 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
             viewport={{ once: true, margin: '0px 0px -15% 0px' }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+            className="mx-auto w-full max-w-[520px]"
           >
-            <Photo name="about" label="Negotin" alt="Trg u Negotinu, gde Beep Beep dostava vozi od 2020." className="aspect-[4/3] rounded md:aspect-[4/5]" />
+            <div className="hero-float" style={{ animationDuration: '6s' }}>
+              <motion.img
+                src={ptica}
+                alt="Beep Beep: ptica i natpis BEEP! BEEP!"
+                width="900"
+                height="814"
+                loading="lazy"
+                decoding="async"
+                whileHover={{ rotate: -3, scale: 1.03 }}
+                className="h-auto w-full drop-shadow-[0_24px_30px_rgba(10,38,104,.25)]"
+              />
+            </div>
           </motion.div>
         </div>
       </div>

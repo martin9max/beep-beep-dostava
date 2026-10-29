@@ -5,6 +5,15 @@ const IMAGES = Object.fromEntries(
   ).map(([path, url]) => [path.split('/').slice(-2).join('/').replace(/\.[^.]+$/, ''), url]),
 )
 
+// Logoi partnera (src/assets/partners/<ime>.jpg, 288 x 112); lokal sa `logo: 'Pastizza'` ga prikazuje na kartici i meniju
+const LOGOS = Object.fromEntries(
+  Object.entries(import.meta.glob('../assets/partners/*.{svg,png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' })).map(([path, url]) => [
+    path.split('/').pop().replace(/\.[^.]+$/, ''),
+    url,
+  ]),
+)
+export const logoOf = (shop) => (shop.logo ? LOGOS[shop.logo] : null)
+
 /** Da li postoji fotografija (npr. "lokali/kafanica"). Lokali bez slike se prikazuju bez nje. */
 export const hasImage = (src) => Boolean(IMAGES[src])
 

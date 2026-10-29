@@ -76,3 +76,26 @@ export function Link({ href, onClick, ...rest }) {
     />
   )
 }
+
+/**
+ * Link ka delu početne (#o-nama, #kontakt). Sa podstranice ide na početnu bez ponovnog učitavanja,
+ * da radio nastavi da svira, pa skroluje do tog dela.
+ */
+export function SectionLink({ hash, onClick, ...rest }) {
+  const { path } = useRoute()
+  if (path === '/') return <a href={hash} onClick={onClick} {...rest} />
+  return (
+    <a
+      href={withBase('/' + hash)}
+      onClick={(e) => {
+        onClick?.(e)
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        e.preventDefault()
+        navigate('/' + hash)
+        // čeka da React nacrta početnu, pa skroluje do dela
+        requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView()))
+      }}
+      {...rest}
+    />
+  )
+}

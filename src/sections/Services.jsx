@@ -15,7 +15,7 @@ export default function Services() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service, i) => (
             <Reveal key={service.key} delay={(i % 3) * 0.12} className="h-full">
-              <article className="group flex h-full flex-col overflow-hidden rounded border border-line bg-paper transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_30px_-20px_rgba(22,115,196,.45)]">
+              <article className="group flex h-full flex-col overflow-hidden rounded border border-line bg-paper transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_30px_-20px_rgba(13,47,128,.45)]">
                 <Photo name={service.key} label={service.label} alt={service.title} zoom className="aspect-[4/3]" />
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="mb-2 text-2xl font-bold">{service.title}</h3>
@@ -31,7 +31,7 @@ export default function Services() {
 
         {/* premium usluga: izdvojena crvena kartica ispod usluga */}
         <Reveal className="mt-10">
-          <article className="relative grid gap-8 overflow-hidden rounded-2xl bg-red p-7 text-white shadow-[0_30px_60px_-30px_rgba(215,30,40,.75)] sm:p-10 md:grid-cols-[1.1fr_1fr] md:items-center">
+          <article className="relative grid gap-8 overflow-hidden rounded-2xl bg-red p-7 text-white shadow-[0_30px_60px_-30px_rgba(227,19,28,.75)] sm:p-10 md:grid-cols-[1.1fr_1fr] md:items-center">
             <div>
               <span className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[.18em] text-red">
                 <span aria-hidden="true">★</span> {PREMIUM.badge}
