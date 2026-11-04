@@ -5,9 +5,10 @@ const IMAGES = Object.fromEntries(
   ).map(([path, url]) => [path.split('/').slice(-2).join('/').replace(/\.[^.]+$/, ''), url]),
 )
 
-// Logoi partnera (src/assets/partners/<ime>.jpg, 288 x 112); lokal sa `logo: 'Pastizza'` ga prikazuje na kartici i meniju
+// Logoi lokala (288 x 112): src/assets/partners (vide se i u traci "Naši partneri") i src/assets/logos
+// (samo na kartici i meniju lokala). Lokal sa `logo: 'Pastizza'` prikazuje fajl tog imena.
 const LOGOS = Object.fromEntries(
-  Object.entries(import.meta.glob('../assets/partners/*.{svg,png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' })).map(([path, url]) => [
+  Object.entries(import.meta.glob('../assets/{partners,logos}/*.{svg,png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' })).map(([path, url]) => [
     path.split('/').pop().replace(/\.[^.]+$/, ''),
     url,
   ]),
