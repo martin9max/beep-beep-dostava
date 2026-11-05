@@ -136,10 +136,10 @@ function Logo() {
   return (
     <>
       <img src={logo} alt="" width="44" height="44" className="h-10 w-10 shrink-0 sm:h-12 sm:w-12" />
-      <span>
-        <span className="hero-title font-body uppercase text-white">
-          Beep Beep <span className="text-red">Dostava</span>
-        </span>
+      {/* na uskim telefonima (ispod 400 px) natpis ide u dva reda, da ne prelazi preko dugmadi desno */}
+      <span className="hero-title min-w-0 font-body uppercase leading-[1.05] text-white">
+        <span className="block min-[400px]:inline">Beep Beep </span>
+        <span className="block text-red min-[400px]:inline">Dostava</span>
       </span>
     </>
   )

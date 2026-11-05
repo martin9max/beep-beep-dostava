@@ -95,10 +95,10 @@ export default function Hero() {
                 alt=""
                 fetchPriority="high"
                 decoding="async"
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[42%_100%] lg:object-[50%_74%]"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[42%_100%] brightness-[1.12] saturate-[1.08] lg:object-[50%_74%]"
               />
-              {/* zatamnjenje samo tamo gde je tekst (nebo), ostatak slike ostaje svetao */}
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,36,72,.78)_0%,rgba(8,36,72,.5)_38%,rgba(8,36,72,0)_62%,rgba(8,36,72,.35)_100%)] lg:bg-[radial-gradient(85%_95%_at_0%_0%,rgba(8,36,72,.8)_0%,rgba(8,36,72,.5)_45%,rgba(8,36,72,0)_75%),linear-gradient(0deg,rgba(8,36,72,.35)_0%,rgba(8,36,72,0)_30%)]" />
+              {/* blago zatamnjenje samo iza teksta (gore levo), ostatak slike ostaje svetao */}
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,36,72,.62)_0%,rgba(8,36,72,.3)_30%,rgba(8,36,72,0)_52%)] lg:bg-[radial-gradient(70%_80%_at_0%_0%,rgba(8,36,72,.72)_0%,rgba(8,36,72,.4)_40%,rgba(8,36,72,0)_68%)]" />
             </>
           ) : (
             // bez fotografije: nacrtana ulica sa radnjama, trotoarom i putem po kojem vozi trokolica
