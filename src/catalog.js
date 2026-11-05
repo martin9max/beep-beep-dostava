@@ -19,6 +19,7 @@
 // Lokal sa realMenu: true ima pravi meni (u razvoju se ne prikazuje napomena "meni je primer").
 // stripe: ['#178a45', '#fff', '#e3131c'] je traka u bojama lokala na vrhu njegovog menija.
 // logo: 'Pastizza' je ime fajla u src/assets/partners; logo stoji na kartici lokala i na vrhu menija.
+// gallery: true prikazuje slike iz src/assets/galerija/<slug> ("Naši radovi") na vrhu menija.
 //
 // Slike: src/assets/photos/kategorije/<key>.jpg i src/assets/photos/lokali/<slug>.jpg
 // (dok ih nema, prikazuje se emoji na obojenoj pozadini).
@@ -59,6 +60,7 @@ export const CATEGORIES = {
     { key: 'saksije', label: 'Saksijsko cveće', emoji: '🪴' },
   ],
   gifts: [
+    { key: 'torte-po-zelji', label: 'Torte po želji', emoji: '🎂' },
     { key: 'cokoladne', label: 'Čokoladne torte', emoji: '🍫' },
     { key: 'dvesprata', label: 'Torte na dva sprata', emoji: '🎂' },
     { key: 'pokloni', label: 'Pokloni', emoji: '🎁' },
@@ -975,6 +977,35 @@ export const SHOPS = [
   },
 
   // ---------------- TORTE I POKLONI ----------------
+  {
+    // torte po narudžbini; cena po parčetu (cenovnik od vlasnice, novembar 2026)
+    slug: 'tortica-989',
+    name: 'Tortica 989',
+    logo: 'Tortica 989',
+    realMenu: true,
+    // slike radova: src/assets/galerija/tortica-989
+    gallery: true,
+    service: 'gifts',
+    emoji: '🎂',
+    about: 'Torte po narudžbini za rođendane, krštenja i venčanja, sa fondanom ili šlagom, po vašoj želji.',
+    request: {
+      label: 'Kakvu tortu želite?',
+      placeholder: 'npr. torta za 20 osoba, tema balerina, natpis „Stana 5“, roze i bela boja, za subotu u 12h. Možete napisati i koja vam se torta sa slika dopala.',
+    },
+    menu: [
+      {
+        title: 'Torte po želji',
+        emoji: '🎂',
+        cat: 'torte-po-zelji',
+        note: 'Cena je po parčetu · količina je broj parčadi (osoba)',
+        extras: ['slike', 'toperi', 'figure', 'ukrasno cveće (dodatno se naplaćuju, cenu javlja poslastičarnica)'],
+        items: [
+          { id: 'tc-fondan', name: 'Torta sa fondanom', weight: '1 parče', desc: 'dekoracija od fondana, kao na slikama iznad', price: 240 },
+          { id: 'tc-slag', name: 'Torta sa šlagom', weight: '1 parče', desc: 'klasična torta sa šlagom', price: 200 },
+        ],
+      },
+    ],
+  },
   {
     slug: 'poslasticarnica',
     name: 'Poslastičarnica',

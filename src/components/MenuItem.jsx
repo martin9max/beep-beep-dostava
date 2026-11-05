@@ -109,9 +109,7 @@ export function Qty({ value, onChange, label }) {
       <button type="button" onClick={() => onChange(value - 1)} aria-label={`Manje: ${label}`} className="grid h-10 w-10 place-items-center text-xl font-bold text-red">
         −
       </button>
-      <span className="min-w-6 text-center font-bold text-deep" aria-live="polite">
-        {value}
-      </span>
+      <QtyInput value={value} onChange={onChange} label={label} />
       <button type="button" onClick={() => onChange(value + 1)} aria-label={`Više: ${label}`} className="grid h-10 w-10 place-items-center text-xl font-bold text-red">
         +
       </button>
@@ -119,3 +117,26 @@ export function Qty({ value, onChange, label }) {
   )
 }
 
+/** Broj u sredini kontrole: može i da se upiše (npr. 30 parčadi torte), primeni se kad se izađe iz polja. */
+function QtyInput({ value, onChange, label }) {
+  const [draft, setDraft] = useState(null)
+  const commit = () => {
+    if (draft === null) return
+    const n = parseInt(draft, 10)
+    if (n > 0 && n !== value) onChange(Math.min(n, 200))
+    setDraft(null)
+  }
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={`Količina: ${label}`}
+      value={draft ?? String(value)}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 3))}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      className="w-9 bg-transparent text-center font-bold text-deep outline-none focus:rounded focus:bg-paper"
+    />
+  )
+}

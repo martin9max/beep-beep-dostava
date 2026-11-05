@@ -186,7 +186,7 @@ function buildOrder(body) {
   for (const line of Array.isArray(body.items) ? body.items.slice(0, 100) : []) {
     const item = findItem(line.shop, line.id) ?? fail(400, 'Neka stavka više ne postoji u meniju. Osvežite stranicu.')
     const variant = Number.isInteger(line.variant) ? line.variant : 0
-    const qty = Math.min(Math.max(parseInt(line.qty, 10) || 0, 0), 50)
+    const qty = Math.min(Math.max(parseInt(line.qty, 10) || 0, 0), 200) // do 200 (torte se naručuju po parčetu)
     if (!qty) continue
     get(line.shop).lines.push({ id: item.id, qty, name: item.name, variant: variantLabel(item, variant), price: priceOf(item, variant) })
   }

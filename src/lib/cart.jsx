@@ -53,7 +53,7 @@ export function CartProvider({ children }) {
         const rest = s.items.filter((l) => !same(l, shop, id, variant))
         if (qty <= 0) return { ...s, items: rest }
         const existing = s.items.findIndex((l) => same(l, shop, id, variant))
-        const line = { shop, id, variant, qty: Math.min(qty, 50) }
+        const line = { shop, id, variant, qty: Math.min(qty, 200) } // do 200 (torte po parčetu)
         if (existing === -1) return { ...s, items: [...s.items, line] }
         const items = [...s.items]
         items[existing] = line

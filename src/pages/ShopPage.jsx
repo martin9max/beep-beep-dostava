@@ -6,6 +6,8 @@ import { Link } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import MenuItem from '../components/MenuItem'
 import NotFound from './NotFound'
+import BackButton, { ArrowLeft } from '../components/BackButton'
+import Gallery from '../components/Gallery'
 import { usePageTitle } from './PageShell'
 
 const sectionId = (i) => `meni-${i}`
@@ -88,6 +90,8 @@ export default function ShopPage({ slug, category }) {
               </p>
             )}
           </div>
+
+          {shop.gallery && <Gallery slug={shop.slug} name={shop.name} />}
 
           {/* ponuda na prvi pogled: pločice za svaki deo menija (kao "Naša ponuda" na sajtovima lokala) */}
           {shop.menu.length > 2 && (
@@ -218,25 +222,6 @@ export default function ShopPage({ slug, category }) {
 const one = (n) => n % 10 === 1 && n % 100 !== 11
 const few = (n) => [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)
 const unit = (n, food) => (food ? (one(n) ? 'jelo' : 'jela') : one(n) ? 'stavka' : few(n) ? 'stavke' : 'stavki')
-
-function BackButton({ href, label }) {
-  return (
-    <Link href={href} className="group inline-flex items-center gap-2 rounded-full border border-line bg-white py-2 pl-2 pr-4 text-[15px] font-semibold text-deep transition hover:border-red hover:text-red">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-red text-white">
-        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-      </span>
-      {label}
-    </Link>
-  )
-}
-
-function ArrowLeft({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M14 8H3M7 4 3 8l4 4" />
-    </svg>
-  )
-}
 
 function scrollToSection(i) {
   const el = document.getElementById(sectionId(i))

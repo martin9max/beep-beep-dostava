@@ -40,8 +40,17 @@ if (typeof window !== 'undefined') {
   })
 }
 
+/** Da li postoji prethodna stranica ovog sajta u istoriji (kupac nije došao direktno na ovu). */
+export const canGoBack = () => typeof window !== 'undefined' && (history.state?.bbDepth ?? 0) > 0
+
 export function navigate(to, { replace = false, scroll = true } = {}) {
-  history[replace ? 'replaceState' : 'pushState']({ bbKey: replace ? pageKey() : newKey() }, '', withBase(to))
+  // bbDepth: koliko je stranica sajta iza ove (za dugme "Nazad": vrati na prethodnu ili na početnu)
+  const depth = history.state?.bbDepth ?? 0
+  history[replace ? 'replaceState' : 'pushState'](
+    { bbKey: replace ? pageKey() : newKey(), bbDepth: replace ? depth : depth + 1 },
+    '',
+    withBase(to),
+  )
   listeners.forEach((fn) => fn())
   if (scroll && !to.includes('#')) scrollToY(0)
 }

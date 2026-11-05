@@ -4,6 +4,7 @@ import { SERVICES } from '../data'
 import { Link, navigate } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { usePageTitle } from './PageShell'
+import BackButton from '../components/BackButton'
 
 const TAB_LABELS = { food: 'Hrana', market: 'Namirnice', meds: 'Lekovi', flowers: 'Cveće', gifts: 'Torte i pokloni', other: 'Ostalo' }
 
@@ -19,8 +20,9 @@ export default function OrderPage({ service, category }) {
   const pick = (key) => navigate(`/naruci/${active.key}${key && key !== category ? `?k=${key}` : ''}`, { replace: true, scroll: false })
 
   return (
-    <div className="mx-auto max-w-[1120px] px-5 pb-40 pt-8 sm:px-6 md:pt-12">
-      <h1 className="text-[clamp(30px,4vw,44px)] font-bold tracking-tight">Šta vam treba?</h1>
+    <div className="mx-auto max-w-[1120px] px-5 pb-40 pt-6 sm:px-6 md:pt-8">
+      <BackButton href="/#usluge" label="Nazad" back />
+      <h1 className="mt-4 text-[clamp(30px,4vw,44px)] font-bold tracking-tight">Šta vam treba?</h1>
       <p className="mt-1 max-w-[60ch] text-deep/75">
         Izaberite iz jednog ili više lokala, sve stiže u jednoj vožnji.
       </p>
