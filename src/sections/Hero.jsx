@@ -131,8 +131,8 @@ export default function Hero() {
                   </span>
                 ))}
               </h1>
-              {/* dva reda: prvi krupno i podebljano, drugi običan */}
-              <motion.p className="mt-3 leading-tight text-white [text-shadow:0_2px_10px_rgba(4,16,52,.55)] sm:mt-5" {...fadeUp(0.5)}>
+              {/* dva reda: prvi krupno i podebljano, drugi običan; oba sa crnom ivicom i senkom (hero-sub u index.css) */}
+              <motion.p className="hero-sub mt-3 leading-tight text-white sm:mt-5" {...fadeUp(0.5)}>
                 <span className="block text-[clamp(13px,4vw,17px)] font-extrabold sm:text-[22px] lg:text-[26px]">Prva i prava dostava u Negotinu i okolini.</span>
                 <span className="mt-1.5 block text-[clamp(13px,3.8vw,15px)] font-semibold text-white/95 sm:mt-2 sm:text-lg lg:text-xl">
                   Dostava hrane, pića, namirnica, lekova, poklona i još mnogo toga.

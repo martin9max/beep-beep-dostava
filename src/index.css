@@ -485,3 +485,12 @@
     color: #ff2b35;
   }
 }
+
+/* podnaslov na početnom ekranu: crna ivica oko slova i crna senka, da se čita preko fotografije */
+.hero-sub {
+  -webkit-text-stroke: 3px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 #000,
+    0 3px 10px rgb(0 0 0 / 0.65);
+}
