@@ -56,8 +56,8 @@ function Scene({ progress, compact, trikeSize, lower, onArrive }) {
     // 1) ulazak: trokolica dolazi sa strane i koči
     const raw = skipIntro.current ? 1 : clamp((t - start.current - 0.2) / 2.4, 0, 1)
     const intro = 1 - Math.pow(1 - raw, 3)
-    // zvuk dolaska: oko 0,7 s pre nego što stane (zvuk traje pola sekunde i završi se tačno pri kočenju)
-    if (!arrived.current && !skipIntro.current && raw > 0.62) {
+    // zvuk dolaska: tačno kad trokolica stane (posle 85% ulaska pomeraj je manji od milimetra na ekranu)
+    if (!arrived.current && !skipIntro.current && raw > 0.85) {
       arrived.current = true
       onArrive?.()
     }
