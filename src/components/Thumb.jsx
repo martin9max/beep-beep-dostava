@@ -6,7 +6,7 @@ const IMAGES = Object.fromEntries(
 )
 
 // Logoi lokala (288 x 112): src/assets/partners (vide se i u traci "Naši partneri") i src/assets/logos
-// (samo na kartici i meniju lokala). Lokal sa `logo: 'Pastizza'` prikazuje fajl tog imena.
+// (samo na kartici i meniju lokala; tu su i široke verzije logoa koji su u traci u užem okviru, npr. Kafanica).
 const LOGOS = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/{partners,logos}/*.{svg,png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' })).map(([path, url]) => [
     path.split('/').pop().replace(/\.[^.]+$/, ''),

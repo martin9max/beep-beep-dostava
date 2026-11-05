@@ -60,8 +60,8 @@ export default function App() {
             {path === '/' ? (
               <main>
                 <Hero />
-                <About />
                 <Services />
+                <About />
                 <Reviews />
                 <Faq />
                 <Contact />

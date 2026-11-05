@@ -38,8 +38,8 @@ export const RADIO = [
 
 export const NAV = [
   { href: '#pocetna', label: 'Početna' },
-  { href: '#o-nama', label: 'O nama' },
   { href: '#usluge', label: 'Usluge' },
+  { href: '#o-nama', label: 'O nama' },
   { href: '#recenzije', label: 'Recenzije' },
   { href: '#pitanja', label: 'Pitanja' },
   { href: '#kontakt', label: 'Kontakt' },
