@@ -6,7 +6,7 @@ import { Link } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import MenuItem from '../components/MenuItem'
 import NotFound from './NotFound'
-import BackButton, { ArrowLeft } from '../components/BackButton'
+import BackButton, { ArrowLeft, goBack } from '../components/BackButton'
 import Gallery from '../components/Gallery'
 import { usePageTitle } from './PageShell'
 
@@ -124,6 +124,7 @@ export default function ShopPage({ slug, category }) {
         <div className="mx-auto flex max-w-[920px] items-center gap-3 px-5 py-2.5 sm:px-6">
           <Link
             href={back}
+            onClick={(e) => goBack(e, back)}
             aria-label={`Nazad: ${backLabel}`}
             className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-red text-white shadow-[0_8px_18px_-10px_rgba(227,19,28,.9)] transition hover:bg-red-dark"
           >

@@ -1,25 +1,26 @@
 import { Link, canGoBack, navigate } from '../lib/router'
 
 /**
- * Dugme "nazad" (crveni krug sa strelicom i tekst). Sa `back` vraća na prethodnu stranicu sajta,
- * ako je ima; ako je kupac došao direktno (link, osveženo), ide na `href`.
+ * Korak nazad, kao dugme za nazad u pregledaču: vraća na prethodnu stranicu sajta (na isto mesto).
+ * Ako prethodne nema (kupac je došao direktno ili osvežio), ide na `href`, ali ga ne dodaje u istoriju,
+ * pa se posle pregledačevim "nazad" ne vraća opet ovde.
  */
-export default function BackButton({ href, label, back = false }) {
+export function goBack(e, href) {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  e.preventDefault()
+  if (canGoBack()) return history.back()
+  navigate(href, { replace: true })
+  // deo početne (npr. /#usluge): spusti se do tog dela
+  const id = href.split('#')[1]
+  if (id) requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView()))
+}
+
+/** Dugme "nazad" (crveni krug sa strelicom i tekst). */
+export default function BackButton({ href, label }) {
   return (
     <Link
       href={href}
-      onClick={(e) => {
-        if (back && canGoBack()) {
-          e.preventDefault()
-          history.back()
-        } else if (href.includes('#')) {
-          // deo početne (npr. /#usluge): ode na početnu pa se spusti do tog dela
-          e.preventDefault()
-          navigate(href)
-          const id = href.split('#')[1]
-          requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView()))
-        }
-      }}
+      onClick={(e) => goBack(e, href)}
       className="group inline-flex items-center gap-2 rounded-full border border-line bg-white py-2 pl-2 pr-4 text-[15px] font-semibold text-deep transition hover:border-red hover:text-red"
     >
       <span className="grid h-8 w-8 place-items-center rounded-full bg-red text-white">
