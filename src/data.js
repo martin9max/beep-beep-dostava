@@ -54,76 +54,43 @@ export const HERO_STATS = [
 
 export const PARTNERS = ['Partner 1', 'Partner 2', 'Partner 3', 'Partner 4', 'Partner 5', 'Partner 6']
 
-// usluge: naslov, podnaslov (lead), pasusi teksta i slogan na kraju kartice
+// usluge: naslov i kratak podnaslov (lead) ispod slike
 export const SERVICES = [
   {
     key: 'food',
     label: 'hrana',
     title: 'Dostava hrane',
     lead: 'Vaše omiljeno jelo, na vašoj adresi!',
-    text: [
-      'Pizza, giros, burger, pljeskavica, palačinke, burek, peciva ili specijaliteti iz omiljenog restorana? Ne morate nigde da idete!',
-      'Poručite ono što volite iz restorana, picerija, grilova i pekara, a Beep Beep dostava će se pobrinuti da vaša porudžbina stigne na željenu adresu.',
-      'Vi birate šta vam se jede, mi smo na putu!',
-    ],
-    slogan: 'Beep Beep dostava – kada vam se jede, a ne izlazi!',
   },
   {
     key: 'market',
     label: 'namirnice',
     title: 'Dostava pića i namirnica',
     lead: 'Sve što vam treba, bez odlaska u kupovinu!',
-    text: [
-      'Ponestalo vam je namirnica, pića ili osnovnih potrepština? Pošaljite nam spisak, a mi ćemo obaviti kupovinu umesto vas.',
-      'Od voća i povrća, mlečnih i suhomesnatih proizvoda, grickalica i sokova, do sredstava za higijenu i kućnih potrepština – sve na jednom mestu!',
-      'Uštedite vreme, izbegnite gužvu i prepustite kupovinu nama.',
-    ],
-    slogan: 'Vi pravite spisak. Mi završavamo posao!',
   },
   {
     key: 'flowers',
     label: 'cveće',
     title: 'Dostava cveća',
     lead: 'Iznenađenja koja stižu pravo na vrata!',
-    text: [
-      'Ponekad jedan buket kaže više od hiljadu reči. Bilo da želite da nekome ulepšate dan, čestitate poseban trenutak ili jednostavno pokažete pažnju, mi ćemo se pobrinuti da vaše cveće stigne na pravu adresu.',
-      'Odaberite buket, aranžman ili cveće po želji i obradujte dragu osobu čak i kada niste u mogućnosti da budete pored nje.',
-    ],
-    slogan: 'Vi birate cvet. Mi dostavljamo osmeh!',
   },
   {
     key: 'gifts',
     label: 'torte i pokloni',
     title: 'Dostava torti i poklona',
     lead: 'Svaki poseban trenutak zaslužuje posebno iznenađenje!',
-    text: [
-      'Rođendan, godišnjica, slavlje ili običan dan koji želite da učinite posebnim? Pošaljite tortu, kolače ili poklon dragoj osobi i iznenadite je čak i kada ste daleko.',
-      'Pažljivo preuzimamo i dostavljamo vaše slatke zalogaje i poklone, kako bi svaki znak pažnje stigao na pravo mesto.',
-    ],
-    slogan: 'Kilometri nisu prepreka kada želite nekoga da obradujete!',
   },
   {
     key: 'meds',
     label: 'lekovi',
     title: 'Dostava lekova',
     lead: 'Kada vam je potrebno, a ne možete sami do apoteke!',
-    text: [
-      'Zdravlje i vreme su dragoceni. Ako ste sprečeni da odete do apoteke, možemo vam pomoći u preuzimanju i dostavi proizvoda koje apoteka sme da izda i dostavi putem dostavne službe.',
-      'Po dogovoru proveravamo dostupnost i mogućnost dostave, uz poštovanje pravila apoteke i propisa koji važe za lekove.',
-    ],
-    slogan: 'Manje brige oko odlaska. Više vremena za ono što je važno!',
   },
   {
     key: 'other',
     label: 'ostale usluge',
     title: 'Ostale usluge',
     lead: 'Treba vam nešto? Pozovite nas!',
-    text: [
-      'Beep Beep dostava nije tu samo za klasične porudžbine. Tu smo i kada imate obavezu koju ne stižete da završite ili vam je potrebna pomoć oko svakodnevnih zadataka.',
-      'Preuzimanje i dostava dokumenata, kupovina po posebnom zahtevu, plaćanje računa, preuzimanje paketa i druge dogovorene usluge – trudimo se da pronađemo praktično rešenje za vaše potrebe.',
-      'Imate poseban zahtev? Recite nam šta vam je potrebno, a mi ćemo proveriti kako možemo da vam pomognemo.',
-    ],
-    slogan: 'Sve što biste obavili sami, a nemate vremena – možda možemo mi umesto vas!',
   },
 ]
 

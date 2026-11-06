@@ -19,13 +19,7 @@ export default function Services() {
                 <Photo name={service.key} label={service.label} alt={service.title} zoom className="aspect-[4/3]" />
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="text-2xl font-bold">{service.title}</h3>
-                  <p className="mb-3 mt-1 font-semibold text-red">{service.lead}</p>
-                  <div className="space-y-2.5 text-[15px] leading-relaxed text-deep/75">
-                    {service.text.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                  <p className="mb-6 mt-4 font-bold text-deep">{service.slogan}</p>
+                  <p className="mb-6 mt-1 font-semibold text-red">{service.lead}</p>
                   <Button as={Link} href={`/naruci/${service.key}`} arrow className="mt-auto self-start px-6 py-3.5 text-[15px]">
                     Naruči
                   </Button>
