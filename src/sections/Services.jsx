@@ -6,6 +6,7 @@ import { EXTRA_STOP, PHONE, PREMIUM, SERVICES } from '../data'
 
 const whatsapp = `https://wa.me/381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`
 import { Link } from '../lib/router'
+import { isBusiness, useAuth } from '../lib/auth'
 
 export default function Services() {
   return (
@@ -20,9 +21,13 @@ export default function Services() {
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="text-2xl font-bold">{service.title}</h3>
                   <p className="mb-6 mt-1 font-semibold text-red">{service.lead}</p>
-                  <Button as={Link} href={`/naruci/${service.key}`} arrow className="mt-auto self-start px-6 py-3.5 text-[15px]">
-                    Naruči
-                  </Button>
+                  {service.key === 'other' ? (
+                    <BusinessButtons />
+                  ) : (
+                    <Button as={Link} href={`/naruci/${service.key}`} arrow className="mt-auto self-start px-6 py-3.5 text-[15px]">
+                      Naruči
+                    </Button>
+                  )}
                 </div>
               </article>
             </Reveal>
@@ -68,5 +73,27 @@ export default function Services() {
         </Reveal>
       </div>
     </section>
+  )
+}
+
+/** Kartica "Usluge za firme": prijava ili registracija firme; prijavljena firma odmah poručuje. */
+function BusinessButtons() {
+  const { user } = useAuth()
+  if (isBusiness(user)) {
+    return (
+      <Button as={Link} href="/naruci/other" arrow className="mt-auto self-start px-6 py-3.5 text-[15px]">
+        Naruči
+      </Button>
+    )
+  }
+  return (
+    <div className="mt-auto flex flex-wrap gap-3">
+      <Button as={Link} href="/firme/prijava" className="px-5 py-3.5 text-[15px]">
+        Prijava firme
+      </Button>
+      <Button as={Link} href="/firme/registracija" variant="ghost" className="px-5 py-3.5 text-[15px]">
+        Registracija firme
+      </Button>
+    </div>
   )
 }

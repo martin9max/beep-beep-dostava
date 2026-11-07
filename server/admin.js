@@ -166,7 +166,7 @@ function users() {
   return table(
     ['#', 'Ime i prezime', 'Telefon', 'Email', 'Adresa', 'Porudžbina', 'Registrovan', 'Poslednja prijava', 'Sada', ''],
     rows.map(
-      (u) => `<tr><td>${u.id}</td><td>${esc(u.name)} ${esc(u.surname)}</td><td><a href="tel:${esc(u.phone)}">${esc(u.phone)}</a></td>
+      (u) => `<tr><td>${u.id}</td><td>${u.kind === 'firma' ? `<b>${esc(u.company)}</b> (PIB ${esc(u.pib)}, MB ${esc(u.mb)})<br>` : ''}${esc(u.name)} ${esc(u.surname)}</td><td><a href="tel:${esc(u.phone)}">${esc(u.phone)}</a></td>
       <td>${esc(u.email ?? '')}</td><td>${esc(fullAddress(u.address, u.place))} <a href="${esc(mapsLink(u.address, u.place))}" target="_blank" rel="noopener">📍</a>${u.address_note ? `<br><small>${esc(u.address_note)}</small>` : ''}</td>
       <td>${u.orders}</td><td>${esc(u.created_at)}</td><td>${esc(u.last_login ?? '')}</td>
       <td>${u.devices ? `<span class="on">prijavljen</span>` : `<span class="off">odjavljen${u.last_logout ? `<br><small>${esc(u.last_logout)}</small>` : ''}</span>`}</td>

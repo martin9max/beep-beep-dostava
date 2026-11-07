@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
       .catch(() => setUser(null))
   }, [])
 
-  const login = useCallback(async (login, password) => setUser((await apiCall('/api/login', { method: 'POST', body: { login, password } })).user), [])
+  const login = useCallback(async (login, password, kind) => setUser((await apiCall('/api/login', { method: 'POST', body: { login, password, kind } })).user), [])
   const register = useCallback(async (data) => setUser((await apiCall('/api/register', { method: 'POST', body: data })).user), [])
   const update = useCallback(async (data) => setUser((await apiCall('/api/me', { method: 'PUT', body: data })).user), [])
   const logout = useCallback(async () => {
@@ -46,3 +46,6 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext)
+
+/** Da li je prijavljeni nalog nalog firme (usluge za firme). */
+export const isBusiness = (user) => user?.kind === 'firma'

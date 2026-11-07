@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import Field, { FormError } from '../components/Field'
-import { apiCall, useAuth } from '../lib/auth'
+import { apiCall, isBusiness, useAuth } from '../lib/auth'
 import { formatDin } from '../lib/order'
 import { navigate } from '../lib/router'
 import { usePageTitle } from './PageShell'
@@ -51,10 +51,18 @@ export default function AccountPage() {
     <div className="mx-auto grid max-w-[1120px] gap-8 px-5 pb-24 pt-8 sm:px-6 md:pt-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
       <div>
         <h1 className="text-[clamp(34px,5vw,50px)] font-bold tracking-tight">Zdravo, {user.name}!</h1>
+        {isBusiness(user) && <p className="mt-1 font-semibold text-red">Nalog firme: {user.company}</p>}
         <form onSubmit={save} className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-6 sm:grid-cols-2">
-          <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red sm:col-span-2">Moji podaci</h2>
-          <Field label="Ime" name="name" defaultValue={user.name} required maxLength={60} />
-          <Field label="Prezime" name="surname" defaultValue={user.surname} required maxLength={60} />
+          <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red sm:col-span-2">{isBusiness(user) ? 'Podaci firme' : 'Moji podaci'}</h2>
+          {isBusiness(user) && (
+            <>
+              <Field className="sm:col-span-2" label="Naziv firme" name="company" defaultValue={user.company} required maxLength={120} />
+              <Field label="PIB" name="pib" defaultValue={user.pib} inputMode="numeric" required maxLength={11} />
+              <Field label="Matični broj" name="mb" defaultValue={user.mb} inputMode="numeric" required maxLength={10} />
+            </>
+          )}
+          <Field label={isBusiness(user) ? 'Ime kontakt osobe' : 'Ime'} name="name" defaultValue={user.name} required maxLength={60} />
+          <Field label={isBusiness(user) ? 'Prezime kontakt osobe' : 'Prezime'} name="surname" defaultValue={user.surname} required maxLength={60} />
           <Field label="Telefon" value={user.phone} disabled hint="Za promenu broja nas pozovite." />
           <Field label="Email" name="email" type="email" defaultValue={user.email ?? ''} required maxLength={120} />
           <div className="sm:col-span-2">

@@ -66,8 +66,10 @@ export const CATEGORIES = {
     { key: 'pokloni', label: 'Pokloni', emoji: '🎁' },
   ],
   other: [
-    { key: 'dokumenta', label: 'Dokumenta za pravna lica', emoji: '📄' },
-    { key: 'paketi', label: 'Paketi', emoji: '📦' },
+    { key: 'pazar', label: 'Uplata pazara', emoji: '💰' },
+    { key: 'dokumenta', label: 'Dokumenta', emoji: '📄' },
+    { key: 'racuni', label: 'Plaćanje računa', emoji: '🧾' },
+    { key: 'paketi', label: 'Paketi i nabavka', emoji: '📦' },
   ],
 }
 
@@ -1053,20 +1055,21 @@ export const SHOPS = [
     ],
   },
 
-  // ---------------- OSTALE DOSTAVE ----------------
+  // ---------------- USLUGE ZA FIRME ----------------
   {
     slug: 'kurir',
-    name: 'Beep Beep kurir',
+    name: 'Beep Beep za firme',
     service: 'other',
-    emoji: '🛵',
-    about: 'Preuzmemo bilo šta sa jedne adrese i odnesemo na drugu: dokumenta za pravna lica, ključeve, pakete.',
-    request: { label: 'Šta i odakle da preuzmemo?', placeholder: 'npr. ključevi kod komšije, Hajduk Veljkova 12, stan 4. Ili spisak za kupovinu.' },
+    emoji: '💼',
+    about: 'Za radnje, lokale i kancelarije: odnesemo pazar u banku, dokumenta u knjigovodstvo ili kod klijenta, platimo račune i preuzmemo pakete, dok vi radite svoj posao.',
+    request: { label: 'Šta, odakle i do kada?', placeholder: 'npr. pazar iz radnje na Trgu odneti u banku do 14h. Ili: fakture odneti knjigovođi, Hajduk Veljkova 12.' },
     menu: [
-      { title: 'Usluge', items: [
-        { id: 'dokumenta', name: 'Dokumenta za pravna lica', desc: 'Preuzimanje i dostava dokumentacije za firme', price: null, cat: 'dokumenta' },
-        { id: 'kljucevi', name: 'Dostava ključeva', price: null, cat: 'kljucevi' },
-        { id: 'paket', name: 'Paket do 10 kg', price: null, cat: 'paketi' },
-        { id: 'spisak', name: 'Kupovina po spisku', desc: 'Spisak napišite u polju ispod', price: null, cat: 'spisak' },
+      { title: 'Usluge za firme', items: [
+        { id: 'pazar', name: 'Uplata pazara u banku', desc: 'Preuzimamo pazar u radnji i uplaćujemo ga na vaš račun, a potvrdu vraćamo vama', price: null, cat: 'pazar' },
+        { id: 'dokumenta', name: 'Dokumenta i pošta', desc: 'Fakture, ugovori i dokumentacija do knjigovođe, banke, opštine ili klijenta', price: null, cat: 'dokumenta' },
+        { id: 'racuni', name: 'Plaćanje računa', desc: 'Platimo račune firme u banci ili pošti i donesemo potvrde', price: null, cat: 'racuni' },
+        { id: 'paket', name: 'Preuzimanje i slanje paketa', desc: 'Sa pošte, iz kurirske službe ili od dobavljača, do 10 kg', price: null, cat: 'paketi' },
+        { id: 'nabavka', name: 'Nabavka za firmu', desc: 'Kancelarijski materijal, potrošni materijal i sitnice koje vam fale. Spisak napišite u polju ispod', price: null, cat: 'paketi' },
       ] },
     ],
   },

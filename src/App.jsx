@@ -39,6 +39,11 @@ function Page({ path, query }) {
       return <LoginPage next={next} />
     case 'registracija':
       return <RegisterPage next={next} />
+    case 'firme':
+      // prijava i registracija firmi (usluge za firme)
+      if (second === 'prijava') return <LoginPage key="firma" next={next} business />
+      if (second === 'registracija') return <RegisterPage key="firma" next={next} business />
+      return <NotFound />
     case 'nalog':
       return <AccountPage />
     case 'radio':

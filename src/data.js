@@ -88,9 +88,9 @@ export const SERVICES = [
   },
   {
     key: 'other',
-    label: 'ostale usluge',
-    title: 'Ostale usluge',
-    lead: 'Treba vam nešto? Pozovite nas!',
+    label: 'za firme',
+    title: 'Usluge za firme',
+    lead: 'Pazar u banku, dokumenta na pravo mesto, a vi ostajete u radnji!',
   },
 ]
 
@@ -182,7 +182,7 @@ export const FAQ_GROUPS = [
     'Porudžbina',
     [
       ['Kako da naručim?', 'Naručite preko sajta, pozovite nas ili pišite na WhatsApp. Recite šta vam treba i gde, a mi vam odmah kažemo cenu i kada stižemo.'],
-      ['Šta sve dostavljate?', 'Hranu, piće, namirnice, lekove, cveće, torte, poklone, dokumenta, ključeve... Ako staje u termo kutiju, vozimo ga.'],
+      ['Šta sve dostavljate?', 'Hranu, piće, namirnice, lekove, cveće, torte i poklone. Za firme nosimo pazar u banku, dokumenta i pakete i plaćamo račune. Ako staje u termo kutiju, vozimo ga.'],
       ['Dostavljate li alkohol i cigarete?', 'Ne.'],
     ],
   ],

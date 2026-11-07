@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { CATEGORIES, itemCategory, shopBySlug } from '../catalog'
 import { useCart } from '../lib/cart'
-import { useAuth } from '../lib/auth'
+import { isBusiness, useAuth } from '../lib/auth'
 import { Link } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import MenuItem from '../components/MenuItem'
 import NotFound from './NotFound'
 import BackButton, { ArrowLeft, goBack } from '../components/BackButton'
 import Gallery from '../components/Gallery'
+import BusinessGate from '../components/BusinessGate'
 import { usePageTitle } from './PageShell'
 
 const sectionId = (i) => `meni-${i}`
@@ -57,6 +58,16 @@ export default function ShopPage({ slug, category }) {
   const categoryLabel = CATEGORIES[shop.service].find((c) => c.key === category)?.label
   const back = `/naruci/${shop.service}${category ? `?k=${category}` : ''}`
   const backLabel = categoryLabel ? `${categoryLabel}: svi lokali` : 'Svi lokali'
+
+  // usluge za firme: ponuda se vidi tek posle prijave
+  if (shop.service === 'other' && !isBusiness(user)) {
+    return (
+      <div className="mx-auto max-w-[920px] px-5 pb-40 pt-6 sm:px-6 md:pt-8">
+        <BackButton href={back} label={backLabel} />
+        <BusinessGate next={`/lokal/${shop.slug}`} />
+      </div>
+    )
+  }
 
   return (
     <div className="pb-40">

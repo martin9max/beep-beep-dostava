@@ -5,8 +5,9 @@ import { Link, navigate } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { usePageTitle } from './PageShell'
 import BackButton from '../components/BackButton'
+import BusinessGate from '../components/BusinessGate'
 
-const TAB_LABELS = { food: 'Hrana', market: 'Namirnice', meds: 'Lekovi', flowers: 'Cveće', gifts: 'Torte i pokloni', other: 'Ostalo' }
+const TAB_LABELS = { food: 'Hrana', market: 'Namirnice', meds: 'Lekovi', flowers: 'Cveće', gifts: 'Torte i pokloni', other: 'Za firme' }
 
 /** /naruci/<usluga>?k=<kategorija>: kategorije sa slikama i lokali koji ih imaju. */
 export default function OrderPage({ service, category }) {
@@ -43,28 +44,31 @@ export default function OrderPage({ service, category }) {
         ))}
       </nav>
 
-      {/* kategorije: jedan red sa slikama, kao brza pretraga */}
-      <CategoryRow categories={categories} selected={selected} onPick={pick} />
+      {/* usluge za firme: samo za prijavljene (vidi BusinessGate) */}
+      <MaybeGate business={active.key === 'other'} next={`/naruci/${active.key}`}>
+        {/* kategorije: jedan red sa slikama, kao brza pretraga */}
+        <CategoryRow categories={categories} selected={selected} onPick={pick} />
 
-      {/* lokali */}
-      <section aria-labelledby="lokali" className="mt-6">
-        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="lokali" className="text-[28px] font-bold">
-            {selected ? `${selected.label}: lokali` : active.key === 'food' ? 'Lokali' : 'Odakle naručujete'}
-          </h2>
-          {selected && (
-            <button type="button" onClick={() => pick(null)} className="text-sm font-semibold text-red underline underline-offset-4">
-              Prikaži sve
-            </button>
-          )}
-        </div>
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {shops.map((shop) => (
-            <ShopCard key={shop.slug} shop={shop} category={selected} />
-          ))}
-        </ul>
-        {!shops.length && <p className="rounded-xl border border-dashed border-line p-8 text-center text-mute">Za ovu kategoriju još nema lokala.</p>}
-      </section>
+        {/* lokali */}
+        <section aria-labelledby="lokali" className="mt-6">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="lokali" className="text-[28px] font-bold">
+              {selected ? `${selected.label}: lokali` : active.key === 'food' ? 'Lokali' : 'Odakle naručujete'}
+            </h2>
+            {selected && (
+              <button type="button" onClick={() => pick(null)} className="text-sm font-semibold text-red underline underline-offset-4">
+                Prikaži sve
+              </button>
+            )}
+          </div>
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {shops.map((shop) => (
+              <ShopCard key={shop.slug} shop={shop} category={selected} />
+            ))}
+          </ul>
+          {!shops.length && <p className="rounded-xl border border-dashed border-line p-8 text-center text-mute">Za ovu kategoriju još nema lokala.</p>}
+        </section>
+      </MaybeGate>
     </div>
   )
 }
@@ -139,3 +143,5 @@ function ShopCard({ shop, category }) {
   )
 }
 
+
+const MaybeGate = ({ business, next, children }) => (business ? <BusinessGate next={next}>{children}</BusinessGate> : children)
