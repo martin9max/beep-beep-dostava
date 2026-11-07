@@ -54,43 +54,49 @@ export const HERO_STATS = [
 
 export const PARTNERS = ['Partner 1', 'Partner 2', 'Partner 3', 'Partner 4', 'Partner 5', 'Partner 6']
 
-// usluge: naslov i kratak podnaslov (lead) ispod slike
+// usluge: naslov, kratak podnaslov (lead, crveno) i slogan (plavo) ispod slike
 export const SERVICES = [
   {
     key: 'food',
     label: 'hrana',
     title: 'Dostava hrane',
     lead: 'Vaše omiljeno jelo, na vašoj adresi!',
+    slogan: 'Beep Beep dostava – kada vam se jede, a ne izlazi!',
   },
   {
     key: 'market',
     label: 'namirnice',
     title: 'Dostava pića i namirnica',
     lead: 'Sve što vam treba, bez odlaska u kupovinu!',
+    slogan: 'Vi pravite spisak. Mi završavamo posao!',
   },
   {
     key: 'flowers',
     label: 'cveće',
     title: 'Dostava cveća',
     lead: 'Iznenađenja koja stižu pravo na vrata!',
+    slogan: 'Vi birate cvet. Mi dostavljamo osmeh!',
   },
   {
     key: 'gifts',
     label: 'torte i pokloni',
     title: 'Dostava torti i poklona',
     lead: 'Svaki poseban trenutak zaslužuje posebno iznenađenje!',
+    slogan: 'Kilometri nisu prepreka kada želite nekoga da obradujete!',
   },
   {
     key: 'meds',
     label: 'lekovi',
     title: 'Dostava lekova',
     lead: 'Kada vam je potrebno, a ne možete sami do apoteke!',
+    slogan: 'Manje brige oko odlaska. Više vremena za ono što je važno!',
   },
   {
     key: 'other',
     label: 'za firme',
     title: 'Usluge za firme',
     lead: 'Pazar u banku, dokumenta na pravo mesto, a vi ostajete u radnji!',
+    slogan: 'Vi vodite posao, a mi završavamo obaveze!',
   },
 ]
 
