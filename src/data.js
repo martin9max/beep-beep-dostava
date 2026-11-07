@@ -112,7 +112,7 @@ export const EXTRA_STOP = {
 
 // recenzije sa Google mapa (prepisane iz originala, samo su dodate kvačice)
 export const REVIEWS_URL = 'https://www.google.com/maps?cid=16704170277850894301'
-export const RATING = { score: '5,0', count: 43 }
+export const RATING = { score: '5,0', count: 42 }
 export const REVIEWS = [
   {
     name: 'Dragana Lukić',
@@ -125,6 +125,54 @@ export const REVIEWS = [
   {
     name: 'Cvećara Cuca',
     text: 'Ne postoje reči kojima bih ovog čoveka nahvalio... ukratko: brz, tačan, ažuran... i pre svega ljubazan!',
+  },
+  {
+    name: 'Vuk Mijucić',
+    text: 'Odličan 5! Brzina, usluga, ljubaznost. Od mene ozbiljna preporuka.',
+  },
+  {
+    name: 'Adrian Adi',
+    text: 'Brza i dobra usluga, ljubaznost, preporučujem!',
+  },
+  {
+    name: 'Nenad Dumitrikić',
+    text: 'Odlična saradnja, moje iskrene preporuke i poverenje.',
+  },
+  {
+    name: 'Tomislav Milenković',
+    text: 'Prava stvar. I za mlade i za stare, za sve uzraste.',
+  },
+  {
+    name: 'Marko Kulc',
+    text: 'Sve preporuke, brzi, tačni i profesionalni.',
+  },
+  {
+    name: 'Snežana Jevtić',
+    text: 'Najjača dostava na svetu, sve pohvale! 👍',
+  },
+  {
+    name: 'Lazar Kostić',
+    text: 'Odlična dostava, brz, pristojan, pravedan.',
+  },
+  {
+    name: 'Slavka Ranković',
+    text: 'Dostava je prva liga, brzi i efikasni.',
+  },
+  {
+    name: 'Neda Grekulović',
+    text: 'Super brzi, najbolji, najuslužniji! 😊',
+  },
+  {
+    name: 'Stefan Vojinović',
+    text: 'Brza dostava, svaka čast!',
+  },
+  {
+    name: 'Ivana Simonović',
+    text: 'Najbolja dostava u gradu!',
+  },
+  {
+    name: 'Filip Dobrić',
+    text: 'Jedini u gradu!',
   },
 ]
 
