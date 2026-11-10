@@ -101,10 +101,12 @@ export function RadioProvider({ children }) {
       setError('Program još nije spreman.')
       return
     }
-    const { item, offset, next } = now
+    const { item, next } = now
+    // pesma se uključuje od mesta gde je "u etru", a džingl (špica) uvek od početka, da se čuje ceo
+    const offset = item.kind === 'jingle' ? 0 : now.offset
     setTrack({ ...item, next })
     // #t= kaže pregledaču odakle da krene (radi i na telefonima, u istom dodiru)
-    a.src = `${urlOf(item.file)}#t=${offset.toFixed(1)}`
+    a.src = offset > 0.5 ? `${urlOf(item.file)}#t=${offset.toFixed(1)}` : urlOf(item.file)
     a.play().catch(() => {
       if (wanted.current) setPlaying(false)
     })

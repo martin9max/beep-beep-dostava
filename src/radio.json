@@ -2,44 +2,9 @@
   "songs": [],
   "jingles": [
     {
-      "file": "radio/dzinglovi/01-slusate.mp3",
-      "text": "Slušate Beep Beep radio. Prvi radio u Negotinu!",
-      "duration": 6.03
-    },
-    {
-      "file": "radio/dzinglovi/02-dok-cekate.mp3",
-      "text": "Beep Beep radio. Muzika dok čekate dostavu.",
-      "duration": 5.63
-    },
-    {
-      "file": "radio/dzinglovi/03-gladni.mp3",
-      "text": "Gladni ste, a ne izlazi vam se? Naručite preko našeg sajta, a mi smo već na putu. Beep Beep dostava!",
-      "duration": 10.06
-    },
-    {
-      "file": "radio/dzinglovi/04-sve-do-vrata.mp3",
-      "text": "Hrana, piće, cveće, torte, lekovi... Sve što vam treba, do vaših vrata. Beep Beep dostava.",
-      "duration": 9.99
-    },
-    {
-      "file": "radio/dzinglovi/05-firme.mp3",
-      "text": "Imate firmu? Pazar u banku, dokumenta na pravo mesto, a vi ostajete u radnji. Beep Beep usluge za firme.",
-      "duration": 10.41
-    },
-    {
-      "file": "radio/dzinglovi/06-uzivajte.mp3",
-      "text": "Vi uživajte, mi vozimo. Beep Beep radio.",
-      "duration": 5.65
-    },
-    {
-      "file": "radio/dzinglovi/07-inostranstvo.mp3",
-      "text": "Živite u inostranstvu? Obradujte svoje u Negotinu tortom, cvećem ili poklonom. Beep Beep dostava.",
-      "duration": 9.9
-    },
-    {
-      "file": "radio/dzinglovi/08-telefon.mp3",
-      "text": "Poručite odmah: nula šezdeset četiri, četrdeset četiri, sedamdeset sedam, dva, sedamdeset sedam. Beep Beep dostava!",
-      "duration": 11.66
+      "file": "radio/dzinglovi/01-spica.mp3",
+      "text": "",
+      "duration": 11.33
     }
   ]
 }

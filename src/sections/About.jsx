@@ -7,6 +7,9 @@ import { useEffect, useRef, useState } from 'react'
 const PARAGRAPHS = [
   'Naša priča počela je 5. decembra 2020. godine u Negotinu, sa jednostavnom idejom: da ljudima omogućimo da sve što im je potrebno dobiju na svojoj adresi, bez nepotrebnog gubljenja vremena i dodatnih obaveza.',
   'Počeli smo u izazovnom vremenu, tokom zime i pandemije, kada je pomoć u svakodnevnim obavezama bila važnija nego ikada. Verovali smo u svoju ideju, bili uporni i odlučili da pokažemo da dostava može biti mnogo više od prevoza stvari od jedne adrese do druge.',
+  'Ne zaustavljamo se na onome što smo do sada postigli. Razvijamo nove mogućnosti, unapređujemo usluge i stvaramo još jednostavniji način da dođete do svega što vam je potrebno.',
+  'Naš cilj je da Beep Beep dostava bude vaš prvi izbor kada vam je potrebna pomoć, ušteda vremena ili jednostavno neko na koga možete da računate.',
+  'Hvala svima koji su od početka uz nas, koji nam ukazuju poverenje i koji su deo naše priče.',
 ]
 
 // broj se "odbrojava" od nule kad sekcija uđe u ekran
@@ -45,7 +48,7 @@ export default function About() {
                 {text}
               </Reveal>
             ))}
-            <Reveal as="dl" delay={0.36} className="grid max-w-[46ch] grid-cols-3 gap-4 border-t border-line pt-6">
+            <Reveal as="dl" delay={PARAGRAPHS.length * 0.12} className="grid max-w-[46ch] grid-cols-3 gap-4 border-t border-line pt-6">
               {FACTS.map((fact) => (
                 <div key={fact.label} className="flex flex-col-reverse">
                   <dt className="text-sm leading-snug text-mute">{fact.label}</dt>

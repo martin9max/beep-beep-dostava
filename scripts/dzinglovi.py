@@ -8,6 +8,8 @@ Glas:
   - ako postoji snimak pravog čoveka u branding/dzinglovi/snimci/<id>.(m4a|mp3|wav|aac|ogg), koristi se on
     (snimak se očisti: odseče se tišina, ujednači jačina, glas dobije "radijski" zvuk);
   - inače se pravi probni glas iz Mac-a (glas "Lana", hrvatski), samo da se čuje kako džingl zvuči.
+    Probni džinglovi idu u branding/dzinglovi/ai-probni i NE puštaju se na radiju; na radio (public/radio/dzinglovi)
+    idu samo džinglovi sa pravim snimkom.
 Podloga i sirena se prave ovde (sopstveni zvuk, bez tuđih prava).
 Potrebno: ffmpeg, numpy (pip3 install --user numpy).
 """
@@ -23,6 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEXTS = ROOT / 'branding/dzinglovi/tekstovi.json'
 RECORDINGS = ROOT / 'branding/dzinglovi/snimci'
 OUT = ROOT / 'public/radio/dzinglovi'
+DRAFTS = ROOT / 'branding/dzinglovi/ai-probni'
 SR = 44100
 BPM = 116
 
@@ -165,8 +168,9 @@ def make(item, index):
         mix[vi : vi + len(v)] += np.repeat(v[:, None], 2, axis=1) * 0.95
         wav = tmp / 'mix.wav'
         write_wav(wav, mix)
-        OUT.mkdir(parents=True, exist_ok=True)
-        mp3 = OUT / f"{item['id']}.mp3"
+        target = OUT if kind == 'snimak' else DRAFTS
+        target.mkdir(parents=True, exist_ok=True)
+        mp3 = target / f"{item['id']}.mp3"
         run('ffmpeg', '-y', '-i', str(wav), '-af', 'alimiter=limit=0.89,loudnorm=I=-15:TP=-1', '-ar', str(SR), '-b:a', '128k', str(mp3))
         print(f"{mp3.relative_to(ROOT)}  ({kind}, {total:.1f} s)")
 
