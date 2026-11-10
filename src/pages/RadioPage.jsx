@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
-import { hasSongs, onAir, useRadio } from '../lib/radio'
+import { onAir, songCount, useRadio } from '../lib/radio'
+import { RADIO } from '../data'
 import { Bars } from '../components/Radio'
 import { usePageTitle } from './PageShell'
 import ptica from '../assets/beep-beep-ptica.webp'
 
-/** /radio: Beep Beep radio, prvi radio u Negotinu. Jedna stanica uživo: pesme i najave po satu. */
+// boje stanica (roze, narandžasta, plava, ljubičasta)
+const COLORS = ['from-[#ff3d8b] to-[#d6246e]', 'from-[#ff9a1f] to-[#f06a00]', 'from-[#22a6f2] to-[#1477d4]', 'from-[#8b5cf6] to-[#6d3fd8]']
+
+/** /radio: Beep Beep radio, prvi radio u Negotinu. Četiri stanice; kupac bira stanicu i vidi šta svira. */
 export default function RadioPage() {
   const radio = useRadio()
   usePageTitle('Beep Beep radio')
@@ -28,7 +32,7 @@ export default function RadioPage() {
               <span className="hero-title block text-red">Radio</span>
             </h1>
             <p className="mt-3 max-w-[38ch] text-[16px] leading-snug text-white/85 sm:text-lg">
-              Muzika dok čekate dostavu. Pustite radio i nastavite da naručujete, svira na svakoj stranici sajta.
+              Muzika dok čekate dostavu. Izaberite stanicu i nastavite da naručujete, svira na svakoj stranici sajta.
             </p>
           </div>
 
@@ -38,29 +42,58 @@ export default function RadioPage() {
 
       {radio.error && <p className="mt-4 rounded-xl bg-red/10 px-4 py-3 font-semibold text-red">{radio.error}</p>}
 
-      <section className="mt-10 grid gap-4 sm:grid-cols-3">
-        {[
-          ['📻', 'Uživo, za sve isto', 'Kao pravi radio: svi u Negotinu u istom trenutku slušaju istu pesmu.'],
-          ['🎶', 'Muzika i najave', 'Pesme se smenjuju sa kratkim najavama Beep Beep dostave i naših partnera.'],
-          ['🛵', 'Svira dok naručujete', 'Pustite radio, pa slobodno idite na meni i korpu. Muzika ne staje.'],
-        ].map(([emoji, title, text]) => (
-          <div key={title} className="rounded-2xl border border-line bg-white p-5">
-            <span className="text-3xl" aria-hidden="true">
-              {emoji}
-            </span>
-            <h2 className="mt-2 text-xl font-bold">{title}</h2>
-            <p className="mt-1 text-[15px] text-deep/75">{text}</p>
-          </div>
-        ))}
-      </section>
+      <h2 className="mt-10 text-[28px] font-bold sm:text-[32px]">Stanice</h2>
+      <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {RADIO.map((s, i) => {
+          const on = radio.station?.key === s.key
+          return (
+            <li key={s.key}>
+              <button
+                type="button"
+                onClick={() => radio.play(s)}
+                aria-pressed={on}
+                className={`group relative flex h-full w-full flex-col items-start overflow-hidden rounded-2xl bg-gradient-to-br p-4 text-left text-white transition hover:-translate-y-1 sm:p-5 ${COLORS[i % COLORS.length]} ${
+                  on ? 'ring-4 ring-deep ring-offset-2 ring-offset-paper' : 'shadow-[0_16px_30px_-20px_rgba(10,38,104,.7)]'
+                }`}
+              >
+                <span className="text-3xl leading-none drop-shadow" aria-hidden="true">
+                  {s.emoji}
+                </span>
+                <span className="mt-3 block text-[18px] font-extrabold leading-tight sm:text-xl">Beep Beep {s.label}</span>
+                <span className="mt-0.5 block text-[13px] font-semibold text-white/85">{s.desc}</span>
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-[12px] font-bold">
+                  {on && radio.playing ? (
+                    <>
+                      <Bars className="h-3" /> Svira
+                    </>
+                  ) : on ? (
+                    'Izabrano'
+                  ) : (
+                    <>▶ Pusti</>
+                  )}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
 
-      {!hasSongs && (
-        <p className="mt-6 rounded-2xl border border-dashed border-line bg-white p-5 text-center text-deep/80">
-          Muzički program stiže uskoro. Do tada slušate najave Beep Beep radija.
-        </p>
-      )}
+      <p className="mt-4 text-[13px] text-mute">
+        Moderna i Folk se puštaju preko YouTube-a: video se vidi gore, u kartici radija, i te stanice staju kad odete sa ove
+        stranice. Strana i Ambijent sviraju i dok naručujete.
+      </p>
 
-      <p className="mt-10 text-center text-[13px] text-mute">Beep Beep radio, Negotin. Muzika se pušta uz dozvolu autora.</p>
+      <p className="mt-10 text-center text-[13px] leading-relaxed text-mute">
+        Beep Beep radio, Negotin. Muzika na stanicama Strana i Ambijent: Kevin MacLeod (
+        <a href="https://incompetech.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+          incompetech.com
+        </a>
+        ), licenca{' '}
+        <a href="https://creativecommons.org/licenses/by/4.0/deed.sr" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+          Creative Commons BY 4.0
+        </a>
+        . Sva prava na muziku pripadaju autorima.
+      </p>
     </div>
   )
 }
@@ -68,22 +101,25 @@ export default function RadioPage() {
 /** Kartica u baneru: šta je u etru, šta sledi i kontrole. */
 function NowPlaying() {
   const radio = useRadio()
-  const { playing, track, volume } = radio
-  // dok radio ne svira, kartica ipak pokazuje šta je trenutno u etru (osvežava se svakih 5 s)
+  const { station, playing, track, volume } = radio
+  const own = station?.type === 'own'
+  // naša stanica koja ne svira: kartica ipak pokazuje šta je trenutno u etru (osvežava se svakih 5 s)
   const [preview, setPreview] = useState(null)
   useEffect(() => {
-    const update = () => setPreview(onAir())
+    if (!own) return setPreview(null)
+    const update = () => setPreview(onAir(station.key))
     update()
     const id = setInterval(update, 5000)
     return () => clearInterval(id)
-  }, [])
-  const item = playing && track ? track : preview?.item
-  const next = playing && track ? track.next : preview?.next
+  }, [own, station])
+  const item = track ?? preview?.item
+  const next = own ? (track ? track.next : preview?.next) : null
   const song = item?.kind === 'song'
 
   return (
     <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md sm:p-5" aria-live="polite">
       <div className="flex items-center gap-4">
+        {/* slika je uvek Beep Beep ptica, za svaku stanicu */}
         <div className="relative grid aspect-square w-24 shrink-0 place-items-center overflow-hidden rounded-xl bg-white sm:w-32">
           <img src={ptica} alt="" className="h-full w-full object-contain p-1.5" />
         </div>
@@ -92,23 +128,33 @@ function NowPlaying() {
             <span className={`inline-flex items-center gap-1 rounded bg-red px-1.5 py-0.5 text-white ${playing ? '' : 'opacity-80'}`}>
               <span className={`h-1.5 w-1.5 rounded-full bg-white ${playing ? 'animate-pulse' : ''}`} /> Uživo
             </span>
-            {playing ? 'Trenutno svira' : 'Sada u etru'}
+            {!station ? 'Izaberite stanicu' : playing ? 'Trenutno svira' : 'Sada u etru'}
           </p>
-          <p className="mt-1 line-clamp-2 text-[17px] font-bold leading-snug sm:text-xl">{song ? item.title : 'Beep Beep radio'}</p>
-          <p className="truncate text-[13px] text-white/75">{song ? item.artist : item ? 'Najava' : 'Prvi radio u Negotinu'}</p>
+          <p className="mt-1 line-clamp-2 text-[17px] font-bold leading-snug sm:text-xl">
+            {song ? item.title : station ? `Beep Beep ${station.label}` : 'Beep Beep radio'}
+          </p>
+          <p className="truncate text-[13px] text-white/75">
+            {song ? item.artist : item?.kind === 'jingle' ? 'Beep Beep dostava, špica' : station ? station.desc : 'Prvi radio u Negotinu'}
+          </p>
           {song && item.credit && <p className="mt-0.5 line-clamp-2 text-[11px] text-white/60">{item.credit}</p>}
         </div>
       </div>
       {next && (
         <p className="mt-3 truncate text-[13px] text-white/70">
-          Sledeće: {next.kind === 'song' ? `${next.title}${next.artist ? `, ${next.artist}` : ''}` : 'najava Beep Beep radija'}
+          Sledeće: {next.kind === 'song' ? `${next.title}${next.artist ? `, ${next.artist}` : ''}` : 'Beep Beep špica'}
         </p>
       )}
+      {own && !songCount(station.key) && <p className="mt-3 text-[13px] text-white/70">Pesme za ovu stanicu stižu uskoro, do tada ide špica.</p>}
+
+      {/* YouTube video (Moderna i Folk): po pravilima YouTube-a mora da se vidi dok svira, najmanje 200 x 200 */}
+      <div className={station?.type === 'youtube' ? 'mt-4 flex justify-center sm:justify-start' : 'h-0 overflow-hidden'} aria-hidden={station?.type !== 'youtube'}>
+        <div ref={radio.ytSlot} className="h-[200px] w-[200px] overflow-hidden rounded-xl bg-black" />
+      </div>
 
       <div className="mt-4 flex items-center gap-3">
         <button
           type="button"
-          onClick={radio.toggle}
+          onClick={station ? radio.toggle : () => radio.play(RADIO[0])}
           aria-label={playing ? 'Pauza' : 'Pusti radio'}
           className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-red text-white shadow-[0_12px_24px_-10px_rgba(227,19,28,.9)] transition hover:scale-105"
         >

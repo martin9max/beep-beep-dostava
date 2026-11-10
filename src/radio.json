@@ -1,5 +1,178 @@
 {
-  "songs": [],
+  "stations": {
+    "ambijent": [
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Airport Lounge.mp3",
+        "title": "Airport Lounge",
+        "artist": "Kevin MacLeod",
+        "credit": "„Airport Lounge“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 307.67
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Backbay Lounge.mp3",
+        "title": "Backbay Lounge",
+        "artist": "Kevin MacLeod",
+        "credit": "„Backbay Lounge“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 266.55
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Bossa Antigua.mp3",
+        "title": "Bossa Antigua",
+        "artist": "Kevin MacLeod",
+        "credit": "„Bossa Antigua“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 283.35
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Clean Soul.mp3",
+        "title": "Clean Soul",
+        "artist": "Kevin MacLeod",
+        "credit": "„Clean Soul“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 306.73
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Dreamer.mp3",
+        "title": "Dreamer",
+        "artist": "Kevin MacLeod",
+        "credit": "„Dreamer“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 204.07
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "artist": "Kevin MacLeod",
+        "credit": "„Easy Lemon“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 126.38
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Lobby Time.mp3",
+        "title": "Lobby Time",
+        "artist": "Kevin MacLeod",
+        "credit": "„Lobby Time“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 193.2
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "artist": "Kevin MacLeod",
+        "credit": "„Local Forecast - Elevator“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 189.2
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Night on the Docks - Sax.mp3",
+        "title": "Night on the Docks - Sax",
+        "artist": "Kevin MacLeod",
+        "credit": "„Night on the Docks - Sax“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 174.05
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Overcast.mp3",
+        "title": "Overcast",
+        "artist": "Kevin MacLeod",
+        "credit": "„Overcast“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 228.08
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Smooth Lovin.mp3",
+        "title": "Smooth Lovin",
+        "artist": "Kevin MacLeod",
+        "credit": "„Smooth Lovin“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 259.4
+      },
+      {
+        "file": "radio/pesme/ambijent/Kevin MacLeod - Wallpaper.mp3",
+        "title": "Wallpaper",
+        "artist": "Kevin MacLeod",
+        "credit": "„Wallpaper“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 220.06
+      }
+    ],
+    "strana": [
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Carefree.mp3",
+        "title": "Carefree",
+        "artist": "Kevin MacLeod",
+        "credit": "„Carefree“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 205.14
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Disco con Tutti.mp3",
+        "title": "Disco con Tutti",
+        "artist": "Kevin MacLeod",
+        "credit": "„Disco con Tutti“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 236.35
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Fluffing a Duck.mp3",
+        "title": "Fluffing a Duck",
+        "artist": "Kevin MacLeod",
+        "credit": "„Fluffing a Duck“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 67.37
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Funkorama.mp3",
+        "title": "Funkorama",
+        "artist": "Kevin MacLeod",
+        "credit": "„Funkorama“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 201.46
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Groove Grove.mp3",
+        "title": "Groove Grove",
+        "artist": "Kevin MacLeod",
+        "credit": "„Groove Grove“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 205.77
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Happy Alley.mp3",
+        "title": "Happy Alley",
+        "artist": "Kevin MacLeod",
+        "credit": "„Happy Alley“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 80.25
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Hep Cats.mp3",
+        "title": "Hep Cats",
+        "artist": "Kevin MacLeod",
+        "credit": "„Hep Cats“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 250.72
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Life of Riley.mp3",
+        "title": "Life of Riley",
+        "artist": "Kevin MacLeod",
+        "credit": "„Life of Riley“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 235.36
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Monkeys Spinning Monkeys.mp3",
+        "title": "Monkeys Spinning Monkeys",
+        "artist": "Kevin MacLeod",
+        "credit": "„Monkeys Spinning Monkeys“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 125.07
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Off to Osaka.mp3",
+        "title": "Off to Osaka",
+        "artist": "Kevin MacLeod",
+        "credit": "„Off to Osaka“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 109.71
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Pamgaea.mp3",
+        "title": "Pamgaea",
+        "artist": "Kevin MacLeod",
+        "credit": "„Pamgaea“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 168.57
+      },
+      {
+        "file": "radio/pesme/strana/Kevin MacLeod - Wholesome.mp3",
+        "title": "Wholesome",
+        "artist": "Kevin MacLeod",
+        "credit": "„Wholesome“, Kevin MacLeod (incompetech.com), licenca CC BY 4.0",
+        "duration": 363.81
+      }
+    ]
+  },
   "jingles": [
     {
       "file": "radio/dzinglovi/01-spica.mp3",

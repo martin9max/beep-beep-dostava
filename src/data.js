@@ -46,6 +46,15 @@ export const HERO_STATS = [
   ['Keš', 'plaćate kad preuzmete'],
 ]
 
+// stanice Beep Beep radija. type 'youtube': YouTube plejlista (yt.list) ili prenos uživo (yt.video), plejer mora da se vidi;
+// type 'own': naš program iz public/radio/pesme/<key> sa našom špicom između pesama (spisak pravi `npm run radio`)
+export const RADIO = [
+  { key: 'moderna', label: 'Moderna', desc: 'Novi domaći hitovi', emoji: '🎧', type: 'youtube', yt: { list: 'PLDoNWpWHi2nJ2lhB2GWBQN_72wIGETXBp' } },
+  { key: 'strana', label: 'Strana', desc: 'Strana muzika uz Beep Beep špicu', emoji: '🌍', type: 'own' },
+  { key: 'ambijent', label: 'Ambijent', desc: 'Opuštena muzika za svaki trenutak', emoji: '🎶', type: 'own' },
+  { key: 'folk', label: 'Folk', desc: 'Narodna i folk, uživo', emoji: '🎤', type: 'youtube', yt: { video: 'aJgu2xSo-t0' } },
+]
+
 export const PARTNERS = ['Partner 1', 'Partner 2', 'Partner 3', 'Partner 4', 'Partner 5', 'Partner 6']
 
 // sajtovi partnera (ključ je ime fajla logoa u src/assets/partners). Klik na logo u traci "Naši partneri"

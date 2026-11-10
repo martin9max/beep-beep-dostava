@@ -1,4 +1,4 @@
-// Spisak programa za Beep Beep radio: pesme (public/radio/pesme) i džinglovi (public/radio/dzinglovi)
+// Spisak programa za Beep Beep radio: pesme po stanicama (public/radio/pesme/<stanica>) i džinglovi (public/radio/dzinglovi)
 // sa trajanjem, naslovom i izvođačem -> src/radio.json. Pokretanje: npm run radio
 //
 // Naslov i izvođač se čitaju iz same mp3 pesme (oznake). Za pesme sa licencom koja traži navođenje autora
@@ -25,17 +25,23 @@ const list = (dir) =>
         .sort((a, b) => a.localeCompare(b, 'sr'))
     : []
 
-const songs = list('public/radio/pesme').map((file) => {
-  const info = probe(path.join(root, 'public/radio/pesme', file))
+// pesme po stanicama: public/radio/pesme/<stanica>/*.mp3 (stanice tipa 'own' iz src/data.js)
+const song = (dir) => (file) => {
+  const info = probe(path.join(root, dir, file))
   const fallback = file.replace(/\.[^.]+$/, '').split(' - ')
   return {
-    file: `radio/pesme/${file}`,
+    file: `${dir.replace(/^public\//, '')}/${file}`,
     title: info.title || fallback.at(-1),
     artist: info.artist || (fallback.length > 1 ? fallback[0] : ''),
     credit: extra[file]?.credit ?? '',
     duration: info.duration,
   }
-})
+}
+const stations = Object.fromEntries(
+  (existsSync(path.join(root, 'public/radio/pesme')) ? readdirSync(path.join(root, 'public/radio/pesme'), { withFileTypes: true }) : [])
+    .filter((d) => d.isDirectory())
+    .map((d) => [d.name, list(`public/radio/pesme/${d.name}`).map(song(`public/radio/pesme/${d.name}`))]),
+)
 
 const jingles = list('public/radio/dzinglovi').map((file) => ({
   file: `radio/dzinglovi/${file}`,
@@ -43,5 +49,6 @@ const jingles = list('public/radio/dzinglovi').map((file) => ({
   duration: probe(path.join(root, 'public/radio/dzinglovi', file)).duration,
 }))
 
-writeFileSync(path.join(root, 'src/radio.json'), JSON.stringify({ songs, jingles }, null, 2) + '\n')
-console.log(`Beep Beep radio: ${songs.length} pesama, ${jingles.length} džinglova -> src/radio.json`)
+writeFileSync(path.join(root, 'src/radio.json'), JSON.stringify({ stations, jingles }, null, 2) + '\n')
+const counts = Object.entries(stations).map(([k, v]) => `${k}: ${v.length}`).join(', ') || 'nema pesama'
+console.log(`Beep Beep radio: ${counts}; ${jingles.length} džinglova -> src/radio.json`)
