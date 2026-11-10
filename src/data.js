@@ -29,12 +29,6 @@ export const deliveryPriceOf = (place) => deliveryPrice(place, DELIVERY)
 
 // Radio u zaglavlju: YouTube video (type: 'video') ili plejlista (type: 'playlist').
 // Ako neka stanica prestane da radi, zamenite id (deo linka posle v= ili list=).
-export const RADIO = [
-  { key: 'moderna', label: 'Moderna', desc: 'Novi domaći hitovi', emoji: '🎧', type: 'playlist', id: 'PLDoNWpWHi2nJ2lhB2GWBQN_72wIGETXBp' }, // novi hitovi 2026
-  { key: 'strana', label: 'Strana', desc: 'Pop hitovi iz sveta, uživo', emoji: '🌍', type: 'video', id: 'h-0jQ7cis4w' }, // POP Hits Mix Radio, 24/7
-  { key: 'ambijent', label: 'Ambijent', desc: 'Vlado Georgiev, Lexington i domaći pop', emoji: '🎶', type: 'playlist', id: 'PL_L-kKESJ9rW7GxUondAIaUCPO0NUok6R' }, // domaći pop: Vlado Georgiev, Lexington, Saša Kovačević, Željko Samardžić... (oko 200 pesama)
-  { key: 'folk', label: 'Folk', desc: 'Narodna i folk, uživo', emoji: '🎤', type: 'video', id: 'aJgu2xSo-t0' }, // Grand Radio, 24/7
-]
 
 export const NAV = [
   { href: '#pocetna', label: 'Početna' },

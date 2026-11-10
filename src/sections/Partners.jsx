@@ -20,7 +20,21 @@ const MIXED = [...WIDE.map((logo, i) => [(i + 0.5) / WIDE.length, logo]), ...NAR
   .sort((a, b) => a[0] - b[0])
   .map(([, logo]) => logo)
 // redosled koji je izabrao vlasnik; novi partneri (kojih nema na ovom spisku) idu na kraj, izmešani kao gore
-const ORDER = ['Marina i Batica', 'Pastizza', 'Bajka', 'Tortica 989', 'Jovanović Auto Centar Negotin', 'Druga priča', 'Bucino dućanče', 'La Moara', 'Aleksandrović', 'Kafanica']
+// (PS i OD Motors nisu jedan pored drugog, kao ni Bajka i Druga priča; Aleksandrović je između La Moare i Kafanice)
+const ORDER = [
+  'Marina i Batica',
+  'Pastizza',
+  'Bajka',
+  'PS KFZ Meisterbetrieb',
+  'Tortica 989',
+  'Jovanović Auto Centar Negotin',
+  'Druga priča',
+  'OD Motors',
+  'Bucino dućanče',
+  'La Moara',
+  'Aleksandrović',
+  'Kafanica',
+]
 const place = (logo) => (ORDER.includes(logo.name) ? ORDER.indexOf(logo.name) : ORDER.length + MIXED.indexOf(logo))
 const LOGOS = [...MIXED].sort((a, b) => place(a) - place(b))
 

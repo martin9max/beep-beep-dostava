@@ -2,8 +2,8 @@ import { Link, useRoute } from '../lib/router'
 import { useRadio } from '../lib/radio'
 
 /**
- * Dugme "Radio" u zaglavlju: vodi na stranicu /radio (izbor stanice, šta svira, spisak pesama).
- * Dok muzika svira, pokazuje ime stanice i mali ekvilajzer.
+ * Dugme "Radio" u zaglavlju: vodi na stranicu /radio (Beep Beep radio uživo).
+ * Dok muzika svira, pokazuje "Uživo" i mali ekvilajzer.
  */
 export default function Radio() {
   const radio = useRadio()
@@ -13,7 +13,7 @@ export default function Radio() {
   return (
     <Link
       href="/radio"
-      // YouTube plejer se sprema već na klik, da izbor stanice odmah krene
+      // plejer se sprema već na klik
       onPointerDown={radio.prepare}
       onClick={radio.prepare}
       aria-label={playing ? `Radio: ${station?.label} (svira)` : 'Radio'}
