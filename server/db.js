@@ -78,6 +78,14 @@ if (!userColumns.includes('kind')) db.exec("ALTER TABLE users ADD COLUMN kind TE
 if (!userColumns.includes('company')) db.exec("ALTER TABLE users ADD COLUMN company TEXT NOT NULL DEFAULT ''")
 if (!userColumns.includes('pib')) db.exec("ALTER TABLE users ADD COLUMN pib TEXT NOT NULL DEFAULT ''")
 if (!userColumns.includes('mb')) db.exec("ALTER TABLE users ADD COLUMN mb TEXT NOT NULL DEFAULT ''")
+// adresa firme (posebno od lične adrese: isti čovek može imati i lični nalog i firmu)
+if (!userColumns.includes('company_address')) {
+  db.exec("ALTER TABLE users ADD COLUMN company_address TEXT NOT NULL DEFAULT ''")
+  db.exec("ALTER TABLE users ADD COLUMN company_place TEXT NOT NULL DEFAULT ''")
+  db.exec("ALTER TABLE users ADD COLUMN company_address_note TEXT NOT NULL DEFAULT ''")
+  // nalozi registrovani kao firma: adresa firme je adresa iz naloga
+  db.exec("UPDATE users SET company_address = address, company_place = place, company_address_note = address_note WHERE kind = 'firma'")
+}
 if (!orderColumns.includes('place')) db.exec("ALTER TABLE orders ADD COLUMN place TEXT NOT NULL DEFAULT ''")
 
 // istekle sesije se brišu pri pokretanju

@@ -57,7 +57,7 @@ export function PlaceField({ value, onChange, name = 'place' }) {
           <optgroup label={`Sela (${DELIVERY.perKm} din po km od Negotina)`}>
             {VILLAGES.map((v) => (
               <option key={v} value={v}>
-                {v} {KM[v] ? `– ${KM[v]} km, ${formatDin(KM[v] * DELIVERY.perKm)} din` : '– cenu javlja dostavljač'}
+                {v} {KM[v] ? `(${KM[v]} km, ${formatDin(KM[v] * DELIVERY.perKm)} din)` : '(cenu javlja dostavljač)'}
               </option>
             ))}
           </optgroup>

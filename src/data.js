@@ -61,7 +61,7 @@ export const SERVICES = [
     label: 'hrana',
     title: 'Dostava hrane',
     lead: 'Vaše omiljeno jelo, na vašoj adresi!',
-    slogan: 'Beep Beep dostava – kada vam se jede, a ne izlazi!',
+    slogan: 'Beep Beep dostava, kada vam se jede, a ne izlazi!',
   },
   {
     key: 'market',

@@ -53,16 +53,9 @@ export default function AccountPage() {
         <h1 className="text-[clamp(34px,5vw,50px)] font-bold tracking-tight">Zdravo, {user.name}!</h1>
         {isBusiness(user) && <p className="mt-1 font-semibold text-red">Nalog firme: {user.company}</p>}
         <form onSubmit={save} className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-6 sm:grid-cols-2">
-          <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red sm:col-span-2">{isBusiness(user) ? 'Podaci firme' : 'Moji podaci'}</h2>
-          {isBusiness(user) && (
-            <>
-              <Field className="sm:col-span-2" label="Naziv firme" name="company" defaultValue={user.company} required maxLength={120} />
-              <Field label="PIB" name="pib" defaultValue={user.pib} inputMode="numeric" required maxLength={11} />
-              <Field label="Matični broj" name="mb" defaultValue={user.mb} inputMode="numeric" required maxLength={10} />
-            </>
-          )}
-          <Field label={isBusiness(user) ? 'Ime kontakt osobe' : 'Ime'} name="name" defaultValue={user.name} required maxLength={60} />
-          <Field label={isBusiness(user) ? 'Prezime kontakt osobe' : 'Prezime'} name="surname" defaultValue={user.surname} required maxLength={60} />
+          <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red sm:col-span-2">Moji podaci</h2>
+          <Field label={user.kind === 'firma' ? 'Ime kontakt osobe' : 'Ime'} name="name" defaultValue={user.name} required maxLength={60} />
+          <Field label={user.kind === 'firma' ? 'Prezime kontakt osobe' : 'Prezime'} name="surname" defaultValue={user.surname} required maxLength={60} />
           <Field label="Telefon" value={user.phone} disabled hint="Za promenu broja nas pozovite." />
           <Field label="Email" name="email" type="email" defaultValue={user.email ?? ''} required maxLength={120} />
           <div className="sm:col-span-2">
@@ -83,6 +76,7 @@ export default function AccountPage() {
             </div>
           </div>
         </form>
+        <FirmForm />
       </div>
 
       <section className="lg:pt-[76px]">
@@ -119,5 +113,73 @@ export default function AccountPage() {
         )}
       </section>
     </div>
+  )
+}
+
+/**
+ * "Moja firma": firma u nalogu, sa svojom adresom. Kupac je dodaje ovde i tada može da poruči usluge za firme
+ * i da u korpi bira da li se dostavlja na adresu firme ili na njegovu adresu.
+ */
+function FirmForm() {
+  const { user, setUser } = useAuth()
+  const [open, setOpen] = useState(isBusiness(user) || (typeof location !== 'undefined' && location.hash === '#firma'))
+  const [place, setPlace] = useState(null)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const has = isBusiness(user)
+  // sa linka "Dodaj firmu u nalog" (/nalog#firma) stranica odmah skroluje do ovog dela
+  useEffect(() => {
+    if (location.hash === '#firma') setTimeout(() => document.getElementById('firma')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+  }, [])
+
+  const save = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSaved(false)
+    setBusy(true)
+    try {
+      setUser((await apiCall('/api/firm', { method: 'PUT', body: Object.fromEntries(new FormData(e.currentTarget)) })).user)
+      setSaved(true)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <div id="firma" className="mt-6 rounded-2xl border border-dashed border-line bg-white p-6">
+        <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red">Imate firmu?</h2>
+        <p className="mt-2 text-[15px] text-deep/80">
+          Dodajte firmu svom nalogu i poručujte uplatu pazara, dostavu dokumenata i ostale usluge za firme. Pri porudžbini birate da li
+          dostavljamo na adresu firme ili na vašu.
+        </p>
+        <Button className="mt-4" onClick={() => setOpen(true)}>
+          Dodaj firmu
+        </Button>
+      </div>
+    )
+  }
+  return (
+    <form id="firma" onSubmit={save} className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-6 sm:grid-cols-2">
+      <h2 className="font-body text-sm font-bold uppercase tracking-[.2em] text-red sm:col-span-2">Moja firma</h2>
+      <Field className="sm:col-span-2" label="Naziv firme" name="company" defaultValue={user.company} required maxLength={120} autoComplete="organization" />
+      <Field label="PIB" name="pib" defaultValue={user.pib} inputMode="numeric" required maxLength={11} placeholder="9 cifara" />
+      <Field label="Matični broj" name="mb" defaultValue={user.mb} inputMode="numeric" required maxLength={10} placeholder="8 cifara" />
+      <div className="sm:col-span-2">
+        <PlaceField name="companyPlace" value={place ?? user.companyPlace ?? ''} onChange={setPlace} />
+      </div>
+      <Field className="sm:col-span-2" label="Adresa firme (ulica i broj)" name="companyAddress" defaultValue={user.companyAddress} required maxLength={200} />
+      <Field className="sm:col-span-2" label="Dodatno o adresi firme" name="companyAddressNote" defaultValue={user.companyAddressNote} maxLength={200} placeholder="Ulaz iz dvorišta, lokal br. 3..." />
+      <div className="grid gap-3 sm:col-span-2">
+        <FormError>{error}</FormError>
+        {saved && <p className="text-sm font-semibold text-[#1d7a46]">{has ? 'Sačuvano.' : 'Firma je dodata.'}</p>}
+        <Button type="submit" disabled={busy} className="justify-self-start">
+          {busy ? 'Čuvam...' : has ? 'Sačuvaj firmu' : 'Dodaj firmu'}
+        </Button>
+      </div>
+    </form>
   )
 }

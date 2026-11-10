@@ -22,7 +22,7 @@ export function formatOrder({ id, shops, customer, address, map, phone, note, to
     ...shops.flatMap((shop, i) => [
       '',
       `${i + 1}. ${shop.name}`,
-      ...shop.lines.map((l) => `- ${l.qty}x ${l.name}${l.variant ? ` (${l.variant})` : ''}${l.price == null ? ' – po računu' : ''}`),
+      ...shop.lines.map((l) => `- ${l.qty}x ${l.name}${l.variant ? ` (${l.variant})` : ''}${l.price == null ? ' (po računu)' : ''}`),
       ...(shop.request ? [`  Napomena za lokal: ${shop.request}`] : []),
     ]),
     '',
@@ -32,7 +32,7 @@ export function formatOrder({ id, shops, customer, address, map, phone, note, to
     `Adresa: ${address}`,
     ...(map ? [`Mapa: ${map}`] : []),
     `Telefon: ${phone}`,
-    delivery == null ? `Dostava: ${zone} – cenu javlja dostavljač kupcu` : `Dostava: ${zone} – ${formatDin(delivery)} din`,
+    delivery == null ? `Dostava: ${zone}, cenu javlja dostavljač kupcu` : `Dostava: ${zone}, ${formatDin(delivery)} din`,
     `Ukupno: ${formatDin(total)} din${shops.some((s) => s.lines.some((l) => l.price == null)) ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
     `Primljeno: ${now.toLocaleDateString('sr-RS')} u ${now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })}`,
     `Javi kupcu (WhatsApp): wa.me/${toWhatsApp(phone)}`,

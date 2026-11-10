@@ -154,6 +154,15 @@ export function RegisterPage({ next, business = false }) {
           Prijavite se
         </Link>
       </p>
+      {business && (
+        <p className="mt-4 text-center text-sm text-deep/80">
+          Već imate nalog kao fizičko lice?{' '}
+          <Link href="/prijava?next=%2Fnalog%23firma" className="font-bold text-ink underline underline-offset-4">
+            Prijavite se i dodajte firmu
+          </Link>{' '}
+          u svoj nalog, pa birate na koju adresu dostavljamo.
+        </p>
+      )}
       <OtherKindLink business={business} />
     </Card>
   )

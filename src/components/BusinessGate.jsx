@@ -4,7 +4,7 @@ import { Link, navigate } from '../lib/router'
 /**
  * Usluge za firme (uplata pazara, dokumenta...) vide i poručuju samo nalozi firmi.
  * Dok se proverava prijava, ne prikazuje se ništa. Neprijavljeni dobijaju prijavu ili registraciju firme,
- * a prijavljeni kupac (običan nalog) poruku da je ovo samo za firme. Posle prijave firma se vraća
+ * a prijavljeni kupac bez firme poziv da doda firmu u svoj nalog. Posle prijave firma se vraća
  * tačno na stranicu sa koje je krenula (`next`).
  */
 export default function BusinessGate({ next, children }) {
@@ -26,14 +26,15 @@ export default function BusinessGate({ next, children }) {
       {user ? (
         <>
           <p className="mx-auto mt-3 max-w-[46ch] text-deep/75">
-            Prijavljeni ste kao kupac ({user.name}). Uplatu pazara, dokumenta i ostale usluge za firme mogu da poruče samo nalozi firmi.
+            Uplatu pazara, dokumenta i ostale usluge za firme poručuju nalozi sa firmom. Dodajte svoju firmu u nalog ({user.name}), pa
+            pri porudžbini birate da li dostavljamo na adresu firme ili na vašu.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={switchTo(`/firme/prijava${query}`)} className="btn btn-primary px-6 py-3">
+            <Link href="/nalog#firma" className="btn btn-primary px-6 py-3">
+              Dodaj firmu u nalog
+            </Link>
+            <button type="button" onClick={switchTo(`/firme/prijava${query}`)} className="btn btn-ghost px-6 py-3">
               Odjavi se i prijavi firmu
-            </button>
-            <button type="button" onClick={switchTo(`/firme/registracija${query}`)} className="btn btn-ghost px-6 py-3">
-              Registruj firmu
             </button>
           </div>
         </>

@@ -32,7 +32,13 @@ const publicUser = (u) => ({
   company: u.company || '',
   pib: u.pib || '',
   mb: u.mb || '',
+  companyAddress: u.company_address || '',
+  companyPlace: u.company_place || '',
+  companyAddressNote: u.company_address_note || '',
 })
+
+/** Nalog ima firmu: registrovan kao firma ili je kupac svom nalogu dodao firmu. */
+const hasFirm = (u) => Boolean(u?.company)
 
 /** Podaci firme (samo za nalog firme): naziv, PIB (9 cifara) i matični broj (8 cifara). */
 function readBusiness(body) {
@@ -48,8 +54,16 @@ function readBusiness(body) {
 }
 
 /** Kako se kupac zove u porudžbini: firma sa PIB-om i kontakt osobom, ili samo ime i prezime. */
-const customerName = (u) =>
-  u.kind === 'firma' ? `${u.company} (PIB ${u.pib}), kontakt: ${u.name} ${u.surname}` : `${u.name} ${u.surname}`
+const customerName = (u, asFirm = u.kind === 'firma') =>
+  asFirm && hasFirm(u) ? `${u.company} (PIB ${u.pib}), kontakt: ${u.name} ${u.surname}` : `${u.name} ${u.surname}`
+
+/** Adresa firme iz forme (mesto, ulica i broj, dodatno). */
+function readFirmAddress(body) {
+  const a = { address: text(body.companyAddress), place: cleanPlace(body.companyPlace), note: text(body.companyAddressNote) }
+  if (!a.place) fail(400, 'Izaberite mesto firme.')
+  if (!a.address) fail(400, 'Upišite adresu firme.')
+  return a
+}
 
 const text = (value, max = 200) => (typeof value === 'string' ? value.trim().slice(0, max) : '')
 
@@ -84,14 +98,19 @@ const routes = {
     if (!isValidPhone(phone)) fail(400, 'Broj telefona nije ispravan (npr. 064 123 4567).')
     if (password.length < 8) fail(400, 'Lozinka mora imati bar 8 znakova.')
     const normalized = normalizePhone(phone)
-    if (db.prepare('SELECT 1 FROM users WHERE phone = ?').get(normalized)) fail(409, 'Ovaj broj telefona je već registrovan. Prijavite se.')
-    if (db.prepare('SELECT 1 FROM users WHERE email = ?').get(profile.email)) fail(409, 'Ovaj email je već registrovan. Prijavite se.')
+    const already = business ? ' Ako je to vaš lični nalog, prijavite se i dodajte firmu u delu „Moj nalog“.' : ' Prijavite se.'
+    if (db.prepare('SELECT 1 FROM users WHERE phone = ?').get(normalized)) fail(409, `Ovaj broj telefona je već registrovan.${already}`)
+    if (db.prepare('SELECT 1 FROM users WHERE email = ?').get(profile.email)) fail(409, `Ovaj email je već registrovan.${already}`)
 
     const { lastInsertRowid: id } = db
-      .prepare('INSERT INTO users (name, surname, phone, email, password_hash, address, place, address_note, kind, company, pib, mb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .prepare(
+        `INSERT INTO users (name, surname, phone, email, password_hash, address, place, address_note, kind, company, pib, mb,
+                            company_address, company_place, company_address_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
       .run(
         profile.name, profile.surname, normalized, profile.email, hashPassword(password), profile.address, profile.place, profile.addressNote,
         business ? 'firma' : 'kupac', business?.company ?? '', business?.pib ?? '', business?.mb ?? '',
+        business ? profile.address : '', business ? profile.place : '', business ? profile.addressNote : '',
       )
     db.prepare("INSERT INTO logins (user_id, login, success, kind, ip, user_agent) VALUES (?, ?, 1, 'registracija', ?, ?)").run(
       id, normalized, ip(req), req.headers['user-agent'] ?? '',
@@ -131,8 +150,8 @@ const routes = {
       fail(401, 'Pogrešan telefon/email ili lozinka.')
     }
     // prijava za firme: nalog kupca se ovde ne prijavljuje (usluge za firme su samo za naloge firmi)
-    if (body.kind === 'firma' && user.kind !== 'firma') {
-      fail(403, 'Ovo je nalog za kupce, ne za firmu. Za usluge za firme registrujte firmu.')
+    if (body.kind === 'firma' && !hasFirm(user)) {
+      fail(403, 'Ovaj nalog nema firmu. Prijavite se kao kupac i dodajte firmu u delu „Moj nalog“, ili registrujte firmu.')
     }
     createSession(req, res, user.id)
     return { user: publicUser(user) }
@@ -157,10 +176,21 @@ const routes = {
     db.prepare('UPDATE users SET name = ?, surname = ?, email = ?, address = ?, place = ?, address_note = ? WHERE id = ?').run(
       p.name, p.surname, p.email, p.address, p.place, p.addressNote, user.id,
     )
-    // firma može da promeni i svoje podatke (naziv, PIB, matični broj) ako ih je poslala
-    if (user.kind === 'firma' && body.company !== undefined) {
-      const b = readBusiness(body)
-      db.prepare('UPDATE users SET company = ?, pib = ?, mb = ? WHERE id = ?').run(b.company, b.pib, b.mb, user.id)
+
+    return { user: publicUser(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)) }
+  },
+
+  // firma u nalogu: dodavanje ili izmena (naziv, PIB, matični broj i adresa firme)
+  'PUT /api/firm': (req, res, body) => {
+    const user = requireUser(req)
+    const b = readBusiness(body)
+    const a = readFirmAddress(body)
+    const added = !hasFirm(user)
+    db.prepare('UPDATE users SET company = ?, pib = ?, mb = ?, company_address = ?, company_place = ?, company_address_note = ? WHERE id = ?').run(
+      b.company, b.pib, b.mb, a.address, a.place, a.note, user.id,
+    )
+    if (added) {
+      notify('accounts', ['FIRMA DODATA NALOGU', b.company, `PIB: ${b.pib}, MB: ${b.mb}`, `Vlasnik naloga: ${user.name} ${user.surname}, ${user.phone}`, `Adresa firme: ${joinAddress(a.address, a.place)}`].join('\n'))
     }
     return { user: publicUser(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)) }
   },
@@ -175,14 +205,20 @@ const routes = {
     const user = requireUser(req)
     const shops = buildOrder(body)
     // usluge za firme poručuju samo nalozi firmi
-    if (user.kind !== 'firma' && shops.some((s) => shopBySlug(s.slug)?.service === 'other')) {
-      fail(403, 'Usluge za firme mogu da poruče samo nalozi firmi. Registrujte firmu ili izbacite te usluge iz korpe.')
+    const forFirm = shops.some((s) => shopBySlug(s.slug)?.service === 'other')
+    if (forFirm && !hasFirm(user)) {
+      fail(403, 'Usluge za firme mogu da poruče samo nalozi sa firmom. Dodajte firmu u delu „Moj nalog“ ili izbacite te usluge iz korpe.')
     }
-    // privremena adresa ("nisam kod kuće") ili stalna adresa iz naloga
+    // na koga ide porudžbina: firma (adresa firme, naziv i PIB) ili lično (adresa iz naloga)
+    const asFirm = hasFirm(user) && (body.deliverTo === 'firma' || forFirm || user.kind === 'firma')
+    const base = asFirm && body.deliverTo !== 'licno'
+      ? { address: user.company_address || user.address, place: user.company_place || user.place, note: user.company_address ? user.company_address_note : user.address_note }
+      : { address: user.address, place: user.place, note: user.address_note }
+    // privremena adresa ("nisam kod kuće") ili stalna adresa (lična ili firme)
     const custom = text(body.address)
-    const address = custom || user.address
-    const place = custom ? cleanPlace(body.place) : user.place
-    const addressNote = custom ? text(body.addressNote) : user.address_note
+    const address = custom || base.address
+    const place = custom ? cleanPlace(body.place) : base.place
+    const addressNote = custom ? text(body.addressNote) : base.note
     if (!place) fail(400, 'Izaberite mesto za dostavu (Negotin ili selo).')
     const fullAddress = joinAddress(address, place) + (addressNote ? ` (${addressNote})` : '')
     const note = text(body.note, 500)
@@ -191,7 +227,7 @@ const routes = {
     const delivery = deliveryPriceOf(place) // Negotin 500 din, selo km × 120 din, ostalo null
     const goods = shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0)
     const total = goods + (delivery ?? 0)
-    const customer = customerName(user)
+    const customer = customerName(user, asFirm)
 
     const { lastInsertRowid: id } = db
       .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -280,7 +316,7 @@ function reportLoginTrouble(login, user) {
     user
       ? [
           'PROBLEM SA PRIJAVOM',
-          `Nalog: ${user.name} ${user.surname} – 3 puta pogrešna lozinka.`,
+          `Nalog: ${user.name} ${user.surname}, 3 puta pogrešna lozinka.`,
           `Telefon: ${user.phone}`,
           `Email: ${user.email ?? '-'}`,
           'Verovatno je lozinka zaboravljena. Pozovite kupca.',

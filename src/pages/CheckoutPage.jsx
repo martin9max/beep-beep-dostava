@@ -3,11 +3,11 @@ import Button from '../components/Button'
 import Field, { FormError } from '../components/Field'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { Qty } from '../components/MenuItem'
-import { variantLabel } from '../catalog'
+import { shopBySlug, variantLabel } from '../catalog'
 import { AddressDialog, PinIcon, useDeliveryAddress } from '../components/Address'
 import { deliveryNote, fullAddress } from '../places'
 import { DELIVERY, EXTRA_STOP, PHONE, deliveryPriceOf } from '../data'
-import { apiCall, useAuth } from '../lib/auth'
+import { apiCall, firmAddress, useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { formatDin } from '../lib/order'
 import { Link } from '../lib/router'
@@ -187,7 +187,16 @@ function Summary({ cart, place }) {
 }
 
 function DeliveryForm({ cart, onDone }) {
-  const { user, current, isTemp, setTempAddress } = useDeliveryAddress()
+  const { user, current: deliveryAddress, home, isTemp, setTempAddress } = useDeliveryAddress()
+  // nalog sa firmom: bira se da li se dostavlja na adresu firme ili na ličnu adresu.
+  // Usluge za firme u korpi (ili nalog registrovan kao firma) znače da je porudžbina za firmu.
+  const firm = firmAddress(user)
+  const forFirm = cart.items.some((item) => shopBySlug(item.shop)?.service === 'other')
+  const sameAddress = firm && firm.address === home?.address && firm.place === home?.place
+  const showChoice = Boolean(firm) && !sameAddress
+  const [deliverTo, setDeliverTo] = useState(firm && (forFirm || user.kind === 'firma') ? 'firma' : 'licno')
+  const base = deliverTo === 'firma' && firm ? firm : home
+  const current = isTemp ? deliveryAddress : base
   const [dialog, setDialog] = useState(false)
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
@@ -199,7 +208,7 @@ function DeliveryForm({ cart, onDone }) {
     if (!current?.place) return setDialog(true)
     setBusy(true)
     try {
-      const body = { items: cart.items, requests: cart.requests, note, ...(isTemp ? current : {}) }
+      const body = { items: cart.items, requests: cart.requests, note, deliverTo: firm ? deliverTo : undefined, ...(isTemp ? current : {}) }
       const order = await apiCall('/api/orders', { method: 'POST', body })
       cart.clear()
       setTempAddress(null)
@@ -215,6 +224,42 @@ function DeliveryForm({ cart, onDone }) {
     <form onSubmit={submit} className="rounded-2xl border border-line bg-white p-6">
       <h2 className="text-[24px] font-bold">Dostava</h2>
 
+      {showChoice && (
+        <fieldset className="mt-4">
+          <legend className="mb-2 text-sm font-semibold text-deep">Gde dostavljamo?</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[
+              ['firma', `Firma: ${user.company}`, firm],
+              ['licno', 'Moja adresa', home],
+            ].map(([key, label, addr]) => (
+              <label
+                key={key}
+                className={`flex cursor-pointer gap-3 rounded-xl border-2 p-3.5 transition ${deliverTo === key ? 'border-ink bg-ink/5' : 'border-line hover:border-ink/40'}`}
+              >
+                <input
+                  type="radio"
+                  name="deliverTo"
+                  value={key}
+                  checked={deliverTo === key}
+                  onChange={() => {
+                    setDeliverTo(key)
+                    setTempAddress(null)
+                  }}
+                  className="mt-1 accent-[var(--color-ink)]"
+                />
+                <span>
+                  <b className="block leading-tight text-deep">{label}</b>
+                  <span className="text-sm text-deep/75">{addr?.place ? fullAddress(addr.address, addr.place) : 'adresa nije upisana'}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          {forFirm && deliverTo === 'licno' && (
+            <p className="mt-2 text-sm text-mute">U korpi su usluge za firme: porudžbina ide na firmu, a dostavljamo na vašu adresu.</p>
+          )}
+        </fieldset>
+      )}
+
       <div className={`mt-4 rounded-xl border-2 p-4 ${isTemp ? 'border-red/50 bg-red/5' : 'border-line bg-paper/60'}`}>
         <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.14em] text-mute">
           <PinIcon className="h-3.5 w-3.5" />
@@ -229,6 +274,7 @@ function DeliveryForm({ cart, onDone }) {
           <p className="mt-1 font-semibold text-red">Izaberite mesto (Negotin ili selo) da bismo znali cenu dostave.</p>
         )}
         <p className="mt-2 text-sm text-deep/75">
+          {firm && (deliverTo === 'firma' || forFirm) && `${user.company} · `}
           {user.name} {user.surname} · {user.phone}
         </p>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
@@ -237,7 +283,7 @@ function DeliveryForm({ cart, onDone }) {
           </button>
           {isTemp && (
             <button type="button" onClick={() => setTempAddress(null)} className="text-left text-[15px] font-semibold text-mute underline underline-offset-4">
-              Vrati na kućnu ({fullAddress(user.address, user.place)})
+              Vrati na {base === firm ? 'adresu firme' : 'kućnu'} ({fullAddress(base.address, base.place)})
             </button>
           )}
         </div>

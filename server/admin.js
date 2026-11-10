@@ -187,7 +187,7 @@ function logins() {
     ['Vreme', 'Vrsta', 'Uspelo', 'Upisano', 'Korisnik', 'IP adresa', 'Uređaj'],
     rows.map(
       (l) => `<tr><td>${esc(l.created_at)}</td><td>${esc(l.kind)}</td><td class="${l.success ? 'ok' : 'no'}">${l.success ? 'da' : 'ne'}</td>
-      <td>${esc(l.login)}</td><td>${l.name ? `${esc(l.name)} ${esc(l.surname)}` : '–'}</td><td>${esc(l.ip)}</td>
+      <td>${esc(l.login)}</td><td>${l.name ? `${esc(l.name)} ${esc(l.surname)}` : ''}</td><td>${esc(l.ip)}</td>
       <td><small>${esc((l.user_agent || '').slice(0, 90))}</small></td></tr>`,
     ),
   )
@@ -202,7 +202,7 @@ function orders() {
       const items = shops
         .map(
           (s, i) => `<div class="shop">${i + 1}. ${esc(s.name)}</div><ul class="items">${s.lines
-            .map((l) => `<li>${l.qty}× ${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ''}${l.price == null ? ' – po računu' : ''}</li>`)
+            .map((l) => `<li>${l.qty}× ${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ''}${l.price == null ? ' (po računu)' : ''}</li>`)
             .join('')}</ul>${s.request ? `<div class="req">${esc(s.request)}</div>` : ''}`,
         )
         .join('')

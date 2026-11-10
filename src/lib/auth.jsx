@@ -47,5 +47,9 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => useContext(AuthContext)
 
-/** Da li je prijavljeni nalog nalog firme (usluge za firme). */
-export const isBusiness = (user) => user?.kind === 'firma'
+/** Da li nalog ima firmu (registrovan kao firma ili je firma dodata ličnom nalogu): usluge za firme. */
+export const isBusiness = (user) => Boolean(user?.company)
+
+/** Adresa firme (za nalog sa firmom), u istom obliku kao lična adresa. */
+export const firmAddress = (user) =>
+  user?.company ? { address: user.companyAddress || user.address, place: user.companyPlace || user.place, addressNote: user.companyAddress ? user.companyAddressNote : user.addressNote } : null

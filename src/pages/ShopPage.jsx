@@ -120,7 +120,7 @@ export default function ShopPage({ slug, category }) {
                   <span className="min-w-0 leading-tight">
                     <span className="block truncate text-[14px] font-bold text-deep group-hover:text-red">{section.title}</span>
                     <span className="block text-[12px] text-mute">
-                      {section.items.length} {unit(section.items.length, food)}
+                      {section.items.length} {unit(section.items.length, food && !/pić|napic/i.test(section.title))}
                     </span>
                   </span>
                 </button>
@@ -230,7 +230,7 @@ export default function ShopPage({ slug, category }) {
   )
 }
 
-// "1 jelo, 5 jela" za hranu, "1 stavka, 3 stavke, 5 stavki" za ostalo
+// "1 jelo, 5 jela" za hranu, "1 stavka, 3 stavke, 5 stavki" za ostalo (i za pića u meniju restorana)
 const one = (n) => n % 10 === 1 && n % 100 !== 11
 const few = (n) => [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)
 const unit = (n, food) => (food ? (one(n) ? 'jelo' : 'jela') : one(n) ? 'stavka' : few(n) ? 'stavke' : 'stavki')

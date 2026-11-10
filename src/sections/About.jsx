@@ -5,9 +5,8 @@ import { animate, motion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 const PARAGRAPHS = [
-  'Krenuli smo 5. decembra 2020. godine, usred zime i usred pandemije, kada su nam svi govorili da Negotinu dostava ne treba. Danas niko ne pita da li treba. Pitaju samo koliko brzo stižemo.',
-  'Naša tajna nije nikakva tajna: termo kutija. Pica stiže topla, sladoled stiže hladan, a torta stiže onakva kakvu ste je naručili. Ako vam je neko doneo mlaku pljeskavicu i rekao da je to normalno, slagao vas je.',
-  'Vozimo po Negotinu, po selima i dalje, gde god vas put odvede. Vi samo pozovite. Ostalo je naš posao.',
+  'Naša priča počela je 5. decembra 2020. godine u Negotinu, sa jednostavnom idejom: da ljudima omogućimo da sve što im je potrebno dobiju na svojoj adresi, bez nepotrebnog gubljenja vremena i dodatnih obaveza.',
+  'Počeli smo u izazovnom vremenu, tokom zime i pandemije, kada je pomoć u svakodnevnim obavezama bila važnija nego ikada. Verovali smo u svoju ideju, bili uporni i odlučili da pokažemo da dostava može biti mnogo više od prevoza stvari od jedne adrese do druge.',
 ]
 
 // broj se "odbrojava" od nule kad sekcija uđe u ekran
