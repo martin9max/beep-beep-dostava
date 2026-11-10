@@ -48,6 +48,13 @@ export const HERO_STATS = [
 
 export const PARTNERS = ['Partner 1', 'Partner 2', 'Partner 3', 'Partner 4', 'Partner 5', 'Partner 6']
 
+// sajtovi partnera (ključ je ime fajla logoa u src/assets/partners). Klik na logo u traci "Naši partneri"
+// otvara ovaj sajt; ako sajta nema, a partner ima meni kod nas, otvara se njegov meni na našem sajtu.
+// Upisuju se samo provereni, zvanični sajtovi (može i Facebook ili Instagram stranica).
+export const PARTNER_LINKS = {
+  Bajka: 'https://picerijabajkanegotin.com',
+}
+
 // usluge: naslov, kratak podnaslov (lead, crveno) i slogan (plavo) ispod slike
 export const SERVICES = [
   {

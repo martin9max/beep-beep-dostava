@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
-import { PARTNERS } from '../data'
+import { PARTNERS, PARTNER_LINKS } from '../data'
+import { SHOPS } from '../catalog'
+import { Link } from '../lib/router'
 import { EASE } from '../lib/order'
 
 // Logoi iz src/assets/partners; ime fajla je ime partnera. Originali su u branding/partneri.
@@ -38,7 +40,14 @@ const ORDER = [
 const place = (logo) => (ORDER.includes(logo.name) ? ORDER.indexOf(logo.name) : ORDER.length + MIXED.indexOf(logo))
 const LOGOS = [...MIXED].sort((a, b) => place(a) - place(b))
 
-const ITEMS = LOGOS.length ? LOGOS : PARTNERS.map((name) => ({ name, src: null }))
+// kuda vodi klik na logo: sajt partnera, ili njegov meni kod nas (lokal čiji je logo isti fajl)
+const linkOf = (name) => {
+  if (PARTNER_LINKS[name]) return { href: PARTNER_LINKS[name], external: true }
+  const shop = SHOPS.find((s) => s.logo === name)
+  return shop ? { href: `/lokal/${shop.slug}`, external: false } : null
+}
+
+const ITEMS = (LOGOS.length ? LOGOS : PARTNERS.map((name) => ({ name, src: null }))).map((logo) => ({ ...logo, link: linkOf(logo.name) }))
 
 // jedan krug trake ima bar 8 logoa (dok je partnera manje, ponavljaju se), da bude širi od ekrana
 const PER_SET = 8
@@ -83,15 +92,37 @@ export default function Partners({ className = '' }) {
                     : 'h-[100px] w-[257px] sm:h-[136px] sm:w-[350px] lg:h-[156px] lg:w-[401px]'
               }`}
             >
-              {partner.src ? (
-                <img src={partner.src} alt={partner.name} decoding="sync" draggable="false" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-semibold text-mute">{partner.name}</span>
-              )}
+              <PartnerLink link={partner.link} name={partner.name} hidden={i >= ITEMS.length}>
+                {partner.src ? (
+                  <img src={partner.src} alt={partner.name} decoding="sync" draggable="false" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-sm font-semibold text-mute">{partner.name}</span>
+                )}
+              </PartnerLink>
             </li>
           ))}
         </ul>
       </div>
     </motion.section>
+  )
+}
+
+/** Logo kao link: sajt partnera otvara se u novoj kartici, a naš meni na istoj stranici. Ponovljeni logoi se ne fokusiraju. */
+function PartnerLink({ link, name, hidden, children }) {
+  if (!link) return children
+  const common = {
+    className: 'block h-full w-full transition-opacity hover:opacity-85',
+    'aria-label': link.external ? `${name}: sajt partnera (otvara se u novoj kartici)` : `${name}: meni`,
+    tabIndex: hidden ? -1 : undefined,
+    draggable: false,
+  }
+  return link.external ? (
+    <a href={link.href} target="_blank" rel="noopener noreferrer" {...common}>
+      {children}
+    </a>
+  ) : (
+    <Link href={link.href} {...common}>
+      {children}
+    </Link>
   )
 }
