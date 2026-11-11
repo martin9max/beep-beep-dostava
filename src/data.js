@@ -1,5 +1,5 @@
 import { deliveryPrice } from './places.js'
-import { FOLK, MODERNA } from './radio-youtube'
+import { FOLK, MODERNA } from './radio-youtube.js'
 
 export const PHONE = '064 44 77 2 77'
 
