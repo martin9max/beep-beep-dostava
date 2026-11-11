@@ -10,6 +10,8 @@ Program teče po satu, kao kod pravog radija. Svi slušaoci u istom trenutku ču
 
 Dok u fascikli nema pesama, radio pušta samo džinglove, a na stranici piše da muzički program stiže uskoro.
 
+Stanice Moderna i Folk puštaju zvanične spotove sa YouTube-a, po 50 pesama. Spisak je u `src/radio-youtube.js`. Pesma se dodaje ili menja tako što se upiše ID snimka, odnosno deo adrese posle `watch?v=`. Svaki slušalac dobija pesme izmešane drugačijim redom. Ako neki snimak nestane sa YouTube-a, radio ga sam preskoči. Po pravilima YouTube-a video mora da se vidi dok svira, zato ove dve stanice sviraju samo na stranici radija.
+
 ## Odakle sme da se uzme muzika
 
 Pažnja: muzika sa sajtova za „besplatnu muziku“ nije uvek dozvoljena za radio. Pixabay i YouTube Audio Library dozvoljavaju muziku kao podlogu u videu, ali ne i puštanje pesama jedne za drugom, kao na radiju. Zato ih za radio ne koristimo.

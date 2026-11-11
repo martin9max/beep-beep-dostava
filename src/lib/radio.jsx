@@ -6,7 +6,7 @@ import cover from '../assets/beep-beep-ptica.webp'
  * Beep Beep radio: četiri stanice (RADIO u data.js).
  * - Naše stanice ('own'): pesme iz public/radio/pesme/<stanica> i naša špica posle svake dve pesme. Program teče po
  *   satu, pa svi slušaoci iste stanice u istom trenutku čuju istu pesmu (špica uvek kreće od početka).
- * - YouTube stanice ('youtube'): plejlista ili prenos uživo. Po YouTube pravilima plejer mora da se vidi (najmanje
+ * - YouTube stanice ('youtube'): naš spisak od 50 pesama (src/radio-youtube.js), plejlista ili prenos uživo. Po YouTube pravilima plejer mora da se vidi (najmanje
  *   200 x 200), pa YouTube video stoji u kartici na stranici /radio (ytSlot), a kad kupac ode sa te stranice,
  *   YouTube stanica staje.
  * Plejer za naše stanice je ovde (ne na stranici /radio), pa one sviraju i dok kupac ide sa stranice na stranicu.
@@ -159,7 +159,17 @@ export function RadioProvider({ children }) {
     }
     pendingYt.current = null
     const p = yt.current
-    if (s.yt.list) {
+    if (s.yt.videos) {
+      // naš spisak pesama: svakom slušaocu izmešan drugačije, i kad stigne do kraja, kreće ispočetka
+      const order = [...s.yt.videos]
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[order[i], order[j]] = [order[j], order[i]]
+      }
+      shuffledYt.current = true
+      p.unMute()
+      p.loadPlaylist(order, 0)
+    } else if (s.yt.list) {
       // plejlista: kreće od prve, a čim krene izmeša se i skoči na nasumičnu pesmu
       shuffledYt.current = false
       p.mute()

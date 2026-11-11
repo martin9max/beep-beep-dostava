@@ -225,7 +225,8 @@ const routes = {
     // cena dostave se računa iz mesta, ne iz browsera
     const zone = zoneOf(place)
     const delivery = deliveryPriceOf(place) // Negotin 500 din, selo km × 120 din, ostalo null
-    const goods = shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0)
+    // cene marketa imaju pare (npr. 104,99), pa se zbir zaokružuje na dve decimale
+    const goods = Math.round(shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0) * 100) / 100
     const total = goods + (delivery ?? 0)
     const customer = customerName(user, asFirm)
 

@@ -21,8 +21,8 @@ export default function Footer() {
             </span>
           </SectionLink>
           <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed">
-            Prva i prava dostava u Negotinu i okolini. Od 5. decembra 2020. donosimo hranu, lekove, cveće i sve ostalo do
-            vaših vrata, brzo i sa osmehom.
+            Prva i prava dostava u Negotinu i okolini, od 5. decembra 2020. Dostava hrane, pića, namirnica, lekova, poklona i
+            još mnogo toga.
           </p>
           <a href={tel} className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-bold text-red transition hover:bg-white/90">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">

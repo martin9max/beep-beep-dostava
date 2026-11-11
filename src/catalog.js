@@ -16,7 +16,7 @@
 //   note: '32 cm / 48 cm'            sitan tekst ispod naslova (veličine, gramaža, salata po izboru)
 //   extras: ['masline', 'jaje']      dodaci po želji; kupac ih upiše u napomenu za lokal
 // Stavka može imati weight: '360 g' (prikazuje se pored naziva).
-// Lokal sa realMenu: true ima pravi meni (u razvoju se ne prikazuje napomena "meni je primer").
+// Lokal sa realMenu: true ima pravi meni (sa cenovnika ili sajta lokala).
 // stripe: ['#178a45', '#fff', '#e3131c'] je traka u bojama lokala na vrhu njegovog menija.
 // logo: 'Pastizza' je ime fajla u src/assets/partners; logo stoji na kartici lokala i na vrhu menija.
 // gallery: true prikazuje slike iz src/assets/galerija/<slug> ("Naši radovi") na vrhu menija.
@@ -47,6 +47,8 @@ export const CATEGORIES = {
     { key: 'slatkisi', label: 'Slatkiši i grickalice', emoji: '🍫' },
     { key: 'kafa', label: 'Kafa i čaj', emoji: '☕' },
     { key: 'higijena', label: 'Higijena', emoji: '🧴' },
+    { key: 'namirnice', label: 'Osnovne namirnice', emoji: '🧂' },
+    { key: 'kuca', label: 'Kućna hemija i papir', emoji: '🧽' },
   ],
   meds: [
     { key: 'recept', label: 'Lekovi na recept', emoji: '💊' },
@@ -1017,45 +1019,108 @@ export const SHOPS = [
 
   // ---------------- PIĆE I NAMIRNICE ----------------
   {
-    slug: 'market',
-    name: 'Market po izboru',
+    // pravi cenovnik marketa Aleksandrović (11.11.2026), samo osnovni artikli; cene se menjaju, pa ih povremeno osvežiti
+    slug: 'aleksandrovic',
+    name: 'Super Market Aleksandrović',
+    logo: 'Aleksandrović',
+    realMenu: true,
     service: 'market',
     emoji: '🛒',
-    about: 'Kupujemo u marketu koji vi kažete. Plaćate po računu, kad kurir donese.',
-    request: { label: 'Nešto što nije na spisku?', placeholder: 'npr. 2 kg brašna T-400, jogurt 1 l (Imlek), market Idea kod pošte' },
+    about: 'Super Market Aleksandrović, Trg Đorđa Stanojevića 68, Negotin. Hleb, mleko, voće i povrće, namirnice, piće i sve za kuću. Voće i povrće se plaća po izmerenoj težini.',
+    request: { label: 'Nešto što nije na spisku?', placeholder: 'npr. pavlaka 700 g Imlek, 2 kg brašna T-500, deterdžent za veš Persil' },
     menu: [
-      { title: 'Hleb i peciva', cat: 'pekara', items: [
-        { id: 'hleb', name: 'Hleb beli', price: null },
-        { id: 'hleb-integralni', name: 'Hleb integralni', price: null },
-        { id: 'kifle', name: 'Kifle (5 kom)', price: null },
+      { title: 'Hleb i peciva', cat: 'pekara', emoji: '🥖', items: [
+        { id: 'al-hleb-domaci-zajecarski-500-g', name: 'Hleb domaći, Zaječarski', weight: '500 g', price: 65 },
+        { id: 'al-hleb-srpski-beli-rezani-500-g', name: 'Hleb srpski beli, rezani', weight: '500 g', price: 95 },
+        { id: 'al-hleb-crni-rezani-500-g', name: 'Hleb crni, rezani', weight: '500 g', price: 110 },
+        { id: 'al-hleb-7-zrna-rezani-450-g', name: 'Hleb 7 zrna, rezani', weight: '450 g', price: 115 },
+        { id: 'al-tost-hleb-classic-500-g', name: 'Tost hleb Classic', weight: '500 g', price: 160 },
+        { id: 'al-kore-za-pitu-iva-500-g', name: 'Kore za pitu Iva', weight: '500 g', price: 179.99 },
       ] },
-      { title: 'Mleko i mlečno', cat: 'mlecno', items: [
-        { id: 'mleko', name: 'Mleko 1 l', price: null },
-        { id: 'jogurt', name: 'Jogurt 1 l', price: null },
-        { id: 'jaja', name: 'Jaja (10 kom)', price: null },
-        { id: 'sir', name: 'Sir beli 500 g', price: null },
+      { title: 'Mleko, jaja i sir', cat: 'mlecno', emoji: '🥛', items: [
+        { id: 'al-mleko-2-8-imlek-1-l', name: 'Mleko 2,8% Imlek', weight: '1 l', price: 104.99 },
+        { id: 'al-mleko-1-5-imlek-1-l', name: 'Mleko 1,5% Imlek', weight: '1 l', price: 129.99 },
+        { id: 'al-jogurt-gusti-2-8-imlek-1-75-kg', name: 'Jogurt Gusti 2,8% Imlek', weight: '1,75 kg', price: 184.99 },
+        { id: 'al-jogurt-2-8-imlek-casa', name: 'Jogurt 2,8% Imlek, čaša', price: 39.99 },
+        { id: 'al-kiselo-mleko-imlek-700-g', name: 'Kiselo mleko Imlek', weight: '700 g', price: 149.99 },
+        { id: 'al-kisela-pavlaka-imlek-400-g', name: 'Kisela pavlaka Imlek', weight: '400 g', price: 149.99 },
+        { id: 'al-jaja-l-klasa-10-komada', name: 'Jaja L klasa, 10 komada', price: 174.99 },
+        { id: 'al-sir-kravlji-stara-planina-400-g', name: 'Sir kravlji Stara planina', weight: '400 g', price: 449.99 },
+        { id: 'al-gauda-paladin-kackavalj-250-g', name: 'Gauda Paladin, kačkavalj', weight: '250 g', price: 349.99 },
+        { id: 'al-trapist-paladin-kackavalj-250-g', name: 'Trapist Paladin, kačkavalj', weight: '250 g', price: 349.99 },
+        { id: 'al-maslac-imlek-125-g', name: 'Maslac Imlek', weight: '125 g', price: 249.99 },
       ] },
-      { title: 'Voda i sokovi', cat: 'pice', items: [
-        { id: 'voda', name: 'Voda 1,5 l', price: null },
-        { id: 'voda-pak', name: 'Voda 6 × 1,5 l', price: null },
-        { id: 'sok', name: 'Sok 1 l', price: null },
+      { title: 'Voće i povrće', cat: 'voce', emoji: '🍎', items: [
+        { id: 'al-banane-1-kg', name: 'Banane', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 219.99 },
+        { id: 'al-jabuke-ajdared-1-kg', name: 'Jabuke Ajdared', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 89.99 },
+        { id: 'al-narandze-1-kg', name: 'Narandže', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 179.99 },
+        { id: 'al-mandarine-1-kg', name: 'Mandarine', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 119.99 },
+        { id: 'al-limun-1-kg', name: 'Limun', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 159.99 },
+        { id: 'al-krompir-1-kg', name: 'Krompir', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 99.99 },
+        { id: 'al-crni-luk-1-kg', name: 'Crni luk', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 64.99 },
+        { id: 'al-beli-luk-1-kg', name: 'Beli luk', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 349.99 },
+        { id: 'al-paradajz-1-kg', name: 'Paradajz', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 199.99 },
+        { id: 'al-krastavac-1-kg', name: 'Krastavac', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 159.99 },
+        { id: 'al-sargarepa-1-kg', name: 'Šargarepa', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 79.99 },
+        { id: 'al-paprika-babura-crvena-1-kg', name: 'Paprika babura crvena', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 259.99 },
+        { id: 'al-kupus-1-kg', name: 'Kupus', desc: 'cena za 1 kg, plaća se po izmerenoj težini', weight: '1 kg', price: 69.99 },
+        { id: 'al-zelena-salata-komad', name: 'Zelena salata', weight: 'komad', price: 59.99 },
+        { id: 'al-persun-veza', name: 'Peršun', weight: 'veza', price: 49.99 },
       ] },
-      { title: 'Voće i povrće', cat: 'voce', items: [
-        { id: 'banane', name: 'Banane 1 kg', price: null },
-        { id: 'jabuke', name: 'Jabuke 1 kg', price: null },
-        { id: 'krompir', name: 'Krompir 2 kg', price: null },
+      { title: 'Osnovne namirnice', cat: 'namirnice', emoji: '🧂', items: [
+        { id: 'al-brasno-t-400-danubius-1-kg', name: 'Brašno T-400 Danubius', weight: '1 kg', price: 89.99 },
+        { id: 'al-secer-crvenka-1-kg', name: 'Šećer Crvenka', weight: '1 kg', price: 109.99 },
+        { id: 'al-so-kuhinjska-1-kg', name: 'So kuhinjska', weight: '1 kg', price: 54.99 },
+        { id: 'al-ulje-dijamant-1-l', name: 'Ulje Dijamant', weight: '1 l', price: 199.99 },
+        { id: 'al-pirinac-biser-900-g', name: 'Pirinač Biser', weight: '900 g', price: 149.99 },
+        { id: 'al-spagete-danubius-400-g', name: 'Špagete Danubius', weight: '400 g', price: 69.99 },
+        { id: 'al-makarone-danubius-400-g', name: 'Makarone Danubius', weight: '400 g', price: 64.99 },
+        { id: 'al-pasulj-tetovac-k-plus-400-g', name: 'Pasulj tetovac K plus', weight: '400 g', price: 169.99 },
+        { id: 'al-paradajz-pire-gurman-370-g', name: 'Paradajz pire Gurman', weight: '370 g', price: 199.99 },
+        { id: 'al-sok-od-paradajza-gurman-500-ml', name: 'Sok od paradajza Gurman', weight: '500 ml', price: 69.99 },
+        { id: 'al-ajvar-podravka-blagi-350-g', name: 'Ajvar Podravka, blagi', weight: '350 g', price: 179.99 },
+        { id: 'al-vegeta-200-g', name: 'Vegeta', weight: '200 g', price: 169.99 },
+        { id: 'al-biber-mleveni-moravka-50-g', name: 'Biber mleveni Moravka', weight: '50 g', price: 84.99 },
+        { id: 'al-aleva-paprika-gold-100-g', name: 'Aleva paprika Gold', weight: '100 g', price: 119.99 },
+        { id: 'al-sirce-alkoholno-dijamant-1-l', name: 'Sirće alkoholno Dijamant', weight: '1 l', price: 99.99 },
       ] },
-      { title: 'Slatkiši i grickalice', cat: 'slatkisi', items: [
-        { id: 'cokolada', name: 'Čokolada 100 g', price: null },
-        { id: 'cips', name: 'Čips', price: null },
+      { title: 'Voda i sokovi', cat: 'pice', emoji: '🧃', items: [
+        { id: 'al-rosa-negazirana-1-5-l', name: 'Rosa negazirana', weight: '1,5 l', price: 74.99 },
+        { id: 'al-rosa-negazirana-balon-6-l', name: 'Rosa negazirana, balon', weight: '6 l', price: 249.99 },
+        { id: 'al-knjaz-milos-0-5-l', name: 'Knjaz Miloš', weight: '0,5 l', price: 54.99 },
+        { id: 'al-koka-kola-2-l', name: 'Koka-Kola', weight: '2 l', price: 189.99 },
+        { id: 'al-koka-kola-1-5-l', name: 'Koka-Kola', weight: '1,5 l', price: 159.99 },
+        { id: 'al-koka-kola-zero-1-5-l', name: 'Koka-Kola Zero', weight: '1,5 l', price: 159.99 },
+        { id: 'al-fanta-narandza-1-5-l', name: 'Fanta narandža', weight: '1,5 l', price: 159.99 },
+        { id: 'al-next-breskva-1-l', name: 'Next breskva', weight: '1 l', price: 169.99 },
       ] },
-      { title: 'Kafa i čaj', cat: 'kafa', items: [
-        { id: 'kafa', name: 'Mlevena kafa 200 g', price: null },
-        { id: 'caj', name: 'Čaj', price: null },
+      { title: 'Kafa i čaj', cat: 'kafa', emoji: '☕', items: [
+        { id: 'al-doncafe-moment-200-g', name: 'Doncafe Moment', weight: '200 g', price: 469.99 },
+        { id: 'al-doncafe-moment-500-g', name: 'Doncafe Moment', weight: '500 g', price: 949.99 },
+        { id: 'al-c-kafa-200-g', name: 'C kafa', weight: '200 g', price: 429.99 },
+        { id: 'al-grand-3u1-classic-kesica', name: 'Grand 3u1 Classic, kesica', price: 24.99 },
+        { id: 'al-nescafe-classic-crema-95-g', name: 'Nescafe Classic Crema', weight: '95 g', price: 539.99 },
       ] },
-      { title: 'Higijena', cat: 'higijena', items: [
-        { id: 'toalet-papir', name: 'Toalet papir', price: null },
-        { id: 'deterdzent', name: 'Deterdžent za sudove', price: null },
+      { title: 'Slatkiši i grickalice', cat: 'slatkisi', emoji: '🍫', items: [
+        { id: 'al-plazma-300-g', name: 'Plazma', weight: '300 g', price: 329.99 },
+        { id: 'al-milka-jagoda-100-g', name: 'Milka jagoda', weight: '100 g', price: 159.99 },
+        { id: 'al-smoki-150-g', name: 'Smoki', weight: '150 g', price: 124.99 },
+        { id: 'al-chio-cips-slani-80-g', name: 'Chio čips, slani', weight: '80 g', price: 119.99 },
+      ] },
+      { title: 'Kućna hemija i papir', cat: 'kuca', emoji: '🧽', items: [
+        { id: 'al-toalet-papir-perfex-10-rolni', name: 'Toalet papir Perfex, 10 rolni', price: 269.99 },
+        { id: 'al-ubrus-perfetto-1-rolna', name: 'Ubrus Perfetto', weight: '1 rolna', price: 109.99 },
+        { id: 'al-salvete-fresh-100-komada', name: 'Salvete Fresh, 100 komada', price: 79.99 },
+        { id: 'al-papirne-maramice-perfex-100-komada', name: 'Papirne maramice Perfex, 100 komada', price: 109.99 },
+        { id: 'al-fairy-limun-za-sudove-450-ml', name: 'Fairy limun, za sudove', weight: '450 ml', price: 179.99 },
+        { id: 'al-domestos-750-ml', name: 'Domestos', weight: '750 ml', price: 239.99 },
+        { id: 'al-merix-prasak-za-ves-2-25-kg', name: 'Merix prašak za veš', weight: '2,25 kg', price: 479.99 },
+        { id: 'al-ariel-prasak-za-ves-1-95-kg', name: 'Ariel prašak za veš', weight: '1,95 kg', price: 799.99 },
+      ] },
+      { title: 'Lična higijena', cat: 'higijena', emoji: '🧴', items: [
+        { id: 'al-sapun-dove-original-90-g', name: 'Sapun Dove Original', weight: '90 g', price: 109.99 },
+        { id: 'al-sampon-head-shoulders-classic-330-ml', name: 'Šampon Head & Shoulders Classic', weight: '330 ml', price: 359.99 },
+        { id: 'al-pampers-4-62-komada', name: 'Pampers 4, 62 komada', price: 1999.99 },
       ] },
     ],
   },

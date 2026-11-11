@@ -95,17 +95,38 @@ export default function ShopPage({ slug, category }) {
           )}
           <div className="relative p-5 sm:p-8">
             <h1 className="font-serif text-[clamp(36px,6vw,60px)] font-bold italic leading-none tracking-tight">{shop.name}</h1>
-            {import.meta.env.DEV && !shop.realMenu && (
-              <p className="mt-3 rounded-lg bg-[#fff3c4] px-3 py-2 text-sm text-[#7a5a00]">
-                Razvoj: meni i cene su primer. Pravi meni upišite u <code>src/catalog.js</code>.
-              </p>
-            )}
           </div>
 
           {shop.gallery && <Gallery slug={shop.slug} name={shop.name} />}
 
+          {/* market i ostale prodavnice: velike pločice "Šta vam treba?" (hleb, voda...), da se odmah vidi gde je šta */}
+          {!food && shop.menu.length > 2 && (
+            <div className="relative border-t border-line bg-paper/50 p-3 sm:p-5">
+              <h2 className="px-1 text-[20px] font-bold sm:text-[22px]">Šta vam treba?</h2>
+              <p className="px-1 text-[14px] text-mute">Dodirnite grupu i odmah idete na nju.</p>
+              <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
+                {shop.menu.map((section, i) => (
+                  <button
+                    key={section.title}
+                    type="button"
+                    onClick={() => scrollToSection(i)}
+                    className="group flex min-h-[124px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-line bg-white px-2 py-4 text-center shadow-[0_10px_24px_-20px_rgba(13,47,128,.7)] transition hover:-translate-y-0.5 hover:border-red active:scale-[.98]"
+                  >
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-red/10 text-[32px] leading-none transition-transform group-hover:scale-110" aria-hidden="true">
+                      {section.emoji ?? shop.emoji}
+                    </span>
+                    <span className="text-[15px] font-bold leading-tight text-deep group-hover:text-red">{section.title}</span>
+                    <span className="text-[12px] text-mute">
+                      {section.items.length} {unit(section.items.length, false)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ponuda na prvi pogled: pločice za svaki deo menija (kao "Naša ponuda" na sajtovima lokala) */}
-          {shop.menu.length > 2 && (
+          {food && shop.menu.length > 2 && (
             <div className="relative grid grid-cols-2 gap-2 border-t border-line bg-paper/50 p-3 sm:grid-cols-4 sm:p-4">
               {shop.menu.map((section, i) => (
                 <button
