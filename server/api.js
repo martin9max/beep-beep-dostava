@@ -2,7 +2,7 @@
 import { db } from './db.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
-import { formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
+import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
 import { deliveryPriceOf } from '../src/data.js'
 import { cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
 
@@ -239,7 +239,7 @@ const routes = {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }))
+    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone))
     return { id: Number(id), total, delivery, place }
   },
 }
@@ -279,9 +279,10 @@ function buildOrder(body) {
  * Poruke na Telegram, preko istog bota, različitim ljudima:
  *   'orders'   -> TELEGRAM_ORDERS_CHAT_ID   (vlasnik: nove porudžbine)
  *   'accounts' -> TELEGRAM_ACCOUNTS_CHAT_ID (administrator sajta: novi korisnici, problemi sa prijavom)
+ * `buttons` (nije obavezno): dugmad sa linkovima ispod poruke (npr. WhatsApp kupcu sa gotovom porukom).
  * U svakom može više chat id-jeva odvojenih zarezom. Bez tokena ili chat id-ja poruka se ne šalje.
  */
-async function notify(kind, message) {
+async function notify(kind, message, buttons) {
   const token = process.env.TELEGRAM_BOT_TOKEN
   const key = kind === 'orders' ? 'TELEGRAM_ORDERS_CHAT_ID' : 'TELEGRAM_ACCOUNTS_CHAT_ID'
   const chats = (process.env[key] || '').split(',').map((c) => c.trim()).filter(Boolean)
@@ -292,7 +293,7 @@ async function notify(kind, message) {
         const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chat, text: message }),
+          body: JSON.stringify({ chat_id: chat, text: message, ...(buttons && { reply_markup: buttons }) }),
         })
         if (!res.ok) console.error(`Telegram (${chat}) nije uspeo:`, (await res.text()).slice(0, 200))
       } catch (err) {
