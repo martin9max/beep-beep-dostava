@@ -239,7 +239,7 @@ const routes = {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone))
+    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }))
     return { id: Number(id), total, delivery, place }
   },
 }
@@ -290,11 +290,18 @@ async function notify(kind, message, buttons) {
   await Promise.all(
     chats.map(async (chat) => {
       try {
-        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chat, text: message, ...(buttons && { reply_markup: buttons }) }),
-        })
+        const send = (markup) =>
+          fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chat, text: message, ...(markup && { reply_markup: markup }) }),
+          })
+        let res = await send(buttons)
+        // ako Telegram odbije dugmad (npr. predugačka), porudžbina ipak mora da stigne, makar bez dugmadi
+        if (!res.ok && buttons) {
+          console.error(`Telegram (${chat}) odbio dugmad:`, (await res.text()).slice(0, 200))
+          res = await send(null)
+        }
         if (!res.ok) console.error(`Telegram (${chat}) nije uspeo:`, (await res.text()).slice(0, 200))
       } catch (err) {
         console.error(`Telegram (${chat}) nije uspeo:`, err.message)
