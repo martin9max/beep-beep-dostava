@@ -509,3 +509,16 @@
     0 2px 0 #000,
     0 3px 10px rgb(0 0 0 / 0.65);
 }
+
+/* Visina početnog ekrana (Hero): ekran + deo trake partnera.
+   svh (visina ekrana bez trake pregledača) ne postoji na starijim iPhone-ima (iOS pre 15.4);
+   tamo bi se visina izgubila i kartica bi se skupila, pa ispod partnera ostane prazno.
+   Zato je osnova vh, a svh samo gde ga pregledač zna (@supports, da ga minifikacija ne izbaci). */
+.hero-pin { height: calc(100vh + 62px); }
+@media (min-width: 40rem) { .hero-pin { height: calc(100vh + 80px); } }
+@media (min-width: 64rem) { .hero-pin { height: calc(100vh + 90px); } }
+@supports (height: 100svh) {
+  .hero-pin { height: calc(100svh + 62px); }
+  @media (min-width: 40rem) { .hero-pin { height: calc(100svh + 80px); } }
+  @media (min-width: 64rem) { .hero-pin { height: calc(100svh + 90px); } }
+}

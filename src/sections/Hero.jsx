@@ -83,7 +83,7 @@ export default function Hero() {
     <section ref={ref} id="pocetna" className="relative h-[260vh]">
       {/* visina = ekran + pola trake partnera: pri učitavanju se logoi vide "napola preseceni",
           a početni ekran dobija skoro ceo prostor */}
-      <div className="sticky top-0 flex h-[calc(100svh+62px)] flex-col gap-3 px-3 pb-3 pt-[84px] sm:h-[calc(100svh+80px)] sm:px-5 sm:pt-[88px] lg:h-[calc(100svh+90px)]">
+      <div className="hero-pin sticky top-0 flex flex-col gap-3 px-3 pb-3 pt-[84px] sm:px-5 sm:pt-[88px]">
         <div className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] bg-ink text-white">
           {/* pozadina */}
           {HERO_BG ? (
