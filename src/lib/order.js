@@ -11,9 +11,12 @@ export const normalizePhone = (phone) => cleanPhone(phone).replace(/^\+?381/, '0
 
 const toWhatsApp = (phone) => '381' + cleanPhone(phone).replace(/^(\+?381|0)/, '')
 
+/** Telefon za SMS link: +381641234567 */
+export const toSms = (phone) => '+' + toWhatsApp(phone)
+
 // Telegram prima dugmad samo dok su svi linkovi zajedno kraći od ~9.000 znakova (6 dugmadi),
 // pa jedan link sme imati najviše ovoliko; kod velike porudžbine spisak se skraćuje ("i još N stavki")
-const MAX_LINK = 1250
+const MAX_LINK = 1250 // + dugme za SMS (kratak link) i dalje staje
 
 /** Spisak porudžbine za kupca: lokali, stavke sa cenama, dostava i ukupno (najviše `max` stavki) */
 function orderSummary({ id, shops, total, delivery }, max = Infinity) {
@@ -56,14 +59,16 @@ export const etaMessage = (minutes, order, max) =>
  * Dugmad ispod porudžbine na Telegramu: klik otvara WhatsApp sa kupcem i gotovom porukom
  * (spisak porudžbine + za koliko minuta stiže), vlasnik samo pritisne „pošalji“.
  */
-export function etaButtons(phone, order, minutes = [10, 15, 20, 30, 45, 60]) {
+export function etaButtons(phone, order, smsUrl, minutes = [10, 15, 20, 30, 45, 60]) {
   const link = (m, max) => `https://wa.me/${toWhatsApp(phone)}?text=${encodeURIComponent(etaMessage(m, order, max))}`
   // koliko stavki staje u link (proverava se na najdužem, sa dvocifrenim minutima)
   let max = order ? order.shops.reduce((n, s) => n + s.lines.length, 0) : 0
   while (max > 0 && link(60, max).length > MAX_LINK) max--
   if (order && link(60, max).length > MAX_LINK) order = null // ni bez stavki ne staje: samo poruka o minutima
   const buttons = minutes.map((m) => ({ text: `${m} min`, url: link(m, max) }))
-  return { inline_keyboard: [buttons.slice(0, 3), buttons.slice(3)] }
+  // treći red: stranica sa sajta koja otvara SMS (za kupce bez WhatsApp-a); Telegram prima samo https linkove
+  const sms = smsUrl?.startsWith('https://') ? [[{ text: 'SMS kupcu (nema WhatsApp)', url: smsUrl }]] : []
+  return { inline_keyboard: [buttons.slice(0, 3), buttons.slice(3), ...sms] }
 }
 
 /** Cena stavke u poruci: "900 din" ili "1.800 din (po 900)"; bez cene "po računu" */
@@ -102,6 +107,6 @@ export function formatOrder({ id, shops, customer, address, map, phone, note, to
     `Telefon: ${phone}`,
     `WhatsApp: wa.me/${toWhatsApp(phone)}`,
     '',
-    'Za koliko minuta stiže? Dugme ispod otvara WhatsApp sa gotovom porukom kupcu.',
+    'Za koliko minuta stiže? Dugme ispod otvara WhatsApp sa gotovom porukom kupcu (ako kupac nema WhatsApp: dugme SMS kupcu).',
   ].join('\n')
 }

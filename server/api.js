@@ -1,5 +1,7 @@
 // API za sajt: /api/... (registracija, prijava, nalog, porudžbine)
+import { randomBytes } from 'node:crypto'
 import { db } from './db.js'
+import { smsPage } from './sms.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
@@ -229,20 +231,24 @@ const routes = {
     const goods = Math.round(shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0) * 100) / 100
     const total = goods + (delivery ?? 0)
     const customer = customerName(user, asFirm)
+    const smsToken = randomBytes(12).toString('base64url')
 
     const { lastInsertRowid: id } = db
-      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery)
+      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken)
 
     // "zapamti kao moju adresu"
     if (body.saveAddress && custom) {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }))
+    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }, `${siteUrl()}/sms/${id}/${smsToken}`))
     return { id: Number(id), total, delivery, place }
   },
 }
+
+/** Adresa sajta za linkove u porukama (SITE_URL, inače VITE_SITE_URL iz .env) */
+const siteUrl = () => (process.env.SITE_URL || process.env.VITE_SITE_URL || '').replace(/\/$/, '')
 
 function requireUser(req) {
   return currentUser(req) ?? fail(401, 'Prijavite se da biste nastavili.')
@@ -364,6 +370,7 @@ const send = (res, status, data) => {
 /** Middleware (radi i u Vite dev serveru i u server/index.js). */
 export async function api(req, res, next) {
   const url = new URL(req.url, 'http://x')
+  if (url.pathname.startsWith('/sms/')) return smsPage(req, res, url)
   if (!url.pathname.startsWith('/api/')) return next()
   const handler = routes[`${req.method} ${url.pathname}`]
   try {

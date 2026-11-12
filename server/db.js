@@ -64,6 +64,8 @@ db.exec(`
 const orderColumns = db.prepare('PRAGMA table_info(orders)').all().map((c) => c.name)
 if (!orderColumns.includes('zone')) db.exec("ALTER TABLE orders ADD COLUMN zone TEXT NOT NULL DEFAULT 'grad'")
 if (!orderColumns.includes('delivery')) db.exec('ALTER TABLE orders ADD COLUMN delivery INTEGER')
+// tajni kod za stranicu /sms (vlasnik šalje kupcu SMS sa gotovom porukom), da niko ne pogađa brojeve porudžbina
+if (!orderColumns.includes('sms_token')) db.exec('ALTER TABLE orders ADD COLUMN sms_token TEXT')
 
 const userColumns = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name)
 if (!userColumns.includes('place')) {
