@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { MotionConfig, motion } from 'framer-motion'
 import { EASE } from './lib/order'
 import { AuthProvider } from './lib/auth'
@@ -14,13 +15,16 @@ import Faq from './sections/Faq'
 import Footer from './sections/Footer'
 import CartBar from './components/CartBar'
 import PageShell from './pages/PageShell'
-import OrderPage from './pages/OrderPage'
-import ShopPage from './pages/ShopPage'
-import CheckoutPage from './pages/CheckoutPage'
-import AccountPage from './pages/AccountPage'
 import NotFound from './pages/NotFound'
-import RadioPage from './pages/RadioPage'
-import { LoginPage, RegisterPage } from './pages/AuthPages'
+
+// podstranice se učitavaju tek kad se otvore, da početna bude brža
+const OrderPage = lazy(() => import('./pages/OrderPage'))
+const ShopPage = lazy(() => import('./pages/ShopPage'))
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
+const AccountPage = lazy(() => import('./pages/AccountPage'))
+const RadioPage = lazy(() => import('./pages/RadioPage'))
+const LoginPage = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.RegisterPage })))
 
 /** Koja stranica se prikazuje za koju adresu. */
 function Page({ path, query }) {
@@ -75,7 +79,9 @@ export default function App() {
               <PageShell>
                 {/* blag prelaz između stranica: nova stranica uđe odozdo umesto da samo "iskoči" */}
                 <motion.div key={path} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
-                  <Page path={path} query={query} />
+                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                    <Page path={path} query={query} />
+                  </Suspense>
                 </motion.div>
               </PageShell>
             )}

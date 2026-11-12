@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { RoundedBox } from '@react-three/drei'
+import { RoundedBox } from '@react-three/drei/core/RoundedBox'
 import * as THREE from 'three'
 import { useCanvasTexture, drawLogo, drawPhone, drawBird, drawBeep, drawWeave, drawTread, drawPlate } from './textures'
 

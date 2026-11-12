@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 import Trike, { BOX } from './Trike'
 import Parcel from './Parcel'
@@ -43,6 +42,29 @@ function Scene({ progress, compact, trikeSize, lower, onArrive }) {
   // prvi frejm odmah kad platno dobije veličinu (na telefonu je na početku prazno, pa bi scena
   // inače čekala prvi skrol, i trokolica bi ulazila tek tada)
   useEffect(() => invalidate(), [size.width, size.height, invalidate])
+
+  // na računaru se dešavalo da prvi frejm propadne (sajt otvoren u kartici iza, pregledač uspori crtanje
+  // dok se strana učitava), pa trokolica nije ni ulazila dok se ne skroluje. Zato se crtanje traži još
+  // nekoliko puta posle učitavanja i svaki put kad se kartica ili prozor ponovo vide.
+  useEffect(() => {
+    const timers = [100, 400, 1000, 2000].map((ms) => setTimeout(invalidate, ms))
+    const wake = () => document.visibilityState === 'visible' && invalidate()
+    document.addEventListener('visibilitychange', wake)
+    addEventListener('focus', wake)
+    addEventListener('pageshow', wake)
+    return () => {
+      timers.forEach(clearTimeout)
+      document.removeEventListener('visibilitychange', wake)
+      removeEventListener('focus', wake)
+      removeEventListener('pageshow', wake)
+    }
+  }, [invalidate])
+
+  // kad se vrati na početni ekran (scena je bila pauzirana), odmah jedan frejm
+  const frameloop = useThree((s) => s.frameloop)
+  useEffect(() => {
+    if (frameloop !== 'never') invalidate()
+  }, [frameloop, invalidate])
 
   // scena se crta samo kad se nešto menja (skrol ili ulazak), ne 60-120 puta u sekundi bez potrebe
   useEffect(() => progress.on('change', () => invalidate()), [progress, invalidate])
@@ -157,6 +179,47 @@ function BlobShadow() {
   )
 }
 
+// "Studijska" svetla za odsjaje na farbi: nekoliko svetlih ploča oko trokolice, snimljenih jednom u
+// okruženje scene. Isto što i Environment + Lightformer iz drei, ali bez te biblioteke (3D deo je
+// tako nekoliko stotina KB manji i trokolica se brže pojavi).
+const LIGHTFORMERS = [
+  // [jačina, položaj, veličina, rotacija (bez nje ploča gleda ka sredini), boja]
+  [3, [0, 6, 0], [10, 4, 1], [Math.PI / 2, 0, 0]],
+  [2, [0, 2, 6], [10, 0.6, 1]],
+  [1.5, [0, 0.6, 6], [10, 0.3, 1]],
+  [1.2, [-6, 2, 0], [6, 2, 1], [0, Math.PI / 2, 0]],
+  [1, [6, 1, -2], [6, 2, 1], [0, -Math.PI / 2, 0], '#ffcfc4'],
+]
+
+function StudioEnvironment() {
+  const { gl, scene, invalidate } = useThree()
+  useEffect(() => {
+    const room = new THREE.Scene()
+    const plane = new THREE.PlaneGeometry(1, 1)
+    const materials = LIGHTFORMERS.map(([intensity, position, size, rotation, color = 'white']) => {
+      const material = new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity), side: THREE.DoubleSide, toneMapped: false })
+      const mesh = new THREE.Mesh(plane, material)
+      mesh.position.set(...position)
+      mesh.scale.set(...size)
+      if (rotation) mesh.rotation.set(...rotation)
+      else mesh.lookAt(0, 0, 0)
+      room.add(mesh)
+      return material
+    })
+    const target = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType })
+    new THREE.CubeCamera(1, 1000, target).update(gl, room)
+    scene.environment = target.texture
+    invalidate()
+    return () => {
+      scene.environment = null
+      target.dispose()
+      plane.dispose()
+      materials.forEach((m) => m.dispose())
+    }
+  }, [gl, scene, invalidate])
+  return null
+}
+
 export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
   return (
     <Canvas frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
@@ -165,13 +228,7 @@ export default function HeroScene({ progress, active = true, compact = false, si
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
       <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
-      <Environment resolution={256}>
-        <Lightformer intensity={3} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[10, 4, 1]} />
-        <Lightformer intensity={2} position={[0, 2, 6]} scale={[10, 0.6, 1]} />
-        <Lightformer intensity={1.5} position={[0, 0.6, 6]} scale={[10, 0.3, 1]} />
-        <Lightformer intensity={1.2} position={[-6, 2, 0]} rotation-y={Math.PI / 2} scale={[6, 2, 1]} />
-        <Lightformer intensity={1} color="#ffcfc4" position={[6, 1, -2]} rotation-y={-Math.PI / 2} scale={[6, 2, 1]} />
-      </Environment>
+      <StudioEnvironment />
     </Canvas>
   )
 }

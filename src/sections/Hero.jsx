@@ -5,9 +5,9 @@ import Partners from './Partners'
 import HeroStreet from './HeroStreet'
 import { EASE } from '../lib/order'
 import { Link } from '../lib/router'
-import arriveSound from '../assets/sounds/stigao.wav'
+import arriveSound from '../assets/sounds/stigao.mp3'
 
-// Fotografija u pozadini: src/assets/photos/hero-bg.jpg (ako ima licencu sa potpisom, dodajte i potpis autora).
+// Fotografija u pozadini: src/assets/photos/hero-bg.webp (ako ima licencu sa potpisom, dodajte i potpis autora).
 // Dok je nema, pozadina je nacrtana ulica sa radnjama i putem (HeroStreet).
 const HERO_BG = Object.values(import.meta.glob('../assets/photos/hero-bg.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' }))[0]
 

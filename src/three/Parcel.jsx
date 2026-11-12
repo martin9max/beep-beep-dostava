@@ -1,4 +1,4 @@
-import { RoundedBox } from '@react-three/drei'
+import { RoundedBox } from '@react-three/drei/core/RoundedBox'
 import { useCanvasTexture, drawLogo, RED } from './textures'
 
 export const PARCEL = [0.62, 0.46, 0.52]
