@@ -25,31 +25,42 @@ export function etaButtons(phone, minutes = [10, 15, 20, 30, 45, 60]) {
   return { inline_keyboard: [buttons.slice(0, 3), buttons.slice(3)] }
 }
 
+/** Cena stavke u poruci: "900 din" ili "1.800 din (po 900)"; bez cene "po računu" */
+const linePrice = ({ qty, price }) => {
+  if (price == null) return 'po računu'
+  const sum = formatDin(Math.round(price * qty * 100) / 100)
+  return qty > 1 ? `${sum} din (po ${formatDin(price)})` : `${sum} din`
+}
+
 /**
  * Tekst porudžbine koju vlasnik dobija (Telegram, admin panel).
  * `shops`: [{ name, lines: [{ qty, name, variant, price }], request }]
  */
 export function formatOrder({ id, shops, customer, address, map, phone, note, total, zone, delivery }) {
   const now = new Date()
+  // gore sve o porudžbini, dole sve o kupcu (vlasnik je tako tražio, preglednije je)
   return [
     `NOVA PORUDŽBINA #${id}`,
+    `Primljeno: ${now.toLocaleDateString('sr-RS')} u ${now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })}`,
     ...shops.flatMap((shop, i) => [
       '',
       `${i + 1}. ${shop.name}`,
-      ...shop.lines.map((l) => `- ${l.qty}x ${l.name}${l.variant ? ` (${l.variant})` : ''}${l.price == null ? ' (po računu)' : ''}`),
+      ...shop.lines.map((l) => `- ${l.qty}x ${l.name}${l.variant ? ` (${l.variant})` : ''}: ${linePrice(l)}`),
       ...(shop.request ? [`  Napomena za lokal: ${shop.request}`] : []),
     ]),
     '',
     ...(shops.length > 1 ? [`Više lokala: ${shops.length} (dodatna zaustavljanja: ${shops.length - 1})`] : []),
     ...(note ? [`Napomena: ${note}`] : []),
-    `Kupac: ${customer}`,
-    `Adresa: ${address}`,
-    ...(map ? [`Mapa: ${map}`] : []),
-    `Telefon: ${phone}`,
     delivery == null ? `Dostava: ${zone}, cenu javlja dostavljač kupcu` : `Dostava: ${zone}, ${formatDin(delivery)} din`,
     `Ukupno: ${formatDin(total)} din${shops.some((s) => s.lines.some((l) => l.price == null)) ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
-    `Primljeno: ${now.toLocaleDateString('sr-RS')} u ${now.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })}`,
-    `Javi kupcu (WhatsApp): wa.me/${toWhatsApp(phone)}`,
+    '',
+    'KUPAC',
+    `Ime: ${customer}`,
+    `Adresa: ${address}`,
+    ...(map ? [`Lokacija: ${map}`] : []),
+    `Telefon: ${phone}`,
+    `WhatsApp: wa.me/${toWhatsApp(phone)}`,
+    '',
     'Za koliko minuta stiže? Dugme ispod otvara WhatsApp sa gotovom porukom kupcu.',
   ].join('\n')
 }
