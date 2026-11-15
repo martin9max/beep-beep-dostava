@@ -47,6 +47,17 @@ export default function Header() {
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Radio />
+          {/* prijava lokala u panel "Beep Beep partneri" (poseban sajt, zato običan link, ne naš ruter) */}
+          <a
+            href="/partneri"
+            aria-label="Partneri: prijava za lokale"
+            title="Partneri: prijava za lokale"
+            className="hidden h-11 items-center gap-2 rounded-lg border border-white/35 px-3 font-semibold text-white transition hover:bg-white/10 md:flex"
+          >
+            <StoreIcon />
+            {/* reč "Partneri" samo gde ima mesta (uz meni od 1280 px samo ikonica, da ne gura natpis) */}
+            <span className="xl:hidden 2xl:inline">Partneri</span>
+          </a>
           <Link
             href={account.href}
             aria-label={user ? `Moj nalog (${user.name})` : 'Prijava'}
@@ -124,6 +135,12 @@ export default function Header() {
                   {user ? `Moj nalog (${user.name})` : 'Prijava / registracija'}
                 </Link>
               </li>
+              <li className="md:hidden">
+                <a href="/partneri" onClick={close} className="flex items-center gap-2 rounded-lg px-3 py-3 text-lg font-semibold hover:bg-white/10">
+                  <StoreIcon />
+                  Partneri (prijava za lokale)
+                </a>
+              </li>
             </ul>
           </motion.nav>
         )}
@@ -150,6 +167,16 @@ function UserIcon() {
     <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
+    </svg>
+  )
+}
+
+function StoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 9.5 5.5 4h13L20 9.5" />
+      <path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" />
+      <path d="M5.5 12v8h13v-8M10 20v-5h4v5" />
     </svg>
   )
 }

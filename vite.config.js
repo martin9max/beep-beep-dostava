@@ -9,8 +9,11 @@ const backend = {
     Object.assign(process.env, loadEnv(server.config.mode, process.cwd(), ''))
     const { api } = await import('./server/api.js')
     const { admin } = await import('./server/admin.js')
+    const { partneri } = await import('./partneri/server.js')
     server.middlewares.use(api)
     server.middlewares.use(admin)
+    // panel za lokale (poseban sajt) i tokom razvoja: http://localhost:5173/partneri
+    server.middlewares.use((req, res, next) => (/^\/partneri(\/|$|\?)/.test(req.url) ? partneri(req, res) : next()))
   },
 }
 

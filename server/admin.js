@@ -1,10 +1,15 @@
 // Admin panel: /admin (korisnici, prijave, porudžbine). Lozinka je ADMIN_PASSWORD u .env.local.
 import { timingSafeEqual } from 'node:crypto'
 import { db } from './db.js'
+import { hashPassword } from './auth.js'
+import { customerRecord, trustOf } from './risk.js'
+import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
 
-const STATUSES = ['nova', 'prihvaćena', 'u dostavi', 'isporučena', 'otkazana']
+// 'na proveri': sumnjiva porudžbina čeka vlasnika (lokali je ne vide); 'nije preuzeta': kupac nije preuzeo (ulazi u ocenu kupca)
+const STATUSES = ['na proveri', 'nova', 'prihvaćena', 'u dostavi', 'isporučena', 'nije preuzeta', 'otkazana']
+const SHOP_LABEL = { nova: 'čeka lokal', prihvaćena: 'prihvaćeno', spremna: 'spremno', odbijena: 'odbijeno' }
 
 const esc = (v) =>
   String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -60,20 +65,64 @@ export async function admin(req, res, next) {
     return res.end()
   }
 
-  // promena statusa porudžbine
+  // promena statusa porudžbine (ako vlasnik ručno skine "na proveri", porudžbina se pušta lokalima)
   if (req.method === 'POST' && url.pathname === '/admin/status') {
     const form = await readForm(req)
-    if (STATUSES.includes(form.get('status'))) {
-      db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(form.get('status'), Number(form.get('id')))
+    const status = form.get('status')
+    if (STATUSES.includes(status)) {
+      db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, Number(form.get('id')))
+      if (!['na proveri', 'otkazana'].includes(status)) db.prepare('UPDATE orders SET released = 1 WHERE id = ?').run(Number(form.get('id')))
     }
     res.statusCode = 303
     res.setHeader('Location', '/admin?tab=porudzbine')
     return res.end()
   }
 
+  // sumnjiva porudžbina: vlasnik je proverio kupca i pušta je lokalima
+  if (req.method === 'POST' && url.pathname === '/admin/release') {
+    const form = await readForm(req)
+    db.prepare("UPDATE orders SET released = 1, status = 'nova' WHERE id = ? AND released = 0").run(Number(form.get('id')))
+    res.statusCode = 303
+    res.setHeader('Location', '/admin?tab=porudzbine')
+    return res.end()
+  }
+
+  // nalog lokala za panel za lokale: novi ili nova lozinka (isti lokal ima jedan nalog)
+  if (req.method === 'POST' && url.pathname === '/admin/shop-account') {
+    const form = await readForm(req)
+    const slug = form.get('slug')
+    const username = (form.get('username') || '').trim().toLowerCase()
+    const password = form.get('password') || ''
+    let msg
+    if (!shopBySlug(slug)) msg = 'Izaberite lokal.'
+    else if (!/^[a-z0-9._-]{3,40}$/.test(username)) msg = 'Korisničko ime: 3 do 40 znakova, mala slova, brojevi, tačka, crtica.'
+    else if (password.length < 8) msg = 'Lozinka mora imati bar 8 znakova.'
+    else if (db.prepare('SELECT 1 FROM shop_accounts WHERE username = ? AND slug != ?').get(username, slug)) msg = 'To korisničko ime već koristi drugi lokal.'
+    else {
+      db.prepare(
+        `INSERT INTO shop_accounts (slug, username, password_hash) VALUES (?, ?, ?)
+         ON CONFLICT(slug) DO UPDATE SET username = excluded.username, password_hash = excluded.password_hash`,
+      ).run(slug, username, hashPassword(password))
+      // nova lozinka odjavljuje sve uređaje tog lokala
+      db.prepare('DELETE FROM shop_sessions WHERE account_id = (SELECT id FROM shop_accounts WHERE slug = ?)').run(slug)
+      msg = `Sačuvano: ${shopBySlug(slug).name} se prijavljuje kao „${username}“.`
+    }
+    res.statusCode = 303
+    res.setHeader('Location', `/admin?tab=lokali&poruka=${encodeURIComponent(msg)}`)
+    return res.end()
+  }
+
+  if (req.method === 'POST' && url.pathname === '/admin/shop-delete') {
+    const form = await readForm(req)
+    db.prepare('DELETE FROM shop_accounts WHERE slug = ?').run(form.get('slug'))
+    res.statusCode = 303
+    res.setHeader('Location', `/admin?tab=lokali&poruka=${encodeURIComponent('Nalog lokala je obrisan.')}`)
+    return res.end()
+  }
+
   const tab = url.searchParams.get('tab') || 'porudzbine'
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.end(page(tab, url.searchParams.get('obrisan')))
+  res.end(page(tab, url.searchParams.get('obrisan'), url.searchParams.get('poruka')))
 }
 
 async function readForm(req) {
@@ -85,7 +134,7 @@ async function readForm(req) {
   return new URLSearchParams(raw)
 }
 
-function page(tab, deleted) {
+function page(tab, deleted, message) {
   const count = (sql) => db.prepare(sql).get().n
   const stats = [
     ['Korisnika', count('SELECT COUNT(*) n FROM users')],
@@ -93,13 +142,15 @@ function page(tab, deleted) {
     ['Prijava danas', count("SELECT COUNT(*) n FROM logins WHERE success = 1 AND kind = 'prijava' AND date(created_at) = date('now','localtime')")],
     ['Neuspelih danas', count("SELECT COUNT(*) n FROM logins WHERE success = 0 AND date(created_at) = date('now','localtime')")],
     ['Porudžbina danas', count("SELECT COUNT(*) n FROM orders WHERE date(created_at) = date('now','localtime')")],
+    ['Čeka proveru', count('SELECT COUNT(*) n FROM orders WHERE released = 0 AND status != \'otkazana\'')],
   ]
   const tabs = [
     ['porudzbine', 'Porudžbine'],
     ['korisnici', 'Korisnici'],
     ['prijave', 'Prijave'],
+    ['lokali', 'Lokali (panel)'],
   ]
-  const body = { porudzbine: orders, korisnici: users, prijave: logins }[tab]?.() ?? ''
+  const body = { porudzbine: orders, korisnici: users, prijave: logins, lokali: shopAccounts }[tab]?.() ?? ''
 
   return `<!doctype html>
 <html lang="sr-Latn">
@@ -134,12 +185,20 @@ function page(tab, deleted) {
   .del { background:none; border:1px solid var(--red); color:var(--red); border-radius:6px; padding:4px 10px; cursor:pointer; font-weight:600 }
   .del:hover { background:var(--red); color:#fff }
   .on { color:#1d7a46; font-weight:700 } .off { color:var(--mute) } .st-otkazana { opacity:.55 }
+  .st-proveri { background:#ffe3e3 } .flags { margin:6px 0 0; padding-left:18px; color:#9b1218; font-size:13px } .flags .info { color:#8a5a00 }
+  .release { background:#1d7a46; color:#fff; border:0; border-radius:6px; padding:5px 10px; font-weight:700; cursor:pointer; margin-top:6px }
+  .ss { font-size:12px; border-radius:999px; padding:1px 8px; background:#eef2fa; white-space:nowrap } .ss.prihvaćeno, .ss.spremno { background:#dff5dc; color:#1d6a3a } .ss.odbijeno { background:#ffe3e3; color:#9b1218 }
+  .trust { font-weight:700; white-space:nowrap } .trust.ok { color:#1d7a46 } .trust.info { color:#8a5a00 } .trust.check, .trust.block { color:var(--red) }
+  form.inline { display:flex; gap:8px; flex-wrap:wrap; align-items:end; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px }
+  form.inline label { display:grid; gap:2px; font-size:13px; color:var(--mute) } form.inline input, form.inline select { padding:7px 8px; border:1px solid var(--line); border-radius:6px }
+  .save { background:var(--red); color:#fff; border:0; border-radius:6px; padding:8px 14px; font-weight:700; cursor:pointer }
 </style>
 </head>
 <body>
 <header><b>Beep Beep <span>admin</span></b><a href="/">← sajt</a></header>
 <main>
   <div class="stats">${stats.map(([l, n]) => `<div class="stat"><b>${n}</b>${esc(l)}</div>`).join('')}</div>
+  ${message ? `<p class="notice">${esc(message)}</p>` : ''}
   ${deleted ? `<p class="notice">Nalog <b>${esc(deleted)}</b> je obrisan iz baze. Njegove porudžbine su ostale u listi porudžbina.</p>` : ''}
   <nav>${tabs.map(([k, l]) => `<a href="/admin?tab=${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</nav>
   ${body}
@@ -164,11 +223,11 @@ function users() {
     )
     .all(Date.now())
   return table(
-    ['#', 'Ime i prezime', 'Telefon', 'Email', 'Adresa', 'Porudžbina', 'Registrovan', 'Poslednja prijava', 'Sada', ''],
+    ['#', 'Ime i prezime', 'Telefon', 'Email', 'Adresa', 'Porudžbine', 'Ocena kupca', 'Registrovan', 'Poslednja prijava', 'Sada', ''],
     rows.map(
       (u) => `<tr><td>${u.id}</td><td>${u.kind === 'firma' ? `<b>${esc(u.company)}</b> (PIB ${esc(u.pib)}, MB ${esc(u.mb)})<br>` : ''}${esc(u.name)} ${esc(u.surname)}</td><td><a href="tel:${esc(u.phone)}">${esc(u.phone)}</a></td>
       <td>${esc(u.email ?? '')}</td><td>${esc(fullAddress(u.address, u.place))} <a href="${esc(mapsLink(u.address, u.place))}" target="_blank" rel="noopener">📍</a>${u.address_note ? `<br><small>${esc(u.address_note)}</small>` : ''}</td>
-      <td>${u.orders}</td><td>${esc(u.created_at)}</td><td>${esc(u.last_login ?? '')}</td>
+      <td>${u.orders}</td><td>${trustCell(u)}</td><td>${esc(u.created_at)}</td><td>${esc(u.last_login ?? '')}</td>
       <td>${u.devices ? `<span class="on">prijavljen</span>` : `<span class="off">odjavljen${u.last_logout ? `<br><small>${esc(u.last_logout)}</small>` : ''}</span>`}</td>
       <td><form method="post" action="/admin/delete-user" onsubmit="return confirm(${esc(JSON.stringify(`Obrisati nalog: ${u.name} ${u.surname} (${u.phone})? Ovo se ne može vratiti.`))})">
         <input type="hidden" name="id" value="${u.id}"><button class="del">Obriši</button></form></td></tr>`,
@@ -199,9 +258,12 @@ function orders() {
     ['#', 'Vreme', 'Kupac', 'Adresa', 'Stavke', 'Iznos', 'Status'],
     rows.map((o) => {
       const shops = JSON.parse(o.items_json)
+      const flags = JSON.parse(o.risk || '[]')
+      const held = !o.released && o.status !== 'otkazana'
+      const shopState = Object.fromEntries(db.prepare('SELECT slug, status, minutes, reason FROM order_shops WHERE order_id = ?').all(o.id).map((r) => [r.slug, r]))
       const items = shops
         .map(
-          (s, i) => `<div class="shop">${i + 1}. ${esc(s.name)}</div><ul class="items">${s.lines
+          (s, i) => `<div class="shop">${i + 1}. ${esc(s.name)} ${shopBadge(shopState[s.slug], held)}</div><ul class="items">${s.lines
             .map((l) => `<li>${l.qty}× ${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ''}${l.price == null ? ' (po računu)' : ''}</li>`)
             .join('')}</ul>${s.request ? `<div class="req">${esc(s.request)}</div>` : ''}`,
         )
@@ -209,11 +271,54 @@ function orders() {
       const select = `<form method="post" action="/admin/status"><input type="hidden" name="id" value="${o.id}">
         <select name="status" onchange="this.form.submit()">${STATUSES.map((s) => `<option${s === o.status ? ' selected' : ''}>${s}</option>`).join('')}</select>
         <noscript><button>Sačuvaj</button></noscript></form>`
-      return `<tr class="st-${o.status === 'nova' ? 'nova' : o.status === 'otkazana' ? 'otkazana' : ''}"><td>${o.id}</td><td>${esc(o.created_at)}</td>
-        <td>${esc(o.customer)}<br><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></td>
+      const record = customerRecord(o.user_id, o.phone)
+      const trust = trustOf(record)
+      return `<tr class="st-${held ? 'proveri' : o.status === 'nova' ? 'nova' : o.status === 'otkazana' ? 'otkazana' : ''}"><td>${o.id}</td><td>${esc(o.created_at)}</td>
+        <td>${esc(o.customer)}<br><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a>
+          <br><span class="trust ${trust.level}">${esc(trust.label)}</span> <small>(${record.delivered} preuzeto, ${record.noShows} nije)</small>
+          ${flags.length ? `<ul class="flags">${flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join('')}</ul>` : ''}
+          ${held ? `<form method="post" action="/admin/release"><input type="hidden" name="id" value="${o.id}"><button class="release">Proverio sam: pošalji lokalima</button></form>` : ''}</td>
         <td>${esc(o.address)}<br><a href="${esc(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address.replace(/\s*\(.*\)$/, '') + ', Srbija')}`)}" target="_blank" rel="noopener">📍 mapa</a>${o.note ? `<br><small>Napomena: ${esc(o.note)}</small>` : ''}</td>
         <td>${items}${o.shops > 1 ? `<small><b>${o.shops} lokala</b>, dodatna zaustavljanja: ${o.shops - 1}</small>` : ''}</td>
         <td>${formatDin(o.total)} din<br><small>${o.delivery == null ? 'dostava: javlja dostavljač' : `dostava ${formatDin(o.delivery)} din (${esc(o.place || 'grad')})`}</small></td><td>${select}</td></tr>`
     }),
   )
+}
+
+/** Stanje dela porudžbine u panelu lokala (samo za lokale koji imaju nalog). */
+function shopBadge(state, held) {
+  if (!state || !db.prepare('SELECT 1 FROM shop_accounts WHERE slug = ?').get(state.slug)) return ''
+  if (held) return '<span class="ss">lokal još ne vidi</span>'
+  const label = SHOP_LABEL[state.status] ?? state.status
+  const extra = state.status === 'prihvaćena' ? `, ${state.minutes} min` : state.status === 'odbijena' ? `: ${esc(state.reason)}` : ''
+  return `<span class="ss ${label}">${esc(label)}${extra}</span>`
+}
+
+/** Ocena kupca: preuzete, otkazane i nepreuzete porudžbine (interno, kupac je ne vidi). */
+function trustCell(u) {
+  const r = customerRecord(u.id, u.phone)
+  const t = trustOf(r)
+  return `<span class="trust ${t.level}">${esc(t.label)}</span><br><small>${r.delivered} preuzeto, ${r.cancelled} otkazano, ${r.noShows} nije preuzeto</small>`
+}
+
+/** Nalozi lokala za panel za lokale (partneri.beepbeepdostava.rs). */
+function shopAccounts() {
+  const accounts = db.prepare('SELECT * FROM shop_accounts ORDER BY slug').all()
+  const has = new Set(accounts.map((a) => a.slug))
+  const options = SHOPS.map((s) => `<option value="${esc(s.slug)}">${esc(s.name)}${has.has(s.slug) ? ' (ima nalog)' : ''}</option>`).join('')
+  return `<form method="post" action="/admin/shop-account" class="inline" autocomplete="off">
+      <label>Lokal<select name="slug" required><option value="">izaberite</option>${options}</select></label>
+      <label>Korisničko ime<input name="username" required placeholder="npr. pastizza"></label>
+      <label>Lozinka (bar 8 znakova)<input name="password" type="text" required minlength="8"></label>
+      <button class="save">Sačuvaj nalog</button>
+    </form>
+    <p style="color:var(--mute);font-size:14px;margin:-4px 0 14px">Lokal se prijavljuje na <b>partneri.beepbeepdostava.rs</b>. Ako lokal već ima nalog, ovo mu menja korisničko ime i lozinku i odjavljuje ga sa svih uređaja.</p>
+    ${table(
+      ['Lokal', 'Korisničko ime', 'Napravljen', 'Prijavljen uređaja', ''],
+      accounts.map((a) => {
+        const devices = db.prepare('SELECT COUNT(*) n FROM shop_sessions WHERE account_id = ? AND expires_at > ?').get(a.id, Date.now()).n
+        return `<tr><td>${esc(shopBySlug(a.slug)?.name ?? a.slug)}</td><td>${esc(a.username)}</td><td>${esc(a.created_at)}</td><td>${devices}</td>
+          <td><form method="post" action="/admin/shop-delete" onsubmit="return confirm('Obrisati nalog lokala?')"><input type="hidden" name="slug" value="${esc(a.slug)}"><button class="del">Obriši</button></form></td></tr>`
+      }),
+    )}`
 }

@@ -10,6 +10,8 @@ process.env.NODE_ENV ||= 'production'
 
 const { api } = await import('./api.js')
 const { admin } = await import('./admin.js')
+// panel za lokale je poseban sajt (partneri/): isti server ga služi kad zahtev stigne na partneri.<domen>
+const { partneri } = await import('../partneri/server.js')
 
 const dist = path.resolve('dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -36,5 +38,6 @@ async function staticFiles(req, res) {
 createServer((req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff')
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  if ((req.headers.host || '').startsWith('partneri.') || /^\/partneri(\/|$|\?)/.test(req.url)) return partneri(req, res)
   api(req, res, () => admin(req, res, () => staticFiles(req, res)))
 }).listen(PORT, () => console.log(`Beep Beep radi na http://localhost:${PORT}`))

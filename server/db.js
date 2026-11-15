@@ -11,6 +11,8 @@ export const db = new DatabaseSync(file)
 db.exec(`
   PRAGMA journal_mode = WAL;
   PRAGMA foreign_keys = ON;
+  -- sajt i panel za lokale mogu da rade kao dva programa nad istom bazom: kratko sačekaju umesto greške
+  PRAGMA busy_timeout = 3000;
 
   -- registrovani korisnici (lozinka se čuva samo kao heš, nikad u čitljivom obliku)
   CREATE TABLE IF NOT EXISTS users (
@@ -90,5 +92,71 @@ if (!userColumns.includes('company_address')) {
 }
 if (!orderColumns.includes('place')) db.exec("ALTER TABLE orders ADD COLUMN place TEXT NOT NULL DEFAULT ''")
 
+// zaštita od lažnih porudžbina: oznake rizika (JSON spisak) i da li je porudžbina puštena lokalima
+// (sumnjiva porudžbina čeka da je vlasnik odobri u /admin, pa tek onda stiže lokalima)
+if (!orderColumns.includes('risk')) db.exec("ALTER TABLE orders ADD COLUMN risk TEXT NOT NULL DEFAULT '[]'")
+if (!orderColumns.includes('released')) db.exec('ALTER TABLE orders ADD COLUMN released INTEGER NOT NULL DEFAULT 1')
+
+// panel za lokale (partneri/): nalozi lokala, njihove prijave i stanje svakog dela porudžbine po lokalu
+db.exec(`
+  CREATE TABLE IF NOT EXISTS shop_accounts (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug          TEXT NOT NULL UNIQUE,
+    username      TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+  );
+  CREATE TABLE IF NOT EXISTS shop_sessions (
+    token_hash  TEXT PRIMARY KEY,
+    account_id  INTEGER NOT NULL REFERENCES shop_accounts(id) ON DELETE CASCADE,
+    expires_at  INTEGER NOT NULL
+  );
+  -- status: nova, prihvaćena, spremna, odbijena; minutes: za koliko je spremno (kad lokal prihvati)
+  CREATE TABLE IF NOT EXISTS order_shops (
+    order_id    INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    slug        TEXT NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'nova',
+    minutes     INTEGER,
+    reason      TEXT NOT NULL DEFAULT '',
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    PRIMARY KEY (order_id, slug)
+  );
+`)
+
+// jednokratne radnje na serveru (Railway), pokreću se promenljivama okruženja, a pamte u bazi da se ne ponove:
+db.exec('CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)')
+const meta = (key) => db.prepare('SELECT value FROM app_meta WHERE key = ?').get(key)?.value
+const setMeta = (key, value) => db.prepare('INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(key, value)
+
+// SHOP_ACCOUNTS: nalozi lokala za panel, {"slug": ["korisničko ime", "heš lozinke"]}. U promenljivoj je samo heš,
+// ne lozinka. Dodaju se samo lokali koji još nemaju nalog (izmene iz /admin se ne gaze).
+if (process.env.SHOP_ACCOUNTS) {
+  try {
+    for (const [slug, [username, hash]] of Object.entries(JSON.parse(process.env.SHOP_ACCOUNTS))) {
+      db.prepare('INSERT OR IGNORE INTO shop_accounts (slug, username, password_hash) VALUES (?, ?, ?)').run(slug, username, hash)
+    }
+  } catch (err) {
+    console.error('SHOP_ACCOUNTS nije ispravan JSON:', err.message)
+  }
+}
+
+// RESET_ORDERS_ONCE=<oznaka>: briše sve porudžbine i vraća brojač na početak (sledeća je #1).
+// Izvršava se jednom za svaku oznaku; nalozi kupaca i lokala ostaju.
+const reset = process.env.RESET_ORDERS_ONCE
+if (reset && meta('orders_reset') !== reset) {
+  // pre brisanja: kopija cele baze pored nje (npr. /data/beepbeep-pre-reseta-<oznaka>.db), da se stare porudžbine mogu vratiti
+  const backup = file.replace(/\.db$/, '') + `-pre-reseta-${reset.replace(/[^\w-]/g, '')}.db`
+  db.exec(`VACUUM INTO '${backup.replace(/'/g, "''")}'`)
+  console.log(`Kopija baze pre reseta: ${backup}`)
+  db.exec('BEGIN')
+  db.exec('DELETE FROM order_shops')
+  db.exec('DELETE FROM orders')
+  db.exec("DELETE FROM sqlite_sequence WHERE name = 'orders'")
+  setMeta('orders_reset', reset)
+  db.exec('COMMIT')
+  console.log(`Porudžbine obrisane, brojač vraćen na početak (${reset}).`)
+}
+
 // istekle sesije se brišu pri pokretanju
 db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now())
+db.prepare('DELETE FROM shop_sessions WHERE expires_at < ?').run(Date.now())

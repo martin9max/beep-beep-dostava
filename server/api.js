@@ -2,6 +2,8 @@
 import { randomBytes } from 'node:crypto'
 import { db } from './db.js'
 import { smsPage } from './sms.js'
+import { notify } from './notify.js'
+import { assessOrder } from './risk.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
@@ -200,7 +202,8 @@ const routes = {
   'GET /api/orders': (req) => {
     const user = requireUser(req)
     const rows = db.prepare('SELECT id, items_json, total, delivery, zone, status, address, created_at FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 30').all(user.id)
-    return { orders: rows.map(({ items_json, ...o }) => ({ ...o, shops: JSON.parse(items_json) })) }
+    // kupac ne vidi da mu je porudžbina na proveri (interna stvar), već da je primljena
+    return { orders: rows.map(({ items_json, ...o }) => ({ ...o, status: o.status === 'na proveri' ? 'primljena' : o.status, shops: JSON.parse(items_json) })) }
   },
 
   'POST /api/orders': async (req, res, body) => {
@@ -232,17 +235,29 @@ const routes = {
     const total = goods + (delivery ?? 0)
     const customer = customerName(user, asFirm)
     const smsToken = randomBytes(12).toString('base64url')
+    // zaštita od lažnih porudžbina: sumnjiva čeka vlasnika, a ograničen nalog ne može da poruči
+    const risk = assessOrder({ user, shops, total })
+    if (risk.blocked) fail(403, 'Poručivanje preko sajta je privremeno ograničeno za ovaj nalog. Pozovite nas na 064 44 77 2 77 i rado ćemo primiti porudžbinu telefonom.')
 
     const { lastInsertRowid: id } = db
-      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken)
+      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), risk.hold ? 0 : 1, risk.hold ? 'na proveri' : 'nova')
+    // svaki lokal dobija svoj deo porudžbine u panelu za lokale (vidi ga tek kad je porudžbina puštena)
+    for (const shop of shops) db.prepare('INSERT INTO order_shops (order_id, slug) VALUES (?, ?)').run(id, shop.slug)
 
     // "zapamti kao moju adresu"
     if (body.saveAddress && custom) {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    await notify('orders', formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }, `${siteUrl()}/sms/${id}/${smsToken}`))
+    const warning = risk.flags.length
+      ? [
+          risk.hold ? '⚠️ POTREBNA PROVERA: lokalima NIJE poslato. Pozovite kupca, pa odobrite u /admin.' : 'Napomena za vlasnika:',
+          ...risk.flags.map((f) => `• ${f.text}`),
+          '',
+        ].join('\n')
+      : ''
+    await notify('orders', warning + formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }, `${siteUrl()}/sms/${id}/${smsToken}`))
     return { id: Number(id), total, delivery, place }
   },
 }
@@ -279,41 +294,6 @@ function buildOrder(body) {
   const shops = [...bySlug.values()].filter((s) => s.lines.length || s.request)
   if (!shops.length) fail(400, 'Korpa je prazna.')
   return shops
-}
-
-/**
- * Poruke na Telegram, preko istog bota, različitim ljudima:
- *   'orders'   -> TELEGRAM_ORDERS_CHAT_ID   (vlasnik: nove porudžbine)
- *   'accounts' -> TELEGRAM_ACCOUNTS_CHAT_ID (administrator sajta: novi korisnici, problemi sa prijavom)
- * `buttons` (nije obavezno): dugmad sa linkovima ispod poruke (npr. WhatsApp kupcu sa gotovom porukom).
- * U svakom može više chat id-jeva odvojenih zarezom. Bez tokena ili chat id-ja poruka se ne šalje.
- */
-async function notify(kind, message, buttons) {
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  const key = kind === 'orders' ? 'TELEGRAM_ORDERS_CHAT_ID' : 'TELEGRAM_ACCOUNTS_CHAT_ID'
-  const chats = (process.env[key] || '').split(',').map((c) => c.trim()).filter(Boolean)
-  if (!token || !chats.length) return
-  await Promise.all(
-    chats.map(async (chat) => {
-      try {
-        const send = (markup) =>
-          fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chat, text: message, ...(markup && { reply_markup: markup }) }),
-          })
-        let res = await send(buttons)
-        // ako Telegram odbije dugmad (npr. predugačka), porudžbina ipak mora da stigne, makar bez dugmadi
-        if (!res.ok && buttons) {
-          console.error(`Telegram (${chat}) odbio dugmad:`, (await res.text()).slice(0, 200))
-          res = await send(null)
-        }
-        if (!res.ok) console.error(`Telegram (${chat}) nije uspeo:`, (await res.text()).slice(0, 200))
-      } catch (err) {
-        console.error(`Telegram (${chat}) nije uspeo:`, err.message)
-      }
-    }),
-  )
 }
 
 /**

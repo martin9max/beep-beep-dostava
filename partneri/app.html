@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="sr-Latn-RS">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0a2668">
+<title>Beep Beep partneri</title>
+<style>
+  :root {
+    --red: #e3131c; --red-dark: #bb0f16; --blue: #1446b8; --navy: #0a2668; --text: #0d2f80; --mute: #52638c;
+    --line: #d9e1f2; --paper: #f1f4fb; --green: #138a4c; --green-bg: #e2f6ea; --amber: #b86b00; --amber-bg: #fff3d6;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box }
+  body { margin: 0; font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--paper); color: var(--text) }
+  button { font: inherit; cursor: pointer }
+  header { position: sticky; top: 0; z-index: 5; background: linear-gradient(90deg, var(--navy), var(--blue)); color: #fff; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)) }
+  .bar { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+  .brand { font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: .02em; font-size: 17px }
+  .brand span { color: #ff5a60 }
+  .shopname { font-weight: 600; opacity: .95; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .hbtn { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 600 }
+  .hbtn.on { background: #fff; color: var(--navy) }
+  main { max-width: 760px; margin: 0 auto; padding: 16px 16px 60px }
+
+  /* prijava */
+  .login { max-width: 380px; margin: 8vh auto 0; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 24px }
+  .login h1 { margin: 0 0 4px; font-size: 22px }
+  .login p { margin: 0 0 18px; color: var(--mute) }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 4px }
+  input, textarea { width: 100%; font: inherit; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; color: var(--text); background: #fff }
+  input:focus, textarea:focus { outline: 3px solid rgba(20,70,184,.25); border-color: var(--blue) }
+  .primary { width: 100%; margin-top: 18px; background: var(--red); color: #fff; border: 0; border-radius: 12px; padding: 13px; font-weight: 700 }
+  .primary:hover { background: var(--red-dark) }
+  .error { color: var(--red); font-weight: 600; min-height: 1.4em; margin: 10px 0 0 }
+
+  /* kartice */
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap }
+  .tabs button { border: 1px solid var(--line); background: #fff; color: var(--text); border-radius: 999px; padding: 7px 14px; font-weight: 600 }
+  .tabs button.on { background: var(--navy); border-color: var(--navy); color: #fff }
+  .tabs b { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--red); color: #fff; font-size: 12px }
+  .order { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px }
+  .order.nova { border: 2px solid var(--red); box-shadow: 0 6px 20px rgba(227,19,28,.12) }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap }
+  .num { font-size: 20px; font-weight: 800 }
+  .time { color: var(--mute); font-size: 14px }
+  .pill { display: inline-block; border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 700 }
+  .pill.nova { background: var(--red); color: #fff }
+  .pill.prihvaćena { background: var(--amber-bg); color: var(--amber) }
+  .pill.spremna { background: var(--green-bg); color: var(--green) }
+  .pill.odbijena, .pill.otkazana { background: #eceff5; color: var(--mute) }
+  ul { list-style: none; margin: 12px 0 0; padding: 0 }
+  li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--line) }
+  li .q { font-weight: 800; margin-right: 6px }
+  li .p { white-space: nowrap; color: var(--mute) }
+  .req { margin-top: 10px; background: var(--amber-bg); color: #6b4100; border-radius: 10px; padding: 8px 12px; font-size: 15px }
+  .sum { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 800 }
+  .customer { margin-top: 6px; font-size: 18px }
+  .who { color: var(--mute); font-size: 14px; margin-top: 2px }
+  .hint.warn { background: var(--amber-bg); border-color: #f1d08a; color: #6b4100; font-weight: 600 }
+  .actions { margin-top: 14px }
+  .actions p { margin: 0 0 8px; font-weight: 700 }
+  .mins { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px }
+  .mins button { background: var(--green); color: #fff; border: 0; border-radius: 12px; padding: 13px 0; font-weight: 800; font-size: 17px }
+  .ready { width: 100%; background: var(--green); color: #fff; border: 0; border-radius: 12px; padding: 14px; font-weight: 800; font-size: 17px }
+  .reject { margin-top: 10px; background: none; border: 1.5px solid var(--line); color: var(--mute); border-radius: 12px; padding: 9px 14px; font-weight: 600 }
+  .reasons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+  .reasons button { border: 1.5px solid var(--red); color: var(--red); background: #fff; border-radius: 999px; padding: 7px 12px; font-weight: 600 }
+  .state { margin-top: 12px; font-weight: 700 }
+  .empty { text-align: center; color: var(--mute); padding: 40px 10px }
+  .hint { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; color: var(--mute); font-size: 14px; margin-bottom: 14px }
+  @media (max-width: 520px) {
+    .mins { grid-template-columns: repeat(3, 1fr) }
+    /* telefon: ime lokala u svom redu ispod natpisa i dugmadi */
+    .brand { flex: 1 }
+    .shopname { order: 5; flex-basis: 100%; font-size: 15px }
+  }
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <span class="brand">Beep Beep <span>partneri</span></span>
+  <span class="shopname" id="shopname"></span>
+  <button class="hbtn" id="sound" hidden>🔈 Zvuk isključen</button>
+  <button class="hbtn" id="logout" hidden>Odjava</button>
+</div></header>
+<main id="app"></main>
+
+<script>
+const $ = (s) => document.querySelector(s)
+const app = $('#app')
+const din = (n) => n.toLocaleString('sr-RS')
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+// panel radi na partneri.<domen>/ i na <domen>/partneri/
+const BASE = location.pathname.startsWith('/partneri') ? '/partneri' : ''
+const api = async (path, body) => {
+  const res = await fetch(BASE + '/api/' + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {})
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw Object.assign(new Error(data.error || 'Greška. Pokušajte ponovo.'), { status: res.status })
+  return data
+}
+
+let orders = []
+let tab = 'nove'
+let rejecting = null
+let known = null // brojevi porudžbina koje su već viđene (da se zvoni samo za nove)
+let timer = null
+
+// zvuk za novu porudžbinu: isti "beep beep" kao kad trokolica stigne na početnoj strani sajta.
+// Pregledač pušta zvuk tek posle prvog klika na stranici, zato dugme "Uključi zvuk".
+const sound = new Audio(BASE + '/zvuk.mp3')
+sound.preload = 'auto'
+let soundOn = false
+try { soundOn = localStorage.getItem('bb-sound') !== '0' } catch {}
+let blocked = false // pregledač još nije dozvolio zvuk (posle osvežavanja stranice treba jedan klik)
+function beep() {
+  if (!soundOn) return
+  sound.currentTime = 0
+  sound.play().then(() => { if (blocked) { blocked = false; render() } }, () => { if (!blocked) { blocked = true; render() } })
+}
+// prvi klik bilo gde na stranici otključava zvuk
+addEventListener('pointerdown', () => { if (blocked && soundOn) beep() }, { once: false, capture: true })
+// dok neka porudžbina čeka da je lokal prihvati, zvuk se ponavlja na 30 sekundi
+let lastRing = 0
+function ringIfWaiting() {
+  if (orders.some((o) => o.status === 'nova') && Date.now() - lastRing > 30000) { lastRing = Date.now(); beep() }
+}
+function paintSound() {
+  const b = $('#sound')
+  b.textContent = soundOn ? '🔔 Zvuk uključen' : '🔇 Uključi zvuk'
+  b.classList.toggle('on', soundOn)
+}
+$('#sound').onclick = () => {
+  soundOn = !soundOn
+  try { localStorage.setItem('bb-sound', soundOn ? '1' : '0') } catch {}
+  if (soundOn) { beep(); if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission() }
+  paintSound()
+}
+
+function showLogin(message = '') {
+  clearInterval(timer)
+  $('#shopname').textContent = ''
+  $('#sound').hidden = $('#logout').hidden = true
+  app.innerHTML = `<form class="login" id="login">
+    <h1>Prijava za lokale</h1>
+    <p>Porudžbine Beep Beep dostave za vaš lokal.</p>
+    <label for="u">Korisničko ime</label><input id="u" autocomplete="username" autocapitalize="none" required>
+    <label for="p">Lozinka</label><input id="p" type="password" autocomplete="current-password" required>
+    <button class="primary">Prijavi se</button>
+    <p class="error" id="err">${esc(message)}</p>
+  </form>`
+  $('#login').onsubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const { shop } = await api('login', { username: $('#u').value, password: $('#p').value })
+      start(shop)
+    } catch (err) { $('#err').textContent = err.message }
+  }
+}
+
+function start(shop) {
+  $('#shopname').textContent = shop.name
+  $('#sound').hidden = $('#logout').hidden = false
+  paintSound()
+  known = null
+  load()
+  clearInterval(timer)
+  timer = setInterval(load, 10000) // nove porudžbine se proveravaju na 10 sekundi
+}
+
+$('#logout').onclick = async () => { await api('logout', {}).catch(() => {}); showLogin() }
+
+async function load() {
+  try {
+    const data = await api('orders')
+    const fresh = data.orders.filter((o) => o.status === 'nova' && known && !known.has(o.id))
+    known = new Set(data.orders.map((o) => o.id))
+    orders = data.orders
+    if (fresh.length) {
+      lastRing = Date.now()
+      beep()
+      tab = 'nove'
+      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        for (const o of fresh) new Notification(`Beep Beep: nova porudžbina #${o.id}`, { body: `Kupac: ${o.customer}` })
+      }
+    }
+    render()
+    ringIfWaiting()
+  } catch (err) {
+    if (err.status === 401) showLogin('Prijava je istekla. Prijavite se ponovo.')
+  }
+}
+
+const GROUPS = {
+  nove: (o) => o.status === 'nova',
+  priprema: (o) => o.status === 'prihvaćena',
+  gotove: (o) => ['spremna', 'odbijena', 'otkazana'].includes(o.status),
+}
+const LABEL = { nova: 'NOVA', prihvaćena: 'U pripremi', spremna: 'Spremna', odbijena: 'Odbijena', otkazana: 'Otkazana' }
+
+function render() {
+  const count = (k) => orders.filter(GROUPS[k]).length
+  const list = orders.filter(GROUPS[tab])
+  const newCount = count('nove')
+  document.title = newCount ? `(${newCount}) Nova porudžbina, Beep Beep` : 'Beep Beep partneri'
+  app.innerHTML = `
+    ${!soundOn ? '<div class="hint">Uključite zvuk (dugme gore desno) da čujete kad stigne nova porudžbina. Stranica se sama osvežava.</div>'
+      : blocked ? '<div class="hint warn">Kliknite bilo gde na stranici da bi zvuk za nove porudžbine radio.</div>' : ''}
+    <div class="tabs">
+      <button data-tab="nove" class="${tab === 'nove' ? 'on' : ''}">Nove${newCount ? `<b>${newCount}</b>` : ''}</button>
+      <button data-tab="priprema" class="${tab === 'priprema' ? 'on' : ''}">U pripremi (${count('priprema')})</button>
+      <button data-tab="gotove" class="${tab === 'gotove' ? 'on' : ''}">Završene (${count('gotove')})</button>
+    </div>
+    ${list.length ? list.map(card).join('') : `<p class="empty">${tab === 'nove' ? 'Nema novih porudžbina. Čim stigne, čućete zvuk.' : 'Ovde još nema porudžbina.'}</p>`}`
+  app.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; rejecting = null; render() }))
+  app.querySelectorAll('[data-act]').forEach((b) => (b.onclick = () => act(b)))
+}
+
+function card(o) {
+  const time = o.time.slice(11, 16)
+  const lines = o.lines
+    .map((l) => `<li><span><span class="q">${l.qty}×</span>${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ''}</span><span class="p">${l.price == null ? 'po računu' : din(Math.round(l.price * l.qty * 100) / 100) + ' din'}</span></li>`)
+    .join('')
+  let actions = ''
+  if (o.status === 'nova') {
+    actions = rejecting === o.id
+      ? `<div class="actions"><p>Zašto ne možete da pripremite?</p><div class="reasons">
+          ${['Nema artikla', 'Lokal ne radi', 'Prevelika gužva', 'Drugo'].map((r) => `<button data-act="odbijena" data-id="${o.id}" data-reason="${r}">${r}</button>`).join('')}
+          </div><button class="reject" data-act="nazad" data-id="${o.id}">Nazad</button></div>`
+      : `<div class="actions"><p>Prihvati: spremno za</p><div class="mins">
+          ${[10, 15, 20, 30, 45].map((m) => `<button data-act="prihvaćena" data-id="${o.id}" data-min="${m}">${m} min</button>`).join('')}
+          </div><button class="reject" data-act="odbij" data-id="${o.id}">Ne možemo da pripremimo</button></div>`
+  } else if (o.status === 'prihvaćena') {
+    actions = `<p class="state">Prihvaćeno, spremno za ${o.minutes} min (u ${esc(o.updated.slice(11, 16))})</p>
+      <div class="actions"><button class="ready" data-act="spremna" data-id="${o.id}">Spremno za preuzimanje</button></div>`
+  } else if (o.status === 'spremna') {
+    actions = `<p class="state" style="color:var(--green)">Spremno, čeka dostavljača (od ${esc(o.updated.slice(11, 16))})</p>`
+  } else if (o.status === 'odbijena') {
+    actions = `<p class="state">Odbijeno: ${esc(o.reason)}</p>`
+  } else if (o.status === 'otkazana') {
+    actions = '<p class="state">Kupac je otkazao porudžbinu. Ne pripremati.</p>'
+  }
+  return `<article class="order ${o.status}">
+    <div class="top"><span class="num">Porudžbina #${o.id}</span><span class="pill ${o.status}">${LABEL[o.status]}</span><span class="time">primljeno u ${time}</span></div>
+    <div class="customer">Kupac: <b>${esc(o.customer)}</b></div>
+    <div class="who">Po porudžbinu dolazi Beep Beep dostavljač.</div>
+    <ul>${lines}</ul>
+    ${o.request ? `<div class="req"><b>Napomena:</b> ${esc(o.request)}</div>` : ''}
+    <div class="sum"><span>Ukupno za lokal</span><span>${din(o.sum)} din${o.byBill ? ' + po računu' : ''}</span></div>
+    ${actions}
+  </article>`
+}
+
+async function act(b) {
+  const id = Number(b.dataset.id)
+  if (b.dataset.act === 'odbij') { rejecting = id; return render() }
+  if (b.dataset.act === 'nazad') { rejecting = null; return render() }
+  let reason = b.dataset.reason
+  if (reason === 'Drugo') { reason = prompt('Razlog (vlasnik Beep Beep-a će ga videti):'); if (!reason) return }
+  b.disabled = true
+  try {
+    const data = await api('status', { id, status: b.dataset.act, minutes: Number(b.dataset.min) || undefined, reason })
+    orders = data.orders
+    rejecting = null
+    render()
+  } catch (err) { alert(err.message); b.disabled = false }
+}
+
+api('me').then(({ shop }) => (shop ? start(shop) : showLogin())).catch(() => showLogin('Server ne odgovara. Pokušajte ponovo.'))
+</script>
+</body>
+</html>

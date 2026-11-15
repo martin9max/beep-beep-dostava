@@ -10,7 +10,8 @@
     "brand": "swift scripts/brand.swift",
     "start": "node server/index.js",
     "radio": "node scripts/radio.mjs",
-    "dzinglovi": "python3 scripts/dzinglovi.py && node scripts/radio.mjs"
+    "dzinglovi": "python3 scripts/dzinglovi.py && node scripts/radio.mjs",
+    "partneri": "node partneri/server.js"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.3.0",
