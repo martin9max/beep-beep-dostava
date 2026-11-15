@@ -32,7 +32,7 @@ export default function RadioPage() {
               <span className="hero-title block text-red">Radio</span>
             </h1>
             <p className="mt-3 max-w-[38ch] text-[16px] leading-snug text-white/85 sm:text-lg">
-              Muzika dok čekate dostavu. Izaberite stanicu i nastavite da naručujete, svira na svakoj stranici sajta.
+              Muzika dok čekate dostavu. Izaberite stanicu i uživajte.
             </p>
           </div>
 
@@ -79,20 +79,12 @@ export default function RadioPage() {
       </ul>
 
       <p className="mt-4 text-[13px] text-mute">
-        Moderna i Folk se puštaju preko YouTube-a: video se vidi gore, u kartici radija, i te stanice staju kad odete sa ove
-        stranice. Strana i Ambijent sviraju i dok naručujete.
+        Sve stanice se puštaju preko YouTube-a: video se vidi gore, u kartici radija, a muzika staje kad odete sa ove
+        stranice (tako traže pravila YouTube-a).
       </p>
 
       <p className="mt-10 text-center text-[13px] leading-relaxed text-mute">
-        Beep Beep radio, Negotin. Muzika na stanicama Strana i Ambijent: Kevin MacLeod (
-        <a href="https://incompetech.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-          incompetech.com
-        </a>
-        ), licenca{' '}
-        <a href="https://creativecommons.org/licenses/by/4.0/deed.sr" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-          Creative Commons BY 4.0
-        </a>
-        . Sva prava na muziku pripadaju autorima.
+        Beep Beep radio, Negotin. Muzika sa zvaničnih YouTube kanala izvođača. Sva prava na muziku pripadaju autorima.
       </p>
     </div>
   )

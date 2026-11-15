@@ -1,5 +1,5 @@
 import { deliveryPrice } from './places.js'
-import { FOLK, MODERNA, ZABAVNA } from './radio-youtube.js'
+import { FOLK, MODERNA, STRANA, ZABAVNA } from './radio-youtube.js'
 
 export const PHONE = '064 44 77 2 77'
 
@@ -51,7 +51,7 @@ export const HERO_STATS = [
 // type 'own': naš program iz public/radio/pesme/<key> sa našom špicom između pesama (spisak pravi `npm run radio`)
 export const RADIO = [
   { key: 'moderna', label: 'Moderna', desc: 'Novi domaći hitovi', emoji: '🎧', type: 'youtube', yt: { videos: MODERNA } },
-  { key: 'strana', label: 'Strana', desc: 'Strana muzika uz Beep Beep špicu', emoji: '🌍', type: 'own' },
+  { key: 'strana', label: 'Strana', desc: 'Najslušaniji strani hitovi', emoji: '🌍', type: 'youtube', yt: { videos: STRANA } },
   { key: 'zabavna', label: 'Domaća zabavna', desc: 'Domaća zabavna muzika', emoji: '🎶', type: 'youtube', yt: { videos: ZABAVNA } },
   { key: 'folk', label: 'Folk', desc: 'Narodna i folk muzika', emoji: '🎤', type: 'youtube', yt: { videos: FOLK } },
 ]

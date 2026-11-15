@@ -187,7 +187,7 @@ export function TermsPage() {
               Tekstovi, fotografije, logo i izgled sajta pripadaju nama ili su korišćeni uz dozvolu. Logoi partnera pripadaju partnerima.
             </p>
             <p>
-              Beep Beep radio pušta muziku sa YouTube-a i muziku sa slobodnim licencama, uz navođenje autora. Prava na muziku pripadaju autorima.
+              Beep Beep radio pušta muziku sa zvaničnih YouTube kanala izvođača. Prava na muziku pripadaju autorima.
             </p>
           </>,
         ],

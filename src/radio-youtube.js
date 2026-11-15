@@ -288,3 +288,86 @@ export const ZABAVNA = [
   '4xWeu9_VTOU', // Ko će mene da zagrli
   '0vgGIq9iPo0', // Luka Baladić - Bez tebe
 ]
+
+// Strana: najslušaniji strani hitovi (zvanični spotovi sa kanala izvođača, sa po stotine miliona i milijardama pregleda)
+export const STRANA = [
+  'JGwWNGJdvx8', // Ed Sheeran - Shape of You
+  '4NRXx6U8ABQ', // The Weeknd - Blinding Lights
+  'kJQP7kiw5Fk', // Luis Fonsi - Despacito ft. Daddy Yankee
+  'OPf0YbXqDm0', // Mark Ronson - Uptown Funk ft. Bruno Mars
+  'TUVcZfQe-Kw', // Dua Lipa - Levitating ft. DaBaby
+  'oygrmJFKYZY', // Dua Lipa - Don't Start Now
+  'k2qgadSvNyU', // Dua Lipa - New Rules
+  'suAR1PYFNYA', // Dua Lipa - Houdini
+  'H5v3kku4y6Q', // Harry Styles - As It Was
+  'G7KNmW9a75Y', // Miley Cyrus - Flowers
+  'eVli-tstM5E', // Sabrina Carpenter - Espresso
+  'V9PVRfjEBTI', // Billie Eilish - Birds of a Feather
+  'DyDfgMOUjCI', // Billie Eilish - bad guy
+  'kPa7bsKwL-c', // Lady Gaga, Bruno Mars - Die With A Smile
+  'ekr2nIex040', // ROSÉ & Bruno Mars - APT.
+  'pRpeEdMmmQ0', // Shakira - Waka Waka
+  'CocEMWdc7Ck', // Shakira - BZRP Music Sessions #53
+  'DUT5rEU6pqM', // Shakira - Hips Don't Lie ft. Wyclef Jean
+  'JRfuAukYTKg', // David Guetta - Titanium ft. Sia
+  'IcrbM1l_BoI', // Avicii - Wake Me Up
+  '_ovdm2yX4MA', // Avicii - Levels
+  '7wtfhZwyrcc', // Imagine Dragons - Believer
+  'fKopy74weus', // Imagine Dragons - Thunder
+  'dvgZkm1xWPE', // Coldplay - Viva La Vida
+  'YQHsXMglC9A', // Adele - Hello
+  'rYEDA3JcQqw', // Adele - Rolling in the Deep
+  'lWA2pjMjpBs', // Rihanna - Diamonds
+  'tg00YEETFzg', // Rihanna - We Found Love ft. Calvin Harris
+  'CevxZvSJLk8', // Katy Perry - Roar
+  'fRh_vgS2dFE', // Justin Bieber - Sorry
+  'tQ0yjYUFKAE', // Justin Bieber - Peaches ft. Daniel Caesar, Giveon
+  '3E78T8h5EhA', // Post Malone & Swae Lee - Sunflower
+  '9gWIIIr2Asw', // Teddy Swims - Lose Control
+  'Oa_RSwwpPaA', // Benson Boone - Beautiful Things
+  'q0hyYWKXF0Q', // Tones And I - Dance Monkey
+  'zABLecsR5UE', // Lewis Capaldi - Someone You Loved
+  '2Vv-BfVoq4g', // Ed Sheeran - Perfect
+  'lp-EO5I60KA', // Ed Sheeran - Thinking Out Loud
+  'RgKAFK5djSk', // Wiz Khalifa - See You Again ft. Charlie Puth
+  'ZbZSe6N_BXs', // Pharrell Williams - Happy
+  'aJOTlE1K90k', // Maroon 5 - Girls Like You ft. Cardi B
+  '09R8_2nJtjg', // Maroon 5 - Sugar
+  'nfWlot6h_JM', // Taylor Swift - Shake It Off
+  'e-ORhEE9VVg', // Taylor Swift - Blank Space
+  '34Na4j8AVgA', // The Weeknd - Starboy ft. Daft Punk
+  'XXYlFuWEuKI', // The Weeknd - Save Your Tears
+  'mRD0-GxqHVo', // Glass Animals - Heat Waves
+  'QYh6mYIJG2Y', // Ariana Grande - 7 rings
+  '31crA53Dgu0', // Sia - Cheap Thrills
+  '2vjPBrBU-TM', // Sia - Chandelier
+  'YqeW9_5kURI', // Major Lazer & DJ Snake - Lean On ft. MØ
+  'hT_nvWreIhg', // OneRepublic - Counting Stars
+  '60ItHLz5WEA', // Alan Walker - Faded
+  'papuvlVeZg8', // Clean Bandit - Rockabye ft. Sean Paul & Anne-Marie
+  'PMivT7MJ41M', // Bruno Mars - That's What I Like
+  'LjhCEhWiKXk', // Bruno Mars - Just The Way You Are
+  'qrO4YZeyl0I', // Lady Gaga - Bad Romance
+  'kOkQ4T5WO9E', // Calvin Harris, Rihanna - This Is What You Came For
+  'u3VTKvdAuIY', // Kygo, Selena Gomez - It Ain't Me
+  'CCF1_jI8Prk', // Daddy Yankee - Gasolina
+  'BQ0mxQXmLsk', // Camila Cabello - Havana ft. Young Thug
+  'Pkh8UtuejGw', // Shawn Mendes, Camila Cabello - Señorita
+  'bo_efYhYU2A', // Lady Gaga, Bradley Cooper - Shallow
+  'orJSJGHjBLI', // Ed Sheeran - Bad Habits
+  '9HDEHj2yzew', // Dua Lipa - Physical
+  '0zGcUoRlhmw', // The Chainsmokers - Closer ft. Halsey
+  'nfs8NYg7yQM', // Charlie Puth - Attention
+  'WXBHCQYxwr0', // Ava Max - Sweet but Psycho
+  'r7qovpFAGrQ', // Lil Nas X - Old Town Road ft. Billy Ray Cyrus
+  'Uq9gPaIzbe8', // Sam Smith, Kim Petras - Unholy
+  'MSRcC626prw', // SZA - Kill Bill
+  'To4SWGZkEPk', // Tate McRae - greedy
+  'NTpbbQUBbuo', // Hozier - Too Sweet
+  '8UVNT4wvIGY', // Gotye - Somebody That I Used To Know ft. Kimbra
+  'fJ9rUzIMcZQ', // Queen - Bohemian Rhapsody
+  'Zi_XLOBDo_Y', // Michael Jackson - Billie Jean
+  'djV11Xbc914', // a-ha - Take On Me
+  'FTQbiNvZqaY', // Toto - Africa
+  'xFYQQPAOz7Y', // Eminem - Lose Yourself
+]
