@@ -160,7 +160,7 @@ function page(tab, deleted, message) {
     ['Prijava danas', count("SELECT COUNT(*) n FROM logins WHERE success = 1 AND kind = 'prijava' AND date(created_at) = date('now','localtime')")],
     ['Neuspelih danas', count("SELECT COUNT(*) n FROM logins WHERE success = 0 AND date(created_at) = date('now','localtime')")],
     ['Porudžbina danas', count("SELECT COUNT(*) n FROM orders WHERE date(created_at) = date('now','localtime')")],
-    ['Čeka proveru', count('SELECT COUNT(*) n FROM orders WHERE released = 0 AND status != \'otkazana\'')],
+    ['Lokal odbio danas', count("SELECT COUNT(*) n FROM order_shops WHERE status = 'odbijena' AND date(updated_at) = date('now','localtime')")],
   ]
   const tabs = [
     ['porudzbine', 'Porudžbine'],

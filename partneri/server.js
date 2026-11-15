@@ -21,6 +21,7 @@ const { checkPassword, recordFailure, tooManyAttempts } = await import('../serve
 const { notify } = await import('../server/notify.js')
 const { events } = await import('../server/events.js')
 const { shopBySlug } = await import('../src/catalog.js')
+const { lineText, rejectMessage, waLink } = await import('../src/lib/order.js')
 
 const COOKIE = 'bb_partner'
 const SESSION_DAYS = 90
@@ -138,17 +139,87 @@ const routes = {
     db.prepare("UPDATE order_shops SET status = ?, minutes = ?, reason = ?, updated_at = datetime('now', 'localtime') WHERE order_id = ? AND slug = ?").run(
       status, minutes, reason, id, acc.slug,
     )
-    const shop = shopBySlug(acc.slug)?.name ?? acc.slug
-    const message = {
-      prihvaćena: `✅ ${shop} prihvatio porudžbinu #${id}: spremno za ${minutes} min.`,
-      spremna: `🛍️ ${shop}: porudžbina #${id} je SPREMNA za preuzimanje.`,
-      odbijena: `❌ ${shop} ODBIO porudžbinu #${id}.\nRazlog: ${reason}\nPozovite kupca.`,
-    }[status]
     events.emit('orders', [acc.slug]) // odmah osveži drugu stranicu istog lokala (telefon i računar) i admin panel
-    await notify('orders', message)
+    const { message, buttons } = ownerMessage(id, acc.slug, status, minutes, reason)
+    await notify('orders', message, buttons)
     return { orders: ordersFor(acc.slug) }
   },
 }
+
+const siteUrl = () => (process.env.SITE_URL || process.env.VITE_SITE_URL || '').replace(/\/$/, '')
+const nameOf = (slug) => shopBySlug(slug)?.name ?? slug
+const clock = (minutes) => new Date(Date.now() + minutes * 60000).toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })
+const STATE = { nova: 'još nije odgovorio', prihvaćena: 'prihvaćeno', spremna: 'spremno', odbijena: 'ODBIO' }
+
+/**
+ * Poruka vlasniku na Telegram kad lokal prihvati, odbije ili javi da je spremno.
+ * Kod odbijanja: šta je odbijeno i zašto, stanje ostalih lokala, kupac i dugmad sa gotovom porukom kupcu.
+ */
+function ownerMessage(id, slug, status, minutes, reason) {
+  const order = db.prepare('SELECT id, customer, phone, address, items_json, sms_token FROM orders WHERE id = ?').get(id)
+  const parts = db.prepare('SELECT slug, status, minutes, reason FROM order_shops WHERE order_id = ?').all(id)
+  const shop = nameOf(slug)
+  const part = JSON.parse(order.items_json).find((s) => s.slug === slug) ?? { lines: [] }
+  const others = parts.filter((p) => p.slug !== slug)
+  const otherLines = others.map(
+    (p) => `- ${nameOf(p.slug)}: ${STATE[p.status] ?? p.status}${p.status === 'prihvaćena' && p.minutes ? `, spremno za ${p.minutes} min` : ''}${p.status === 'odbijena' && p.reason ? ` (${p.reason})` : ''}`,
+  )
+  const customer = [`Kupac: ${order.customer}`, `Telefon: ${order.phone}`, `Adresa: ${order.address}`]
+  const all = (s) => parts.every((p) => p.status === s)
+
+  if (status === 'prihvaćena') {
+    return {
+      message: [
+        `✅ PRIHVAĆENO #${id}: ${shop}`,
+        `Spremno za ${minutes} min (oko ${clock(minutes)}).`,
+        ...(others.length ? ['', 'Ostali lokali:', ...otherLines] : []),
+        ...(others.length && all('prihvaćena') ? ['', 'Svi lokali su prihvatili porudžbinu.'] : []),
+        '',
+        customer[0],
+      ].join('\n'),
+    }
+  }
+  if (status === 'spremna') {
+    return {
+      message: [
+        `🛍️ SPREMNO #${id}: ${shop}`,
+        'Porudžbina čeka dostavljača u lokalu.',
+        ...(others.length ? ['', 'Ostali lokali:', ...otherLines] : []),
+        ...(others.length && all('spremna') ? ['', 'Svi lokali su spremni, dostavljač može da krene.'] : []),
+        '',
+        ...customer,
+      ].join('\n'),
+    }
+  }
+  // odbijena
+  const partial = others.some((p) => p.status !== 'odbijena')
+  const text = rejectMessage({ id, shop, reason, lines: part.lines, partial })
+  const sms = order.sms_token && siteUrl().startsWith('https://') ? `${siteUrl()}/sms/${id}/${order.sms_token}` : null
+  return {
+    message: [
+      `❌ LOKAL ODBIO PORUDŽBINU #${id}`,
+      `Lokal: ${shop}`,
+      `Razlog: ${reason}`,
+      'Odbijeno:',
+      ...part.lines.map(lineText),
+      ...(part.request ? [`  Napomena za lokal bila je: ${part.request}`] : []),
+      '',
+      ...(others.length ? ['Ostali lokali u ovoj porudžbini:', ...otherLines] : ['Cela porudžbina je bila samo iz ovog lokala.']),
+      '',
+      'KUPAC',
+      ...customer.map((l) => l.replace(/^Kupac: /, 'Ime: ')),
+      '',
+      'Šta dalje: javite kupcu (dugme ispod otvara gotovu poruku), ponudite zamenu iz drugog lokala ili otkažite porudžbinu u /admin.',
+    ].join('\n'),
+    buttons: {
+      inline_keyboard: [
+        [{ text: 'WhatsApp kupcu: lokal odbio', url: waLink(order.phone, text) }],
+        ...(sms ? [[{ text: 'SMS kupcu (nema WhatsApp)', url: sms }]] : []),
+      ],
+    },
+  }
+}
+
 
 async function readBody(req) {
   let raw = ''

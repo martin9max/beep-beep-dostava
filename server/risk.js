@@ -1,10 +1,10 @@
 // Zaštita od lažnih porudžbina: procena rizika pre nego što porudžbina stigne lokalima.
-// Ništa se ne odbija samo zbog jedne sumnje: sumnjiva porudžbina čeka da je vlasnik pogleda
-// (pozove kupca) i odobri u /admin. Odbija se samo nalog koji je 3 ili više puta nije preuzeo.
+// Ništa se ne odbija samo zbog jedne sumnje: sumnjiva porudžbina odmah ide lokalima kao i svaka druga,
+// a vlasnik na Telegramu dobija upozorenje da pozove kupca. Odbija se samo nalog koji 3 ili više puta nije preuzeo.
 //
 // Nivoi oznaka:
 //   'info'  samo napomena vlasniku (npr. preporučen avans), porudžbina ide lokalima odmah
-//   'check' porudžbina čeka proveru vlasnika, lokali je ne vide dok je ne odobri
+//   'check' upozorenje vlasniku: dobro je pozvati kupca (porudžbina ipak odmah ide lokalima)
 //   'block' nalog je ograničen: porudžbina se ne prima, kupac dobija poruku da pozove
 import { db } from './db.js'
 import { shopBySlug } from '../src/catalog.js'
@@ -43,7 +43,7 @@ export function trustOf(record) {
 
 /**
  * Procena nove porudžbine. Vraća { flags: [{ level, text }], hold, blocked }.
- * hold: porudžbina čeka vlasnika; blocked: ne prima se.
+ * hold: sumnjiva (upozorenje vlasniku); blocked: ne prima se.
  */
 export function assessOrder({ user, shops, total }) {
   const flags = []

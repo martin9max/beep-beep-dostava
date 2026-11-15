@@ -14,6 +14,30 @@ const toWhatsApp = (phone) => '381' + cleanPhone(phone).replace(/^(\+?381|0)/, '
 /** Telefon za SMS link: +381641234567 */
 export const toSms = (phone) => '+' + toWhatsApp(phone)
 
+/** WhatsApp link ka kupcu sa gotovom porukom */
+export const waLink = (phone, text) => `https://wa.me/${toWhatsApp(phone)}?text=${encodeURIComponent(text)}`
+
+/** Stavka u poruci: "- 2x Pica (32 cm): 1.800 din (po 900)" */
+export const lineText = (l) => `- ${l.qty}x ${l.name}${l.variant ? ` (${l.variant})` : ''}: ${linePrice(l)}`
+
+/**
+ * Poruka kupcu kad lokal odbije porudžbinu (ili svoj deo porudžbine iz više lokala).
+ * `partial`: u porudžbini ima i drugih lokala, pa se odbija samo ovaj deo.
+ */
+export const rejectMessage = ({ id, shop, reason, lines, partial }) =>
+  [
+    'Poštovani/a,',
+    `nažalost, ${shop} trenutno ne može da pripremi ${partial ? 'deo Vaše porudžbine' : 'Vašu porudžbinu'} #${id}:`,
+    ...lines.map(lineText),
+    ...(reason ? [`Razlog: ${reason.toLowerCase()}.`] : []),
+    '',
+    partial
+      ? 'Za ovaj deo možemo da Vam predložimo zamenu ili da ga otkažemo, a ostatak porudžbine pripremamo. Javite nam šta Vam odgovara.'
+      : 'Možemo da Vam predložimo zamenu iz drugog lokala ili da porudžbinu otkažemo. Javite nam šta Vam odgovara.',
+    'Izvinjavamo se zbog neprijatnosti.',
+    'Vaša Beep Beep Dostava Negotin 😊',
+  ].join('\n')
+
 // Telegram prima dugmad samo dok su svi linkovi zajedno kraći od ~9.000 znakova (6 dugmadi),
 // pa jedan link sme imati najviše ovoliko; kod velike porudžbine spisak se skraćuje ("i još N stavki")
 const MAX_LINK = 1250 // + dugme za SMS (kratak link) i dalje staje

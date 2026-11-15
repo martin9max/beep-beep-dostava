@@ -236,17 +236,17 @@ const routes = {
     const total = goods + (delivery ?? 0)
     const customer = customerName(user, asFirm)
     const smsToken = randomBytes(12).toString('base64url')
-    // zaštita od lažnih porudžbina: sumnjiva čeka vlasnika, a ograničen nalog ne može da poruči
+    // zaštita od lažnih porudžbina: sumnjiva dobija upozorenje za vlasnika, a ograničen nalog ne može da poruči
     const risk = assessOrder({ user, shops, total })
     if (risk.blocked) fail(403, 'Poručivanje preko sajta je privremeno ograničeno za ovaj nalog. Pozovite nas na 064 44 77 2 77 i rado ćemo primiti porudžbinu telefonom.')
 
     const { lastInsertRowid: id } = db
       .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), risk.hold ? 0 : 1, risk.hold ? 'na proveri' : 'nova')
+      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), 1, 'nova')
     // svaki lokal dobija svoj deo porudžbine u panelu za lokale (vidi ga tek kad je porudžbina puštena)
     for (const shop of shops) db.prepare('INSERT INTO order_shops (order_id, slug) VALUES (?, ?)').run(id, shop.slug)
-    // lokali je vide odmah (sumnjiva tek kad je vlasnik pusti u /admin); admin panel je vidi uvek
-    ordersChanged(risk.hold ? [] : shops.map((s) => s.slug))
+    // svaka porudžbina odmah stiže lokalima i u admin panel (vlasnik je ne potvrđuje; sumnjive dobijaju samo upozorenje)
+    ordersChanged(shops.map((s) => s.slug))
 
     // "zapamti kao moju adresu"
     if (body.saveAddress && custom) {
@@ -255,7 +255,7 @@ const routes = {
 
     const warning = risk.flags.length
       ? [
-          risk.hold ? '⚠️ POTREBNA PROVERA: lokalima NIJE poslato. Pozovite kupca, pa odobrite u /admin.' : 'Napomena za vlasnika:',
+          risk.hold ? '⚠️ PAŽNJA, SUMNJIVA PORUDŽBINA (već je poslata lokalima). Dobro je pozvati kupca pre polaska:' : 'Napomena za vlasnika:',
           ...risk.flags.map((f) => `• ${f.text}`),
           '',
         ].join('\n')

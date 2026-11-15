@@ -3,7 +3,8 @@
 // kupca i gotovom porukom. Telegram dugme ne može samo da otvori SMS, zato postoji ova stranica.
 import { timingSafeEqual } from 'node:crypto'
 import { db } from './db.js'
-import { etaMessage, toSms } from '../src/lib/order.js'
+import { etaMessage, rejectMessage, toSms } from '../src/lib/order.js'
+import { shopBySlug } from '../src/catalog.js'
 
 const MINUTES = [10, 15, 20, 30, 45, 60]
 // link važi 3 dana: posle toga podaci kupca više nisu dostupni preko njega
@@ -71,6 +72,14 @@ export function smsPage(req, res, url) {
   }
 
   const summary = { id: order.id, shops: JSON.parse(order.items_json), total: order.total, delivery: order.delivery }
+  // lokali koji su odbili (panel za lokale): za svaki gotova poruka kupcu
+  const parts = db.prepare('SELECT slug, status, reason FROM order_shops WHERE order_id = ?').all(order.id)
+  const rejected = parts.filter((p) => p.status === 'odbijena').map((p) => {
+    const shop = shopBySlug(p.slug)?.name ?? p.slug
+    const lines = summary.shops.find((s) => s.slug === p.slug)?.lines ?? []
+    const partial = parts.some((o) => o.slug !== p.slug && o.status !== 'odbijena')
+    return { shop, text: rejectMessage({ id: order.id, shop, reason: p.reason, lines, partial }) }
+  })
   const buttons = (withList, cls) =>
     MINUTES.map((m) => `<a class="btn ${cls}" href="${esc(smsLink(order.phone, etaMessage(m, withList ? summary : null)))}">${m} min</a>`).join('')
 
@@ -80,6 +89,16 @@ export function smsPage(req, res, url) {
     `SMS kupcu, porudžbina #${order.id}`,
     `<h1>SMS kupcu</h1>
 <p class="muted">Porudžbina #${order.id}: ${esc(order.customer)}, ${esc(order.phone)}</p>
+
+${rejected
+  .map(
+    (r) => `<div class="card" style="border-color:#f3b4b7;background:#fff5f5">
+  <p style="font-weight:700;color:#bb0f16">${esc(r.shop)} je odbio svoj deo porudžbine</p>
+  <a class="btn red" style="margin-top:10px" href="${esc(smsLink(order.phone, r.text))}">SMS kupcu: lokal odbio</a>
+  <details style="margin-top:10px"><summary>Kako izgleda poruka</summary><pre style="margin-top:8px">${esc(r.text)}</pre></details>
+</div>`,
+  )
+  .join('')}
 
 <h2>Za koliko minuta stiže?</h2>
 <div class="grid">${buttons(true, 'red')}</div>
