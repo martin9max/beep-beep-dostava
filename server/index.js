@@ -6,12 +6,18 @@ import { stat } from 'node:fs/promises'
 import path from 'node:path'
 
 for (const file of ['.env', '.env.local']) if (existsSync(file)) process.loadEnvFile(file)
+// vreme kao u Negotinu (server na Railway-u radi po UTC-u, sat vremena iza): i u porukama i u bazi
+process.env.TZ ||= 'Europe/Belgrade'
 process.env.NODE_ENV ||= 'production'
 
 const { api } = await import('./api.js')
 const { admin } = await import('./admin.js')
 // panel za lokale je poseban sajt (partneri/): isti server ga služi kad zahtev stigne na partneri.<domen>
 const { partneri } = await import('../partneri/server.js')
+// porudžbine koje su čekale potvrdu lokala dok se server ponovo pokretao dobijaju svoj rok od 5 minuta ponovo
+const { resumePending } = await import('./owner.js')
+const { db } = await import('./db.js')
+resumePending()
 
 const dist = path.resolve('dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -40,4 +46,8 @@ createServer((req, res) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
   if ((req.headers.host || '').startsWith('partneri.') || /^\/partneri(\/|$|\?)/.test(req.url)) return partneri(req, res)
   api(req, res, () => admin(req, res, () => staticFiles(req, res)))
-}).listen(PORT, () => console.log(`Beep Beep radi na http://localhost:${PORT}`))
+}).listen(PORT, () => {
+  console.log(`Beep Beep radi na http://localhost:${PORT}`)
+  const { t } = db.prepare("SELECT datetime('now', 'localtime') t").get()
+  console.log(`Vreme servera: ${new Date().toLocaleString('sr-RS')} (${process.env.TZ}), u bazi: ${t}`)
+})

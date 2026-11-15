@@ -5,6 +5,7 @@ import { smsPage } from './sms.js'
 import { notify } from './notify.js'
 import { assessOrder } from './risk.js'
 import { ordersChanged } from './events.js'
+import { allConfirmable, scheduleFallback, sendOwnerOrder } from './owner.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
@@ -241,8 +242,8 @@ const routes = {
     if (risk.blocked) fail(403, 'Poručivanje preko sajta je privremeno ograničeno za ovaj nalog. Pozovite nas na 064 44 77 2 77 i rado ćemo primiti porudžbinu telefonom.')
 
     const { lastInsertRowid: id } = db
-      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), 1, 'nova')
+      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status, owner_sent, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)')
+      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), 1, 'nova', mapsLink(address, place))
     // svaki lokal dobija svoj deo porudžbine u panelu za lokale (vidi ga tek kad je porudžbina puštena)
     for (const shop of shops) db.prepare('INSERT INTO order_shops (order_id, slug) VALUES (?, ?)').run(id, shop.slug)
     // svaka porudžbina odmah stiže lokalima i u admin panel (vlasnik je ne potvrđuje; sumnjive dobijaju samo upozorenje)
@@ -253,14 +254,10 @@ const routes = {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    const warning = risk.flags.length
-      ? [
-          risk.hold ? '⚠️ PAŽNJA, SUMNJIVA PORUDŽBINA (već je poslata lokalima). Dobro je pozvati kupca pre polaska:' : 'Napomena za vlasnika:',
-          ...risk.flags.map((f) => `• ${f.text}`),
-          '',
-        ].join('\n')
-      : ''
-    await notify('orders', warning + formatOrder({ id, shops, customer, address: fullAddress, map: mapsLink(address, place), phone: user.phone, note, total, zone: place, delivery }), etaButtons(user.phone, { id: Number(id), shops, total, delivery }, `${siteUrl()}/sms/${id}/${smsToken}`))
+    // vlasnik prvo dobije da je lokal prihvatio, pa tek onda celu porudžbinu (server/owner.js);
+    // ako neki lokal nema nalog u panelu (ne može da potvrdi), cela porudžbina stiže odmah
+    if (allConfirmable(shops.map((s) => s.slug))) scheduleFallback(Number(id))
+    else await sendOwnerOrder(Number(id))
     return { id: Number(id), total, delivery, place }
   },
 }

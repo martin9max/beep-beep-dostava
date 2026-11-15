@@ -96,6 +96,9 @@ if (!orderColumns.includes('place')) db.exec("ALTER TABLE orders ADD COLUMN plac
 // (sumnjiva porudžbina čeka da je vlasnik odobri u /admin, pa tek onda stiže lokalima)
 if (!orderColumns.includes('risk')) db.exec("ALTER TABLE orders ADD COLUMN risk TEXT NOT NULL DEFAULT '[]'")
 if (!orderColumns.includes('released')) db.exec('ALTER TABLE orders ADD COLUMN released INTEGER NOT NULL DEFAULT 1')
+// owner_sent: duga poruka vlasniku je poslata (čeka se da lokal potvrdi, vidi server/owner.js); map_link: Google mapa adrese
+if (!orderColumns.includes('owner_sent')) db.exec('ALTER TABLE orders ADD COLUMN owner_sent INTEGER NOT NULL DEFAULT 1')
+if (!orderColumns.includes('map_link')) db.exec("ALTER TABLE orders ADD COLUMN map_link TEXT NOT NULL DEFAULT ''")
 
 // panel za lokale (partneri/): nalozi lokala, njihove prijave i stanje svakog dela porudžbine po lokalu
 db.exec(`

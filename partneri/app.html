@@ -58,6 +58,7 @@
   .sum { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 800 }
   .customer { margin-top: 6px; font-size: 18px }
   .who { color: var(--mute); font-size: 14px; margin-top: 2px }
+  .allow { margin-left: 6px; background: var(--navy); color: #fff; border: 0; border-radius: 999px; padding: 6px 12px; font-weight: 700 }
   .hint.warn { background: var(--amber-bg); border-color: #f1d08a; color: #6b4100; font-weight: 600 }
   .actions { margin-top: 14px }
   .actions p { margin: 0 0 8px; font-weight: 700 }
@@ -135,9 +136,40 @@ function paintSound() {
 $('#sound').onclick = () => {
   soundOn = !soundOn
   try { localStorage.setItem('bb-sound', soundOn ? '1' : '0') } catch {}
-  if (soundOn) { beep(); if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission() }
+  if (soundOn) { beep(); askNotifications() }
   paintSound()
 }
+
+// obaveštenja na ekranu (i kad je panel u drugoj kartici, umanjen ili je otvoren drugi program):
+// pregledač ih dozvoljava tek kad lokal jednom klikne "Dozvoli"
+const canNotify = () => 'Notification' in window && Notification.permission === 'granted'
+const needsPermission = () => 'Notification' in window && Notification.permission === 'default'
+function askNotifications() {
+  if (needsPermission()) Notification.requestPermission().then(() => render())
+}
+const away = () => document.hidden || !document.hasFocus()
+function notifyNew(list) {
+  if (!canNotify() || !away()) return
+  for (const o of list) {
+    const n = new Notification(`Beep Beep: nova porudžbina #${o.id}`, {
+      body: `Kupac: ${o.customer}\n${o.lines.map((l) => `${l.qty}× ${l.name}`).join(', ')}`,
+      tag: `bb-${o.id}`,
+      requireInteraction: true, // ostaje na ekranu dok je lokal ne klikne
+    })
+    n.onclick = () => { window.focus(); tab = 'nove'; render(); n.close() }
+  }
+}
+// dok neka porudžbina čeka, a panel nije pred očima, naslov kartice treperi
+let blink = false
+setInterval(() => {
+  const waiting = orders.filter((o) => o.status === 'nova').length
+  if (!waiting) return
+  blink = away() ? !blink : false
+  document.title = blink ? `🔔 NOVA PORUDŽBINA (${waiting})` : `(${waiting}) Nova porudžbina, Beep Beep`
+}, 1000)
+// povratak na panel (kartica, prozor, telefon iz mirovanja): odmah najnovije stanje
+document.addEventListener('visibilitychange', () => { if (!document.hidden && live) load() })
+addEventListener('focus', () => { if (live) load() })
 
 function showLogin(message = '') {
   clearInterval(timer)
@@ -189,9 +221,7 @@ async function load() {
       lastRing = Date.now()
       beep()
       tab = 'nove'
-      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-        for (const o of fresh) new Notification(`Beep Beep: nova porudžbina #${o.id}`, { body: `Kupac: ${o.customer}` })
-      }
+      notifyNew(fresh)
     }
     render()
     ringIfWaiting()
@@ -213,6 +243,8 @@ function render() {
   const newCount = count('nove')
   document.title = newCount ? `(${newCount}) Nova porudžbina, Beep Beep` : 'Beep Beep partneri'
   app.innerHTML = `
+    ${needsPermission() ? '<div class="hint warn">Da biste videli novu porudžbinu i kad ste u drugoj kartici ili programu, dozvolite obaveštenja. <button class="allow" data-allow>Dozvoli obaveštenja</button></div>' : ''}
+    ${'Notification' in window && Notification.permission === 'denied' ? '<div class="hint">Obaveštenja na ekranu su isključena u pregledaču (ikonica katanca pored adrese, pa Obaveštenja: Dozvoli). Zvuk i dalje radi.</div>' : ''}
     ${!soundOn ? '<div class="hint">Uključite zvuk (dugme gore desno) da čujete kad stigne nova porudžbina. Nove porudžbine se pojavljuju same, odmah.</div>'
       : blocked ? '<div class="hint warn">Kliknite bilo gde na stranici da bi zvuk za nove porudžbine radio.</div>' : ''}
     <div class="tabs">
@@ -223,6 +255,7 @@ function render() {
     ${list.length ? list.map(card).join('') : `<p class="empty">${tab === 'nove' ? 'Nema novih porudžbina. Čim stigne, čućete zvuk.' : 'Ovde još nema porudžbina.'}</p>`}`
   app.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; rejecting = null; render() }))
   app.querySelectorAll('[data-act]').forEach((b) => (b.onclick = () => act(b)))
+  app.querySelector('[data-allow]')?.addEventListener('click', askNotifications)
 }
 
 function card(o) {

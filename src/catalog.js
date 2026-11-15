@@ -75,7 +75,7 @@ export const CATEGORIES = {
   ],
 }
 
-export const SHOPS = [
+const SHOP_LIST = [
   // ---------------- HRANA ----------------
   {
     // pravi meni sa cenovnika u lokalu (fotografija, oktobar 2026)
@@ -1282,6 +1282,9 @@ export const SHOPS = [
 ]
 
 // ---------- pomoćne funkcije (koriste ih i stranice i server) ----------
+
+// redosled lokala na sajtu: Kafanica prva (vlasnik je tako tražio), ostali kako su upisani gore
+export const SHOPS = [...SHOP_LIST].sort((a, b) => (b.slug === 'kafanica') - (a.slug === 'kafanica'))
 
 export const shopBySlug = (slug) => SHOPS.find((s) => s.slug === slug)
 
