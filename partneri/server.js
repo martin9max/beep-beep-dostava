@@ -21,7 +21,6 @@ const { db } = await import('../server/db.js')
 const { checkPassword, recordFailure, tooManyAttempts } = await import('../server/auth.js')
 const { notify } = await import('../server/notify.js')
 const { events } = await import('../server/events.js')
-const { afterShopAnswer } = await import('../server/owner.js')
 const { shopBySlug } = await import('../src/catalog.js')
 const { lineText, rejectMessage, waLink } = await import('../src/lib/order.js')
 
@@ -144,8 +143,6 @@ const routes = {
     events.emit('orders', [acc.slug]) // odmah osveži drugu stranicu istog lokala (telefon i računar) i admin panel
     const { message, buttons } = ownerMessage(id, acc.slug, status, minutes, reason)
     await notify('orders', message, buttons)
-    // kad su svi lokali iz porudžbine odgovorili: tek tada vlasniku ide cela porudžbina
-    if (status !== 'spremna') await afterShopAnswer(id)
     return { orders: ordersFor(acc.slug) }
   },
 }

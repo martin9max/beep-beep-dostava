@@ -1,9 +1,8 @@
 // Duga poruka vlasniku na Telegram (cela porudžbina, kupac, dugmad sa porukom kupcu) i kada se šalje.
 //
-// Redosled za vlasnika: prvo stigne da je lokal prihvatio (ili odbio), pa kad su svi lokali iz porudžbine
-// odgovorili, ova duga poruka, a na kraju "spremno". Ako neki lokal ne odgovori za 5 minuta, duga poruka
-// ipak stiže, sa upozorenjem da se pozove lokal (porudžbina se nikad ne izgubi). Lokal bez naloga u panelu
-// ne može da potvrdi, pa za takvu porudžbinu duga poruka stiže odmah.
+// Redosled za vlasnika: cela porudžbina stiže čim kupac poruči, a posle nje poruke iz panela lokala
+// (prihvaćeno, odbijeno, spremno). afterShopAnswer/scheduleFallback (prvo potvrda lokala, pa porudžbina)
+// se trenutno ne koriste; resumePending samo dovršava porudžbine koje su ostale da čekaju.
 import { db } from './db.js'
 import { notify } from './notify.js'
 import { etaButtons, formatOrder } from '../src/lib/order.js'
@@ -48,7 +47,8 @@ export async function sendOwnerOrder(id, note = '') {
           '',
         ]
       : []),
-    ...(parts.length ? ['LOKALI', ...states, ''] : []),
+    // stanje lokala samo ako je neki već odgovorio (porudžbina poslata kasnije, npr. posle ponovnog pokretanja)
+    ...(parts.some((p) => p.status !== 'nova') ? ['LOKALI', ...states, ''] : []),
   ].join('\n')
 
   const body = formatOrder({

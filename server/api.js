@@ -5,7 +5,7 @@ import { smsPage } from './sms.js'
 import { notify } from './notify.js'
 import { assessOrder } from './risk.js'
 import { ordersChanged } from './events.js'
-import { allConfirmable, scheduleFallback, sendOwnerOrder } from './owner.js'
+import { sendOwnerOrder } from './owner.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
@@ -254,10 +254,8 @@ const routes = {
       db.prepare('UPDATE users SET address = ?, place = ?, address_note = ? WHERE id = ?').run(address, place, addressNote, user.id)
     }
 
-    // vlasnik prvo dobije da je lokal prihvatio, pa tek onda celu porudžbinu (server/owner.js);
-    // ako neki lokal nema nalog u panelu (ne može da potvrdi), cela porudžbina stiže odmah
-    if (allConfirmable(shops.map((s) => s.slug))) scheduleFallback(Number(id))
-    else await sendOwnerOrder(Number(id))
+    // vlasniku cela porudžbina stiže odmah; posle nje poruke iz panela lokala (prihvaćeno, odbijeno, spremno)
+    await sendOwnerOrder(Number(id))
     return { id: Number(id), total, delivery, place }
   },
 }
