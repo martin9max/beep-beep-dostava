@@ -522,3 +522,10 @@
   @media (min-width: 40rem) { .hero-pin { height: calc(100svh + 80px); } }
   @media (min-width: 64rem) { .hero-pin { height: calc(100svh + 90px); } }
 }
+
+/* Uslovi korišćenja i Politika privatnosti: linkovi u tekstu */
+.legal a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

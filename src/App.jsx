@@ -25,6 +25,8 @@ const AccountPage = lazy(() => import('./pages/AccountPage'))
 const RadioPage = lazy(() => import('./pages/RadioPage'))
 const LoginPage = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.RegisterPage })))
+const TermsPage = lazy(() => import('./pages/LegalPages').then((m) => ({ default: m.TermsPage })))
+const PrivacyPage = lazy(() => import('./pages/LegalPages').then((m) => ({ default: m.PrivacyPage })))
 
 /** Koja stranica se prikazuje za koju adresu. */
 function Page({ path, query }) {
@@ -52,6 +54,10 @@ function Page({ path, query }) {
       return <AccountPage />
     case 'radio':
       return <RadioPage />
+    case 'uslovi':
+      return <TermsPage />
+    case 'privatnost':
+      return <PrivacyPage />
     default:
       return <NotFound />
   }

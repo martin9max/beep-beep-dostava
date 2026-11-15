@@ -81,6 +81,14 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} Beep Beep Dostava Negotin{BUSINESS.legal && ` · ${BUSINESS.legal}`}
           </p>
+          <p className="flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/uslovi" className="footer-link">
+              Uslovi korišćenja
+            </Link>
+            <Link href="/privatnost" className="footer-link">
+              Politika privatnosti
+            </Link>
+          </p>
           <a href={home ? '#' : '#pocetna'} className="footer-link inline-flex items-center gap-2 font-semibold">
             Nazad na vrh
             <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

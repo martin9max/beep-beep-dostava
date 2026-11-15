@@ -146,6 +146,10 @@ export function RegisterPage({ next, business = false }) {
           <Button type="submit" disabled={busy} arrow className="w-full">
             {busy ? 'Pravim nalog...' : business ? 'Registruj firmu' : 'Registruj se'}
           </Button>
+          <p className="legal text-center text-sm text-deep/70">
+            Registracijom prihvatate <Link href="/uslovi">Uslove korišćenja</Link> i potvrđujete da ste pročitali{' '}
+            <Link href="/privatnost">Politiku privatnosti</Link>.
+          </p>
         </div>
       </form>
       <p className="mt-6 border-t border-line pt-5 text-center text-[15px] text-deep/80">
