@@ -63,6 +63,10 @@ export const PARTNERS = ['Partner 1', 'Partner 2', 'Partner 3', 'Partner 4', 'Pa
 // Upisuju se samo provereni, zvanični sajtovi (može i Facebook ili Instagram stranica).
 export const PARTNER_LINKS = {
   Bajka: 'https://picerijabajkanegotin.com',
+  Kafanica: 'https://kafanica.com',
+  'La Moara': 'https://lamoara.rs',
+  'LDS transporte': 'https://www.lds-transporte.at',
+  'Nandiva shop': 'https://www.nandivashop.rs',
 }
 
 // usluge: naslov, kratak podnaslov (lead, crveno) i slogan (plavo) ispod slike

@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { PARTNERS, PARTNER_LINKS } from '../data'
 import { SHOPS } from '../catalog'
@@ -64,6 +65,12 @@ const UNITS = SET.reduce((n, logo) => n + (logo.narrow ? 0.5 : 1), 0)
 /** Traka sa logoima partnera koja se beskonačno pomera. */
 export default function Partners({ className = '' }) {
   const loop = Array.from({ length: COPIES }, () => SET).flat()
+  // traka ne kreće ispočetka kad se posetilac vrati (npr. sa menija Pastizze): animacija se "premota"
+  // za onoliko koliko je prošlo od otvaranja sajta, pa izgleda kao da je sve vreme klizila
+  const track = useRef(null)
+  useLayoutEffect(() => {
+    track.current.style.animationDelay = `-${(performance.now() / 1000).toFixed(2)}s`
+  }, [])
   return (
     <motion.section
       aria-labelledby="partneri"
@@ -80,8 +87,8 @@ export default function Partners({ className = '' }) {
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-paper to-transparent sm:w-12" aria-hidden="true" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-paper to-transparent sm:w-12" aria-hidden="true" />
         {/* razmak je desna margina svakog logoa (ne gap), da jedan krug bude tačno 1/COPIES trake i da nema trzaja */}
-        {/* brzina ne zavisi od broja partnera ni od ekrana (vidi .marquee u index.css); staje dok je miš preko trake */}
-        <ul className="marquee flex w-max hover:[animation-play-state:paused]" style={{ '--copies': COPIES, '--units': UNITS }}>
+        {/* brzina ne zavisi od broja partnera ni od ekrana (vidi .marquee u index.css) */}
+        <ul ref={track} className="marquee flex w-max" style={{ '--copies': COPIES, '--units': UNITS }}>
           {loop.map((partner, i) => (
             <li
               key={i}
