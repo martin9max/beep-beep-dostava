@@ -1,5 +1,5 @@
 import { deliveryPrice } from './places.js'
-import { FOLK, MODERNA } from './radio-youtube.js'
+import { FOLK, MODERNA, ZABAVNA } from './radio-youtube.js'
 
 export const PHONE = '064 44 77 2 77'
 
@@ -52,7 +52,7 @@ export const HERO_STATS = [
 export const RADIO = [
   { key: 'moderna', label: 'Moderna', desc: 'Novi domaći hitovi', emoji: '🎧', type: 'youtube', yt: { videos: MODERNA } },
   { key: 'strana', label: 'Strana', desc: 'Strana muzika uz Beep Beep špicu', emoji: '🌍', type: 'own' },
-  { key: 'ambijent', label: 'Ambijent', desc: 'Opuštena muzika za svaki trenutak', emoji: '🎶', type: 'own' },
+  { key: 'zabavna', label: 'Domaća zabavna', desc: 'Domaća zabavna muzika', emoji: '🎶', type: 'youtube', yt: { videos: ZABAVNA } },
   { key: 'folk', label: 'Folk', desc: 'Narodna i folk muzika', emoji: '🎤', type: 'youtube', yt: { videos: FOLK } },
 ]
 
@@ -133,7 +133,7 @@ export const EXTRA_STOP = {
 
 // recenzije sa Google mapa (prepisane iz originala, samo su dodate kvačice)
 export const REVIEWS_URL = 'https://www.google.com/maps?cid=16704170277850894301'
-export const RATING = { score: '5,0', count: 42 }
+export const RATING = { score: '5,0', count: 43 } // sa Google mapa, 15. 11. 2026.
 export const REVIEWS = [
   {
     name: 'Dragana Lukić',

@@ -4,6 +4,7 @@ import { db } from './db.js'
 import { smsPage } from './sms.js'
 import { notify } from './notify.js'
 import { assessOrder } from './risk.js'
+import { ordersChanged } from './events.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
@@ -244,6 +245,8 @@ const routes = {
       .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), risk.hold ? 0 : 1, risk.hold ? 'na proveri' : 'nova')
     // svaki lokal dobija svoj deo porudžbine u panelu za lokale (vidi ga tek kad je porudžbina puštena)
     for (const shop of shops) db.prepare('INSERT INTO order_shops (order_id, slug) VALUES (?, ?)').run(id, shop.slug)
+    // lokali je vide odmah (sumnjiva tek kad je vlasnik pusti u /admin); admin panel je vidi uvek
+    ordersChanged(risk.hold ? [] : shops.map((s) => s.slug))
 
     // "zapamti kao moju adresu"
     if (body.saveAddress && custom) {

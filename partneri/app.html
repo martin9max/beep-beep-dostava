@@ -106,6 +106,7 @@ let tab = 'nove'
 let rejecting = null
 let known = null // brojevi porudžbina koje su već viđene (da se zvoni samo za nove)
 let timer = null
+let live = null // stalna veza sa serverom (nove porudžbine odmah)
 
 // zvuk za novu porudžbinu: isti "beep beep" kao kad trokolica stigne na početnoj strani sajta.
 // Pregledač pušta zvuk tek posle prvog klika na stranici, zato dugme "Uključi zvuk".
@@ -140,6 +141,8 @@ $('#sound').onclick = () => {
 
 function showLogin(message = '') {
   clearInterval(timer)
+  live?.close()
+  live = null
   $('#shopname').textContent = ''
   $('#sound').hidden = $('#logout').hidden = true
   app.innerHTML = `<form class="login" id="login">
@@ -165,8 +168,13 @@ function start(shop) {
   paintSound()
   known = null
   load()
+  // nova porudžbina stiže odmah preko stalne veze sa serverom; provera na 30 sekundi je samo rezerva
+  // (npr. ako je veza na trenutak pukla)
+  live?.close()
+  live = new EventSource(BASE + '/api/stream')
+  live.onmessage = () => load()
   clearInterval(timer)
-  timer = setInterval(load, 10000) // nove porudžbine se proveravaju na 10 sekundi
+  timer = setInterval(load, 30000)
 }
 
 $('#logout').onclick = async () => { await api('logout', {}).catch(() => {}); showLogin() }
@@ -205,7 +213,7 @@ function render() {
   const newCount = count('nove')
   document.title = newCount ? `(${newCount}) Nova porudžbina, Beep Beep` : 'Beep Beep partneri'
   app.innerHTML = `
-    ${!soundOn ? '<div class="hint">Uključite zvuk (dugme gore desno) da čujete kad stigne nova porudžbina. Stranica se sama osvežava.</div>'
+    ${!soundOn ? '<div class="hint">Uključite zvuk (dugme gore desno) da čujete kad stigne nova porudžbina. Nove porudžbine se pojavljuju same, odmah.</div>'
       : blocked ? '<div class="hint warn">Kliknite bilo gde na stranici da bi zvuk za nove porudžbine radio.</div>' : ''}
     <div class="tabs">
       <button data-tab="nove" class="${tab === 'nove' ? 'on' : ''}">Nove${newCount ? `<b>${newCount}</b>` : ''}</button>

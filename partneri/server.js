@@ -19,6 +19,7 @@ if (standalone) for (const file of ['.env', '.env.local']) if (existsSync(file))
 const { db } = await import('../server/db.js')
 const { checkPassword, recordFailure, tooManyAttempts } = await import('../server/auth.js')
 const { notify } = await import('../server/notify.js')
+const { events } = await import('../server/events.js')
 const { shopBySlug } = await import('../src/catalog.js')
 
 const COOKIE = 'bb_partner'
@@ -143,6 +144,7 @@ const routes = {
       spremna: `🛍️ ${shop}: porudžbina #${id} je SPREMNA za preuzimanje.`,
       odbijena: `❌ ${shop} ODBIO porudžbinu #${id}.\nRazlog: ${reason}\nPozovite kupca.`,
     }[status]
+    events.emit('orders', [acc.slug]) // odmah osveži drugu stranicu istog lokala (telefon i računar) i admin panel
     await notify('orders', message)
     return { orders: ordersFor(acc.slug) }
   },
@@ -179,6 +181,7 @@ export async function partneri(req, res) {
     return res.end(readFileSync(SOUND))
   }
   res.setHeader('Cache-Control', 'no-store')
+  if (url.pathname === '/api/stream') return stream(req, res)
   if (!url.pathname.startsWith('/api/')) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
     // stranica se čita pri svakom zahtevu da izmene odmah važe i bez ponovnog pokretanja (mala je)
@@ -195,6 +198,28 @@ export async function partneri(req, res) {
     res.statusCode = err.status ?? 500
     res.end(JSON.stringify({ error: err instanceof HttpError ? err.message : 'Greška na serveru.' }))
   }
+}
+
+/**
+ * Stalna veza sa otvorenom stranicom lokala (Server-Sent Events): čim stigne porudžbina za ovaj lokal,
+ * stranica dobija "refresh" i odmah je prikaže, bez osvežavanja. Na 25 sekundi ide prazan signal da
+ * veza ne bi bila prekinuta zbog neaktivnosti.
+ */
+function stream(req, res) {
+  const acc = currentShop(req)
+  if (!acc) {
+    res.statusCode = 401
+    return res.end()
+  }
+  res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' })
+  res.write('retry: 3000\n\n')
+  const onOrders = (slugs) => slugs.includes(acc.slug) && res.write('data: refresh\n\n')
+  const ping = setInterval(() => res.write(': ping\n\n'), 25000)
+  events.on('orders', onOrders)
+  req.on('close', () => {
+    clearInterval(ping)
+    events.off('orders', onOrders)
+  })
 }
 
 if (standalone) {

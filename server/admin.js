@@ -3,12 +3,14 @@ import { timingSafeEqual } from 'node:crypto'
 import { db } from './db.js'
 import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
+import { events, ordersChanged } from './events.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
 
 // 'na proveri': sumnjiva porudžbina čeka vlasnika (lokali je ne vide); 'nije preuzeta': kupac nije preuzeo (ulazi u ocenu kupca)
 const STATUSES = ['na proveri', 'nova', 'prihvaćena', 'u dostavi', 'isporučena', 'nije preuzeta', 'otkazana']
+const slugsOf = (id) => db.prepare('SELECT slug FROM order_shops WHERE order_id = ?').all(id).map((r) => r.slug)
 const SHOP_LABEL = { nova: 'čeka lokal', prihvaćena: 'prihvaćeno', spremna: 'spremno', odbijena: 'odbijeno' }
 
 const esc = (v) =>
@@ -39,6 +41,20 @@ export async function admin(req, res, next) {
     res.statusCode = 401
     res.setHeader('WWW-Authenticate', 'Basic realm="Beep Beep admin", charset="UTF-8"')
     return res.end('Potrebna je prijava.')
+  }
+
+  // stalna veza sa stranicom porudžbina: nova porudžbina se pojavi odmah, bez osvežavanja
+  if (url.pathname === '/admin/stream') {
+    res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' })
+    res.write('retry: 3000\n\n')
+    const onOrders = () => res.write('data: refresh\n\n')
+    const ping = setInterval(() => res.write(': ping\n\n'), 25000)
+    events.on('orders', onOrders)
+    req.on('close', () => {
+      clearInterval(ping)
+      events.off('orders', onOrders)
+    })
+    return
   }
 
   // forme sa admin stranice (promena statusa, brisanje korisnika); samo sa iste adrese
@@ -72,6 +88,7 @@ export async function admin(req, res, next) {
     if (STATUSES.includes(status)) {
       db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, Number(form.get('id')))
       if (!['na proveri', 'otkazana'].includes(status)) db.prepare('UPDATE orders SET released = 1 WHERE id = ?').run(Number(form.get('id')))
+      ordersChanged(slugsOf(Number(form.get('id')))) // npr. otkazana: lokal odmah vidi da ne priprema
     }
     res.statusCode = 303
     res.setHeader('Location', '/admin?tab=porudzbine')
@@ -82,6 +99,7 @@ export async function admin(req, res, next) {
   if (req.method === 'POST' && url.pathname === '/admin/release') {
     const form = await readForm(req)
     db.prepare("UPDATE orders SET released = 1, status = 'nova' WHERE id = ? AND released = 0").run(Number(form.get('id')))
+    ordersChanged(slugsOf(Number(form.get('id'))))
     res.statusCode = 303
     res.setHeader('Location', '/admin?tab=porudzbine')
     return res.end()
@@ -203,6 +221,11 @@ function page(tab, deleted, message) {
   <nav>${tabs.map(([k, l]) => `<a href="/admin?tab=${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</nav>
   ${body}
 </main>
+${tab === 'porudzbine' ? `<script>
+  // nova porudžbina (ili promena kod lokala) osveži listu odmah; ne dok vlasnik bira status u padajućem meniju
+  const live = new EventSource('/admin/stream')
+  live.onmessage = () => { if (!(document.activeElement && document.activeElement.tagName === 'SELECT')) location.reload() }
+</script>` : ''}
 </body>
 </html>`
 }
