@@ -6,6 +6,7 @@
 import { db } from './db.js'
 import { notify, sendTelegram } from './notify.js'
 import { isOnline } from './events.js'
+import { pushDevices, pushToShop } from './push.js'
 import { etaButtons, formatDin, formatOrder, lineText } from '../src/lib/order.js'
 import { shopBySlug } from '../src/catalog.js'
 
@@ -111,14 +112,16 @@ export function resumePending() {
 export function shopWarnings(slugs) {
   const lines = []
   for (const slug of slugs) {
-    const acc = db.prepare('SELECT last_seen, telegram_chat_id FROM shop_accounts WHERE slug = ?').get(slug)
+    const acc = db.prepare('SELECT id, last_seen, telegram_chat_id FROM shop_accounts WHERE slug = ?').get(slug)
     if (!acc) lines.push(`⚠️ ${nameOf(slug)} nema nalog u panelu: pozovite lokal telefonom.`)
     else if (!isOnline(slug)) {
       const last = acc.last_seen ? ` (poslednji put na vezi: ${acc.last_seen.slice(8, 10)}.${acc.last_seen.slice(5, 7)}. u ${acc.last_seen.slice(11, 16)})` : ' (još nijednom nije bio otvoren)'
+      const devices = pushDevices(acc.id)
+      const sent = [devices ? `obaveštenje na ${devices} ${devices === 1 ? 'uređaj' : 'uređaja'}` : '', acc.telegram_chat_id ? 'Telegram' : ''].filter(Boolean)
       lines.push(
-        acc.telegram_chat_id
-          ? `ℹ️ ${nameOf(slug)}: panel nije otvoren${last}, porudžbina mu je poslata i na Telegram.`
-          : `⚠️ ${nameOf(slug)}: panel nije otvoren${last}. Pozovite lokal.`,
+        sent.length
+          ? `ℹ️ ${nameOf(slug)}: panel nije otvoren${last}, poslato: ${sent.join(' i ')}. Ako ne odgovori za par minuta, pozovite lokal.`
+          : `⚠️ ${nameOf(slug)}: panel nije otvoren${last}, a obaveštenja nisu uključena. Pozovite lokal.`,
       )
     }
   }
@@ -134,6 +137,13 @@ export async function sendToShops(id) {
   if (!o) return
   const panel = `${siteUrl()}/partneri`
   for (const part of JSON.parse(o.items_json)) {
+    // obaveštenje u uglu ekrana na svim uređajima lokala (i kad je na drugom sajtu ili je panel zatvoren)
+    await pushToShop(part.slug, {
+      title: `🔔 Nova porudžbina #${o.id}`,
+      body: `Kupac: ${o.customer}\n${part.lines.map((l) => `${l.qty}× ${l.name}`).join(', ')}${o.note ? `\nNapomena: ${o.note}` : ''}`,
+      tag: `bb-${o.id}`,
+      url: '/partneri',
+    })
     const chat = db.prepare('SELECT telegram_chat_id FROM shop_accounts WHERE slug = ?').get(part.slug)?.telegram_chat_id
     if (!chat) continue
     const sum = Math.round(part.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0) * 100) / 100
@@ -155,5 +165,8 @@ export async function sendToShops(id) {
 /** Lokalima sa Telegramom: kupac je otkazao porudžbinu. */
 export async function cancelToShops(id) {
   const parts = db.prepare('SELECT os.slug, a.telegram_chat_id chat FROM order_shops os JOIN shop_accounts a ON a.slug = os.slug WHERE os.order_id = ?').all(id)
-  for (const p of parts) if (p.chat) await sendTelegram(p.chat, `🚫 Porudžbina #${id} je OTKAZANA. Ne pripremajte je.`)
+  for (const p of parts) {
+    await pushToShop(p.slug, { title: `🚫 Porudžbina #${id} je otkazana`, body: 'Kupac je otkazao porudžbinu. Ne pripremajte je.', tag: `bb-${id}`, url: '/partneri' })
+    if (p.chat) await sendTelegram(p.chat, `🚫 Porudžbina #${id} je OTKAZANA. Ne pripremajte je.`)
+  }
 }

@@ -23,6 +23,7 @@ const { notify } = await import('../server/notify.js')
 const { events, online } = await import('../server/events.js')
 const { shopBySlug } = await import('../src/catalog.js')
 const { lineText, rejectMessage, waLink } = await import('../src/lib/order.js')
+const { publicKey, saveSubscription } = await import('../server/push.js')
 
 const COOKIE = 'bb_partner'
 const SESSION_DAYS = 90
@@ -117,6 +118,14 @@ const routes = {
     const token = readCookie(req)
     if (token) db.prepare('DELETE FROM shop_sessions WHERE token_hash = ?').run(sha(token))
     setCookie(req, res, '; Max-Age=0')
+    return { ok: true }
+  },
+
+  // push obaveštenja: javni ključ servera i pretplata ovog pregledača (posle "Dozvoli obaveštenja")
+  'GET /api/push-key': () => ({ key: publicKey() }),
+  'POST /api/push-subscribe': (req, res, body) => {
+    const acc = currentShop(req) ?? fail(401, 'Prijavite se.')
+    if (!saveSubscription(acc.id, body)) fail(400, 'Neispravna pretplata.')
     return { ok: true }
   },
 
@@ -249,6 +258,13 @@ export async function partneri(req, res) {
   url.pathname = url.pathname.replace(/^\/partneri(?=\/|$)/, '') || '/'
   res.setHeader('X-Robots-Tag', 'noindex, nofollow')
   res.setHeader('X-Frame-Options', 'DENY')
+  // servisna skripta za push obaveštenja (radi i kad stranica panela nije otvorena)
+  if (url.pathname === '/sw.js') {
+    res.setHeader('Content-Type', 'text/javascript; charset=utf-8')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Service-Worker-Allowed', req.url.startsWith('/partneri') ? '/partneri' : '/')
+    return res.end(readFileSync(path.join(here, 'sw.js')))
+  }
   if (url.pathname === '/zvuk.mp3') {
     res.setHeader('Content-Type', 'audio/mpeg')
     res.setHeader('Cache-Control', 'public, max-age=86400')

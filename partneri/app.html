@@ -145,7 +145,26 @@ $('#sound').onclick = () => {
 const canNotify = () => 'Notification' in window && Notification.permission === 'granted'
 const needsPermission = () => 'Notification' in window && Notification.permission === 'default'
 function askNotifications() {
-  if (needsPermission()) Notification.requestPermission().then(() => render())
+  if (needsPermission()) Notification.requestPermission().then(() => { render(); subscribePush() })
+}
+
+// Push obaveštenja: porudžbina iskoči u uglu ekrana i kad je lokal na drugom sajtu (npr. YouTube) ili je
+// panel zatvoren. Pregledač se pretplati jednom (posle "Dozvoli obaveštenja"), a server šalje na tu pretplatu.
+async function subscribePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !canNotify()) return
+  try {
+    const reg = await navigator.serviceWorker.register(BASE + '/sw.js', { scope: BASE || '/' })
+    await navigator.serviceWorker.ready
+    let sub = await reg.pushManager.getSubscription()
+    if (!sub) {
+      const { key } = await api('push-key')
+      const raw = Uint8Array.from(atob(key.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw })
+    }
+    await api('push-subscribe', sub.toJSON())
+  } catch (err) {
+    console.warn('Push obaveštenja nisu uključena:', err)
+  }
 }
 const away = () => document.hidden || !document.hasFocus()
 function notifyNew(list) {
@@ -200,6 +219,7 @@ function start(shop) {
   paintSound()
   known = null
   load()
+  subscribePush() // ako su obaveštenja već dozvoljena, ovaj uređaj dobija porudžbine i kad panel nije otvoren
   // nova porudžbina stiže odmah preko stalne veze sa serverom; provera na 30 sekundi je samo rezerva
   // (npr. ako je veza na trenutak pukla)
   live?.close()
@@ -243,7 +263,7 @@ function render() {
   const newCount = count('nove')
   document.title = newCount ? `(${newCount}) Nova porudžbina, Beep Beep` : 'Beep Beep partneri'
   app.innerHTML = `
-    ${needsPermission() ? '<div class="hint warn">Da biste videli novu porudžbinu i kad ste u drugoj kartici ili programu, dozvolite obaveštenja. <button class="allow" data-allow>Dozvoli obaveštenja</button></div>' : ''}
+    ${needsPermission() ? '<div class="hint warn">Da porudžbina iskoči u uglu ekrana i kad gledate drugi sajt (npr. YouTube) ili je panel zatvoren, dozvolite obaveštenja. <button class="allow" data-allow>Dozvoli obaveštenja</button></div>' : ''}
     ${'Notification' in window && Notification.permission === 'denied' ? '<div class="hint">Obaveštenja na ekranu su isključena u pregledaču (ikonica katanca pored adrese, pa Obaveštenja: Dozvoli). Zvuk i dalje radi.</div>' : ''}
     ${!soundOn ? '<div class="hint">Uključite zvuk (dugme gore desno) da čujete kad stigne nova porudžbina. Nove porudžbine se pojavljuju same, odmah.</div>'
       : blocked ? '<div class="hint warn">Kliknite bilo gde na stranici da bi zvuk za nove porudžbine radio.</div>' : ''}

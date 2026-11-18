@@ -4,6 +4,7 @@ import { db } from './db.js'
 import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
 import { events, isOnline, ordersChanged } from './events.js'
+import { pushDevices } from './push.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
@@ -373,13 +374,15 @@ function shopAccounts() {
     <p style="color:var(--mute);font-size:14px;margin:-4px 0 14px">Lokal se prijavljuje na <b>beepbeepdostava.rs/partneri</b> (dugme Partneri gore na sajtu). Ako lokal već ima nalog, ovo mu menja korisničko ime i lozinku i odjavljuje ga sa svih uređaja.</p>
     ${SHOPS.filter((s) => !has.has(s.slug)).length ? `<p class="notice" style="background:#fff3c4;border-color:#f1d08a;color:#6b4100">Bez naloga u panelu (ne vide porudžbine, treba ih zvati): ${SHOPS.filter((s) => !has.has(s.slug)).map((s) => esc(s.name)).join(', ')}</p>` : ''}
     ${table(
-      ['Lokal', 'Korisničko ime', 'Panel', 'Prijavljen uređaja', 'Telegram lokala (chat id)', ''],
+      ['Lokal', 'Korisničko ime', 'Panel', 'Prijavljen uređaja', 'Obaveštenja', 'Telegram lokala (chat id)', ''],
       accounts.map((a) => {
         const devices = db.prepare('SELECT COUNT(*) n FROM shop_sessions WHERE account_id = ? AND expires_at > ?').get(a.id, Date.now()).n
         const panel = isOnline(a.slug)
           ? '<span class="on">otvoren sada</span>'
           : `<span class="off">zatvoren${a.last_seen ? `<br><small>poslednji put ${esc(a.last_seen)}</small>` : '<br><small>još nije otvaran</small>'}</span>`
+        const push = pushDevices(a.id)
         return `<tr><td>${esc(shopBySlug(a.slug)?.name ?? a.slug)}</td><td>${esc(a.username)}</td><td>${panel}</td><td>${devices}</td>
+          <td>${push ? `<span class="on">uključena (${push})</span>` : '<span class="off">nisu uključena</span>'}</td>
           <td><form method="post" action="/admin/shop-telegram" class="tg"><input type="hidden" name="slug" value="${esc(a.slug)}">
             <input name="chat" value="${esc(a.telegram_chat_id)}" placeholder="npr. 123456789" inputmode="numeric" style="width:130px"> <button class="save">Sačuvaj</button></form></td>
           <td><form method="post" action="/admin/shop-delete" onsubmit="return confirm('Obrisati nalog lokala?')"><input type="hidden" name="slug" value="${esc(a.slug)}"><button class="del">Obriši</button></form></td></tr>`
