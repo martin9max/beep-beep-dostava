@@ -5,12 +5,12 @@ import { smsPage } from './sms.js'
 import { notify } from './notify.js'
 import { assessOrder } from './risk.js'
 import { ordersChanged } from './events.js'
-import { sendOwnerOrder } from './owner.js'
+import { cancelToShops, sendOwnerOrder, sendToShops } from './owner.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
 import { deliveryPriceOf } from '../src/data.js'
-import { cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
+import { addressProblem, cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -68,6 +68,7 @@ function readFirmAddress(body) {
   const a = { address: text(body.companyAddress), place: cleanPlace(body.companyPlace), note: text(body.companyAddressNote) }
   if (!a.place) fail(400, 'Izaberite mesto firme.')
   if (!a.address) fail(400, 'Upišite adresu firme.')
+  if (addressProblem(a.address, a.place)) fail(400, addressProblem(a.address, a.place))
   return a
 }
 
@@ -85,6 +86,7 @@ function readProfile(body) {
   if (!p.name || !p.surname) fail(400, 'Upišite ime i prezime.')
   if (!p.place) fail(400, 'Izaberite mesto (Negotin ili selo).')
   if (!p.address) fail(400, 'Upišite adresu za dostavu.')
+  if (addressProblem(p.address, p.place)) fail(400, addressProblem(p.address, p.place))
   if (!p.email) fail(400, 'Upišite email adresu.')
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) fail(400, 'Email adresa nije ispravna.')
   return p
@@ -203,9 +205,30 @@ const routes = {
 
   'GET /api/orders': (req) => {
     const user = requireUser(req)
-    const rows = db.prepare('SELECT id, items_json, total, delivery, zone, status, address, created_at FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 30').all(user.id)
-    // kupac ne vidi da mu je porudžbina na proveri (interna stvar), već da je primljena
-    return { orders: rows.map(({ items_json, ...o }) => ({ ...o, status: o.status === 'na proveri' ? 'primljena' : o.status, shops: JSON.parse(items_json) })) }
+    const rows = db.prepare('SELECT id, items_json, total, delivery, zone, status, address, note, created_at FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 30').all(user.id)
+    // kupac ne vidi da mu je porudžbina na proveri (interna stvar), već da je primljena;
+    // uz svaku porudžbinu i šta je uradio svaki lokal (prihvatio, spremno, odbio), da kupac vidi potvrdu
+    return {
+      orders: rows.map(({ items_json, ...o }) => {
+        const parts = shopParts(o.id)
+        return { ...o, status: o.status === 'na proveri' ? 'primljena' : o.status, shops: JSON.parse(items_json), parts, canCancel: cancelable(o, parts) }
+      }),
+    }
+  },
+
+  // kupac otkazuje porudžbinu dok je nijedan lokal nije prihvatio (posle toga samo telefonom)
+  'POST /api/orders/cancel': async (req, res, body) => {
+    const user = requireUser(req)
+    const order = db.prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?').get(Number(body.id), user.id) ?? fail(404, 'Porudžbina ne postoji.')
+    if (!cancelable(order, shopParts(order.id))) {
+      fail(409, 'Lokal je već prihvatio porudžbinu i priprema je. Za otkazivanje nas pozovite na 064 44 77 2 77.')
+    }
+    db.prepare("UPDATE orders SET status = 'otkazana' WHERE id = ?").run(order.id)
+    const slugs = db.prepare('SELECT slug FROM order_shops WHERE order_id = ?').all(order.id).map((r) => r.slug)
+    ordersChanged(slugs) // lokal odmah vidi da ne priprema
+    await notify('orders', [`🚫 KUPAC OTKAZAO PORUDŽBINU #${order.id}`, `Kupac: ${order.customer}, ${order.phone}`, 'Lokal je to video u panelu. Ne treba ništa da se priprema.'].join('\n'))
+    await cancelToShops(order.id)
+    return { ok: true }
   },
 
   'POST /api/orders': async (req, res, body) => {
@@ -227,6 +250,7 @@ const routes = {
     const place = custom ? cleanPlace(body.place) : base.place
     const addressNote = custom ? text(body.addressNote) : base.note
     if (!place) fail(400, 'Izaberite mesto za dostavu (Negotin ili selo).')
+    if (custom && addressProblem(address, place)) fail(400, addressProblem(address, place))
     const fullAddress = joinAddress(address, place) + (addressNote ? ` (${addressNote})` : '')
     const note = text(body.note, 500)
     // cena dostave se računa iz mesta, ne iz browsera
@@ -256,9 +280,32 @@ const routes = {
 
     // vlasniku cela porudžbina stiže odmah; posle nje poruke iz panela lokala (prihvaćeno, odbijeno, spremno)
     await sendOwnerOrder(Number(id))
+    await sendToShops(Number(id)) // lokali sa Telegramom dobijaju i poruku (zvoni i kad telefon spava)
     return { id: Number(id), total, delivery, place }
   },
 }
+
+/** Šta je uradio svaki lokal iz porudžbine, za kupca (bez internih podataka). */
+function shopParts(orderId) {
+  return db
+    .prepare('SELECT slug, status, minutes, reason, updated_at FROM order_shops WHERE order_id = ?')
+    .all(orderId)
+    .map((p) => ({
+      slug: p.slug,
+      name: shopBySlug(p.slug)?.name ?? p.slug,
+      status: p.status,
+      minutes: p.minutes,
+      reason: p.reason,
+      // za koliko je spremno, kao sat (npr. 21:15)
+      readyAt:
+        p.status === 'prihvaćena' && p.minutes
+          ? new Date(new Date(p.updated_at.replace(' ', 'T')).getTime() + p.minutes * 60000).toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })
+          : null,
+    }))
+}
+
+/** Kupac sme sam da otkaže dok nijedan lokal nije prihvatio porudžbinu. */
+const cancelable = (order, parts) => ['nova', 'na proveri'].includes(order.status) && !parts.some((p) => ['prihvaćena', 'spremna'].includes(p.status))
 
 /** Adresa sajta za linkove u porukama (SITE_URL, inače VITE_SITE_URL iz .env) */
 const siteUrl = () => (process.env.SITE_URL || process.env.VITE_SITE_URL || '').replace(/\/$/, '')

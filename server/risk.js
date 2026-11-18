@@ -14,7 +14,7 @@ export const RULES = {
   advance: 10000, // porudžbina preko ovoliko dinara: preporučen avans
   bigQty: 20, // ovoliko komada iste stavke je neobično (osim torti, koje se poručuju po parčetu)
   burstMinutes: 30, // više porudžbina sa istog naloga za ovoliko minuta
-  burstCount: 2, // ... ako ih je već ovoliko, nova čeka proveru
+  burstCount: 3, // ... ako ih je već ovoliko (a prethodne su obrađene), nova dobija upozorenje
 }
 
 /** Koliko je kupac porudžbina preuzeo, otkazao i nije preuzeo (za profil kupca i pravila). */
@@ -56,10 +56,20 @@ export function assessOrder({ user, shops, total }) {
   else if (record.noShows === 1) add('info', 'Kupac jednom nije preuzeo porudžbinu (upozorenje).')
 
   // 2) više porudžbina sa istog naloga u kratkom vremenu
-  const recent = db
-    .prepare(`SELECT COUNT(*) n FROM orders WHERE (user_id = ? OR phone = ?) AND status != 'otkazana' AND created_at > datetime('now', 'localtime', ?)`)
-    .get(user.id, user.phone, `-${RULES.burstMinutes} minutes`).n
-  if (recent >= RULES.burstCount) add('check', `Već ${recent} porudžbine sa ovog naloga u poslednjih ${RULES.burstMinutes} min.`)
+  // Ako prethodne porudžbine još niko nije obradio (ni lokal ni vlasnik), kupac verovatno samo nije dobio potvrdu
+  // i poručuje ponovo: to je napomena da ga treba pozvati, a ne sumnja na lažnu porudžbinu.
+  const recentOrders = db
+    .prepare(`SELECT id, status FROM orders WHERE (user_id = ? OR phone = ?) AND status != 'otkazana' AND created_at > datetime('now', 'localtime', ?)`)
+    .all(user.id, user.phone, `-${RULES.burstMinutes} minutes`)
+  const recent = recentOrders.length
+  const unanswered = recentOrders.filter(
+    (o) => o.status === 'nova' && !db.prepare("SELECT 1 FROM order_shops WHERE order_id = ? AND status != 'nova'").get(o.id),
+  ).length
+  if (recent && unanswered === recent) {
+    add('info', `Kupac poručuje ponovo (već ${recent} za ${RULES.burstMinutes} min), a prethodne još niko nije obradio: verovatno čeka potvrdu. Pozovite ga i pitajte da li mu trebaju sve.`)
+  } else if (recent >= RULES.burstCount) {
+    add('check', `Već ${recent} porudžbine sa ovog naloga u poslednjih ${RULES.burstMinutes} min.`)
+  }
 
   // 3) prva porudžbina sa velikim iznosom
   if (!record.delivered && total >= RULES.bigFirstOrder) add('check', `Prva porudžbina ovog kupca, a iznos je ${total} din: pozovite kupca pre slanja lokalima.`)

@@ -163,3 +163,9 @@ if (reset && meta('orders_reset') !== reset) {
 // istekle sesije se brišu pri pokretanju
 db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now())
 db.prepare('DELETE FROM shop_sessions WHERE expires_at < ?').run(Date.now())
+
+// nalozi lokala: kad je panel poslednji put bio otvoren, i Telegram chat lokala (porudžbina stiže i tamo,
+// jer Telegram zvoni i kad telefon spava, a panel samo dok je stranica otvorena)
+const shopColumns = db.prepare('PRAGMA table_info(shop_accounts)').all().map((c) => c.name)
+if (!shopColumns.includes('last_seen')) db.exec('ALTER TABLE shop_accounts ADD COLUMN last_seen TEXT')
+if (!shopColumns.includes('telegram_chat_id')) db.exec("ALTER TABLE shop_accounts ADD COLUMN telegram_chat_id TEXT NOT NULL DEFAULT ''")

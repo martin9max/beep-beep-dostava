@@ -68,3 +68,12 @@ export const fullAddress = (address, place) =>
 /** Link za Google mape (kurir otvara na telefonu). */
 export const mapsLink = (address, place) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${fullAddress(address, place)}, Srbija`)}`
+
+/**
+ * U Negotinu adresa mora imati broj kuće (ili "bb" ako ga nema), da ga kupac ne bi upisao samo u napomenu
+ * i da dostavljač nađe kuću. Na selu može i opis kuće. Vraća poruku greške ili prazno.
+ */
+export const addressProblem = (address, place) =>
+  zoneOf(place) === 'grad' && !/\d|\bbb\b/i.test(address || '')
+    ? 'Upišite i broj kuće u adresu (npr. Dr Stanoja Nešića 12). Ako kuća nema broj, upišite bb.'
+    : ''

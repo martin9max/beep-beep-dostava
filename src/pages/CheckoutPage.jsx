@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
+import OrderStatus from '../components/OrderStatus'
 import Field, { FormError } from '../components/Field'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
 import { Qty } from '../components/MenuItem'
@@ -293,11 +294,11 @@ function DeliveryForm({ cart, onDone }) {
       <Field
         as="textarea"
         className="mt-4"
-        label="Napomena za kurira (nije obavezno)"
+        label="Napomena (vide je lokal i kurir, nije obavezno)"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         maxLength={500}
-        placeholder="npr. pozovite kad stignete, imam sitno za 2000"
+        placeholder="npr. bez luka, pozovite kad stignete, imam sitno za 2000"
       />
 
       <div className="mt-6 border-t border-line pt-5">
@@ -320,8 +321,12 @@ function Done({ order }) {
       <p className="text-6xl" aria-hidden="true">✅</p>
       <h1 className="mt-6 text-[40px] font-bold">Porudžbina je primljena!</h1>
       <p className="mt-3 text-lg text-deep/80">
-        Broj porudžbine: <b>#{order.id}</b>. Uskoro vas zovemo da potvrdimo{order.delivery == null ? ' i kažemo cenu dostave' : ''}, pa beep beep, krećemo na <b>{order.address}</b>.
+        Broj porudžbine: <b>#{order.id}</b>. Čim lokal potvrdi, ovde piše za koliko je spremno{order.delivery == null ? ', a cenu dostave vam javljamo' : ''}, pa beep beep, krećemo na <b>{order.address}</b>.
       </p>
+      {/* potvrda uživo: šta je uradio lokal, i otkazivanje dok lokal ne prihvati */}
+      <div className="mt-6">
+        <OrderStatus order={{ id: order.id, status: 'nova' }} />
+      </div>
       <div className="mt-8 flex justify-center gap-3">
         <Button as={Link} href="/nalog" variant="ghost">
           Moje porudžbine

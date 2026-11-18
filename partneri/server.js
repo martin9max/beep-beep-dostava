@@ -20,7 +20,7 @@ process.env.TZ ||= 'Europe/Belgrade' // vreme kao u Negotinu, i kad server radi 
 const { db } = await import('../server/db.js')
 const { checkPassword, recordFailure, tooManyAttempts } = await import('../server/auth.js')
 const { notify } = await import('../server/notify.js')
-const { events } = await import('../server/events.js')
+const { events, online } = await import('../server/events.js')
 const { shopBySlug } = await import('../src/catalog.js')
 const { lineText, rejectMessage, waLink } = await import('../src/lib/order.js')
 
@@ -57,7 +57,7 @@ const customerForShop = (customer) => customer
 function ordersFor(slug) {
   return db
     .prepare(
-      `SELECT o.id, o.customer, o.items_json, o.created_at, o.status order_status, os.status, os.minutes, os.reason, os.updated_at
+      `SELECT o.id, o.customer, o.note, o.items_json, o.created_at, o.status order_status, os.status, os.minutes, os.reason, os.updated_at
        FROM order_shops os JOIN orders o ON o.id = os.order_id
        WHERE os.slug = ? AND o.released = 1 AND o.created_at > datetime('now', 'localtime', ?)
        ORDER BY o.id DESC LIMIT 100`,
@@ -72,6 +72,7 @@ function ordersFor(slug) {
         customer: customerForShop(o.customer),
         lines: part.lines.map((l) => ({ qty: l.qty, name: l.name, variant: l.variant, price: l.price })),
         request: part.request,
+        note: o.note, // opšta napomena kupca (polje na dnu korpe): vide je i lokal i kurir
         sum,
         byBill: part.lines.some((l) => l.price == null),
         status: o.order_status === 'otkazana' ? 'otkazana' : o.status,
@@ -157,7 +158,7 @@ const STATE = { nova: 'još nije odgovorio', prihvaćena: 'prihvaćeno', spremna
  * Kod odbijanja: šta je odbijeno i zašto, stanje ostalih lokala, kupac i dugmad sa gotovom porukom kupcu.
  */
 function ownerMessage(id, slug, status, minutes, reason) {
-  const order = db.prepare('SELECT id, customer, phone, address, items_json, sms_token FROM orders WHERE id = ?').get(id)
+  const order = db.prepare('SELECT id, customer, phone, address, note, items_json, sms_token FROM orders WHERE id = ?').get(id)
   const parts = db.prepare('SELECT slug, status, minutes, reason FROM order_shops WHERE order_id = ?').all(id)
   const shop = nameOf(slug)
   const part = JSON.parse(order.items_json).find((s) => s.slug === slug) ?? { lines: [] }
@@ -204,6 +205,7 @@ function ownerMessage(id, slug, status, minutes, reason) {
       'Odbijeno:',
       ...part.lines.map(lineText),
       ...(part.request ? [`  Napomena za lokal bila je: ${part.request}`] : []),
+      ...(order.note ? [`  Napomena kupca: ${order.note}`] : []),
       '',
       ...(others.length ? ['Ostali lokali u ovoj porudžbini:', ...otherLines] : ['Cela porudžbina je bila samo iz ovog lokala.']),
       '',
@@ -286,11 +288,20 @@ function stream(req, res) {
   res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' })
   res.write('retry: 3000\n\n')
   const onOrders = (slugs) => slugs.includes(acc.slug) && res.write('data: refresh\n\n')
-  const ping = setInterval(() => res.write(': ping\n\n'), 25000)
+  // pamti se da je panel ovog lokala otvoren (za poruku vlasniku i admin) i kad je poslednji put bio na vezi
+  const seen = () => db.prepare("UPDATE shop_accounts SET last_seen = datetime('now', 'localtime') WHERE id = ?").run(acc.id)
+  online.set(acc.slug, (online.get(acc.slug) ?? 0) + 1)
+  seen()
+  const ping = setInterval(() => {
+    res.write(': ping\n\n')
+    seen()
+  }, 25000)
   events.on('orders', onOrders)
   req.on('close', () => {
     clearInterval(ping)
     events.off('orders', onOrders)
+    online.set(acc.slug, Math.max((online.get(acc.slug) ?? 1) - 1, 0))
+    seen()
   })
 }
 

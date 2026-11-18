@@ -3,7 +3,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { db } from './db.js'
 import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
-import { events, ordersChanged } from './events.js'
+import { events, isOnline, ordersChanged } from './events.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
@@ -130,6 +130,17 @@ export async function admin(req, res, next) {
     return res.end()
   }
 
+  // Telegram chat lokala (porudžbine i na Telegram); prazno polje briše
+  if (req.method === 'POST' && url.pathname === '/admin/shop-telegram') {
+    const form = await readForm(req)
+    const chat = (form.get('chat') || '').trim()
+    const ok = !chat || /^-?\d{4,20}$/.test(chat)
+    if (ok) db.prepare('UPDATE shop_accounts SET telegram_chat_id = ? WHERE slug = ?').run(chat, form.get('slug'))
+    res.statusCode = 303
+    res.setHeader('Location', `/admin?tab=lokali&poruka=${encodeURIComponent(ok ? 'Telegram lokala je sačuvan.' : 'Chat id mora biti broj (npr. 123456789).')}`)
+    return res.end()
+  }
+
   if (req.method === 'POST' && url.pathname === '/admin/shop-delete') {
     const form = await readForm(req)
     db.prepare('DELETE FROM shop_accounts WHERE slug = ?').run(form.get('slug'))
@@ -210,6 +221,19 @@ function page(tab, deleted, message) {
   form.inline { display:flex; gap:8px; flex-wrap:wrap; align-items:end; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px }
   form.inline label { display:grid; gap:2px; font-size:13px; color:var(--mute) } form.inline input, form.inline select { padding:7px 8px; border:1px solid var(--line); border-radius:6px }
   .save { background:var(--red); color:#fff; border:0; border-radius:6px; padding:8px 14px; font-weight:700; cursor:pointer }
+  /* telefon: svaki red tabele je kartica, a naziv kolone piše iznad podatka (bez pomeranja levo-desno) */
+  @media (max-width: 760px) {
+    main { padding: 14px 10px 50px }
+    .wrap { overflow: visible; background: none; border: 0 }
+    table { min-width: 0 }
+    table, tbody, tr, td { display: block; width: 100% }
+    thead { display: none }
+    tr { background: #fff; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 6px 0 }
+    tr.st-nova { background: #fff8dc } tr.st-proveri { background: #ffeaea }
+    td { border: 0; padding: 6px 14px }
+    td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--mute) }
+    form.inline { flex-direction: column; align-items: stretch }
+  }
 </style>
 </head>
 <body>
@@ -221,6 +245,13 @@ function page(tab, deleted, message) {
   <nav>${tabs.map(([k, l]) => `<a href="/admin?tab=${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</nav>
   ${body}
 </main>
+<script>
+  // naziv kolone uz svaki podatak (vidi se na telefonu, gde je red tabele kartica)
+  for (const table of document.querySelectorAll('table')) {
+    const heads = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim())
+    for (const row of table.querySelectorAll('tbody tr')) [...row.children].forEach((td, i) => td.setAttribute('data-label', heads[i] || ''))
+  }
+</script>
 ${tab === 'porudzbine' ? `<script>
   // nova porudžbina (ili promena kod lokala) osveži listu odmah; ne dok vlasnik bira status u padajućem meniju
   const live = new EventSource('/admin/stream')
@@ -286,7 +317,7 @@ function orders() {
       const shopState = Object.fromEntries(db.prepare('SELECT slug, status, minutes, reason FROM order_shops WHERE order_id = ?').all(o.id).map((r) => [r.slug, r]))
       const items = shops
         .map(
-          (s, i) => `<div class="shop">${i + 1}. ${esc(s.name)} ${shopBadge(shopState[s.slug], held)}</div><ul class="items">${s.lines
+          (s, i) => `<div class="shop">${i + 1}. ${esc(s.name)} ${shopBadge(shopState[s.slug], held, o.status)}</div><ul class="items">${s.lines
             .map((l) => `<li>${l.qty}× ${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ''}${l.price == null ? ' (po računu)' : ''}</li>`)
             .join('')}</ul>${s.request ? `<div class="req">${esc(s.request)}</div>` : ''}`,
         )
@@ -309,12 +340,16 @@ function orders() {
 }
 
 /** Stanje dela porudžbine u panelu lokala (samo za lokale koji imaju nalog). */
-function shopBadge(state, held) {
-  if (!state || !db.prepare('SELECT 1 FROM shop_accounts WHERE slug = ?').get(state.slug)) return ''
+function shopBadge(state, held, orderStatus) {
+  if (!state) return ''
+  if (orderStatus === 'otkazana') return '<span class="ss">otkazano</span>'
+  if (!db.prepare('SELECT 1 FROM shop_accounts WHERE slug = ?').get(state.slug)) return '<span class="ss odbijeno">nema nalog u panelu: pozvati</span>'
   if (held) return '<span class="ss">lokal još ne vidi</span>'
   const label = SHOP_LABEL[state.status] ?? state.status
   const extra = state.status === 'prihvaćena' ? `, ${state.minutes} min` : state.status === 'odbijena' ? `: ${esc(state.reason)}` : ''
-  return `<span class="ss ${label}">${esc(label)}${extra}</span>`
+  // porudžbina čeka, a panel lokala nije otvoren: verovatno je ne vidi
+  const closed = state.status === 'nova' && !isOnline(state.slug) ? ' <span class="ss odbijeno">panel zatvoren</span>' : ''
+  return `<span class="ss ${label}">${esc(label)}${extra}</span>${closed}`
 }
 
 /** Ocena kupca: preuzete, otkazane i nepreuzete porudžbine (interno, kupac je ne vidi). */
@@ -335,13 +370,21 @@ function shopAccounts() {
       <label>Lozinka (bar 8 znakova)<input name="password" type="text" required minlength="8"></label>
       <button class="save">Sačuvaj nalog</button>
     </form>
-    <p style="color:var(--mute);font-size:14px;margin:-4px 0 14px">Lokal se prijavljuje na <b>partneri.beepbeepdostava.rs</b>. Ako lokal već ima nalog, ovo mu menja korisničko ime i lozinku i odjavljuje ga sa svih uređaja.</p>
+    <p style="color:var(--mute);font-size:14px;margin:-4px 0 14px">Lokal se prijavljuje na <b>beepbeepdostava.rs/partneri</b> (dugme Partneri gore na sajtu). Ako lokal već ima nalog, ovo mu menja korisničko ime i lozinku i odjavljuje ga sa svih uređaja.</p>
+    ${SHOPS.filter((s) => !has.has(s.slug)).length ? `<p class="notice" style="background:#fff3c4;border-color:#f1d08a;color:#6b4100">Bez naloga u panelu (ne vide porudžbine, treba ih zvati): ${SHOPS.filter((s) => !has.has(s.slug)).map((s) => esc(s.name)).join(', ')}</p>` : ''}
     ${table(
-      ['Lokal', 'Korisničko ime', 'Napravljen', 'Prijavljen uređaja', ''],
+      ['Lokal', 'Korisničko ime', 'Panel', 'Prijavljen uređaja', 'Telegram lokala (chat id)', ''],
       accounts.map((a) => {
         const devices = db.prepare('SELECT COUNT(*) n FROM shop_sessions WHERE account_id = ? AND expires_at > ?').get(a.id, Date.now()).n
-        return `<tr><td>${esc(shopBySlug(a.slug)?.name ?? a.slug)}</td><td>${esc(a.username)}</td><td>${esc(a.created_at)}</td><td>${devices}</td>
+        const panel = isOnline(a.slug)
+          ? '<span class="on">otvoren sada</span>'
+          : `<span class="off">zatvoren${a.last_seen ? `<br><small>poslednji put ${esc(a.last_seen)}</small>` : '<br><small>još nije otvaran</small>'}</span>`
+        return `<tr><td>${esc(shopBySlug(a.slug)?.name ?? a.slug)}</td><td>${esc(a.username)}</td><td>${panel}</td><td>${devices}</td>
+          <td><form method="post" action="/admin/shop-telegram" class="tg"><input type="hidden" name="slug" value="${esc(a.slug)}">
+            <input name="chat" value="${esc(a.telegram_chat_id)}" placeholder="npr. 123456789" inputmode="numeric" style="width:130px"> <button class="save">Sačuvaj</button></form></td>
           <td><form method="post" action="/admin/shop-delete" onsubmit="return confirm('Obrisati nalog lokala?')"><input type="hidden" name="slug" value="${esc(a.slug)}"><button class="del">Obriši</button></form></td></tr>`
       }),
-    )}`
+    )}
+    <p style="color:var(--mute);font-size:14px;margin-top:10px">Telegram lokala: kad je upisan, lokal svaku novu porudžbinu dobija i na Telegram (zvoni i kad telefon spava).
+    Lokal prvo pošalje bilo koju poruku botu <b>@beepbeepdostavanegotin_bot</b>, a broj (chat id) vam javlja administrator sajta.</p>`
 }

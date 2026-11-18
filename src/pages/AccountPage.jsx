@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
+import OrderStatus from '../components/OrderStatus'
 import Field, { FormError } from '../components/Field'
 import { apiCall, isBusiness, useAuth } from '../lib/auth'
 import { formatDin } from '../lib/order'
@@ -9,6 +10,8 @@ import { PlaceField } from '../components/Address'
 
 const STATUS_COLORS = {
   nova: 'bg-[#fff3c4] text-[#7a5a00]',
+  primljena: 'bg-[#fff3c4] text-[#7a5a00]',
+  'nije preuzeta': 'bg-line text-mute',
   prihvaćena: 'bg-ink/10 text-deep',
   'u dostavi': 'bg-ink text-white',
   isporučena: 'bg-[#dff5dc] text-[#1d6a3a]',
@@ -104,9 +107,16 @@ export default function AccountPage() {
                     </p>
                   </div>
                 ))}
+                {o.note && <p className="mt-2 text-sm italic text-mute">Napomena: „{o.note}“</p>}
                 <p className="mt-3 border-t border-line pt-3 text-sm text-mute">
                   {o.address} · <b className="text-deep">{formatDin(o.total)} din</b>{o.delivery == null && ' + dostava (javlja dostavljač)'}
                 </p>
+                {/* porudžbina u toku: potvrda lokala uživo i otkazivanje */}
+                {!['isporučena', 'otkazana', 'nije preuzeta'].includes(o.status) && (
+                  <div className="mt-3">
+                    <OrderStatus order={o} onChange={(next) => setOrders((list) => list.map((x) => (x.id === next.id ? { ...x, ...next } : x)))} />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

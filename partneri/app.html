@@ -287,7 +287,8 @@ function card(o) {
     <div class="customer">Kupac: <b>${esc(o.customer)}</b></div>
     <div class="who">Po porudžbinu dolazi Beep Beep dostavljač.</div>
     <ul>${lines}</ul>
-    ${o.request ? `<div class="req"><b>Napomena:</b> ${esc(o.request)}</div>` : ''}
+    ${o.request ? `<div class="req"><b>Napomena za lokal:</b> ${esc(o.request)}</div>` : ''}
+    ${o.note ? `<div class="req"><b>Napomena kupca:</b> ${esc(o.note)}</div>` : ''}
     <div class="sum"><span>Ukupno za lokal</span><span>${din(o.sum)} din${o.byBill ? ' + po računu' : ''}</span></div>
     ${actions}
   </article>`

@@ -135,7 +135,7 @@ export function RegisterPage({ next, business = false }) {
           required
           maxLength={200}
           placeholder={place && place !== 'Negotin' ? 'Ulica i broj ili opis kuće (npr. kod škole, zelena kapija)' : 'npr. Hajduk Veljkova 10'}
-          hint="Ako živite na selu, mesto izaberite gore, a ovde upišite ulicu ili opis kuće."
+          hint="Broj kuće upišite ovde, ne u dodatno polje ispod. Na selu može i opis kuće."
         />
         <Field className="sm:col-span-2" label="Dodatno o adresi (nije obavezno)" name="addressNote" maxLength={200} placeholder="Sprat, stan, interfon, zelena kapija..." />
         <div className="sm:col-span-2">
