@@ -1,15 +1,29 @@
 import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
+import { prerenderToNodeStream } from 'react-dom/static'
 import App from './App'
 import { FAQ, PHONE, SITE } from './data'
+import { setServerHref } from './lib/router'
 
-/** HTML stranice za pretraživače (pravi se pri buildu, vidi scripts/prerender.mjs). */
-export function render() {
-  return renderToString(
+export { indexedPaths, pageMeta } from './seo'
+
+/**
+ * HTML jedne strane za pretraživače (pravi se pri buildu, vidi scripts/prerender.mjs).
+ * Početna se pravi odmah (pregledač je "oživi"), a ostale strane čekaju da se učitaju njihovi delovi
+ * (podstranice se učitavaju posebno), da bi u HTML-u bio ceo sadržaj, npr. ceo meni lokala.
+ */
+export async function render(url = '/') {
+  setServerHref(url)
+  const app = (
     <StrictMode>
       <App />
-    </StrictMode>,
+    </StrictMode>
   )
+  if (url === '/') return renderToString(app)
+  const { prelude } = await prerenderToNodeStream(app)
+  let html = ''
+  for await (const chunk of prelude) html += chunk
+  return html
 }
 
 /** Structured data (schema.org) za Google: firma i česta pitanja. */

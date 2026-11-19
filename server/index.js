@@ -32,18 +32,34 @@ async function staticFiles(req, res) {
   const pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname)
   let file = path.join(dist, path.normalize(pathname))
   if (!file.startsWith(dist)) file = dist
-  const info = await stat(file).catch(() => null)
-  // stranice kao /naruci nemaju svoj fajl: dobijaju index.html, a React prikaže pravu stranicu
-  if (!info || info.isDirectory()) file = path.join(dist, 'index.html')
+  let info = await stat(file).catch(() => null)
+  // strane sa gotovim HTML-om (npr. /lokal/kafanica -> dist/lokal/kafanica/index.html, vidi scripts/prerender.mjs)
+  if (info?.isDirectory()) {
+    file = path.join(file, 'index.html')
+    info = await stat(file).catch(() => null)
+  }
+  // ostale stranice (npr. /korpa, /prijava) nemaju svoj fajl: dobijaju index.html, a React prikaže pravu stranicu
+  if (!info) file = path.join(dist, 'index.html')
   const ext = path.extname(file)
   res.setHeader('Content-Type', TYPES[ext] || 'application/octet-stream')
   if (pathname.startsWith('/assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
-  createReadStream(file).pipe(res)
+  createReadStream(file)
+    .on('error', () => {
+      // fajl ne može da se pročita: greška umesto pada servera
+      if (!res.headersSent) res.statusCode = 404
+      res.end()
+    })
+    .pipe(res)
 }
 
 createServer((req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff')
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  // www.beepbeepdostava.rs -> beepbeepdostava.rs (jedna adresa sajta za Google)
+  if ((req.headers.host || '').startsWith('www.')) {
+    res.writeHead(301, { Location: `https://${req.headers.host.slice(4)}${req.url}` })
+    return res.end()
+  }
   if ((req.headers.host || '').startsWith('partneri.') || /^\/partneri(\/|$|\?)/.test(req.url)) return partneri(req, res)
   api(req, res, () => admin(req, res, () => staticFiles(req, res)))
 }).listen(PORT, () => {

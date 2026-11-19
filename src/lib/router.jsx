@@ -55,12 +55,18 @@ export function navigate(to, { replace = false, scroll = true } = {}) {
   if (scroll && !to.includes('#')) scrollToY(0)
 }
 
-/** Trenutna putanja i parametri (?k=pica). Pri prerenderu je uvek početna. */
+// adresa strane koja se pravi pri prerenderu (scripts/prerender.mjs pravi gotov HTML za svaku stranu)
+let serverHref = '/'
+export const setServerHref = (href) => {
+  serverHref = href
+}
+
+/** Trenutna putanja i parametri (?k=pica). Pri prerenderu: strana koja se upravo pravi. */
 export function useRoute() {
   const href = useSyncExternalStore(
     subscribe,
     () => location.pathname + location.search,
-    () => '/',
+    () => serverHref,
   )
   const url = new URL(href, 'http://x')
   const path = BASE && url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname

@@ -84,7 +84,8 @@ export default function App() {
             ) : (
               <PageShell>
                 {/* blag prelaz između stranica: nova stranica uđe odozdo umesto da samo "iskoči" */}
-                <motion.div key={path} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
+                {/* u gotovom HTML-u za Google (prerender) bez animacije, da tekst ne bude sakriven */}
+                <motion.div key={path} initial={typeof window === 'undefined' ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE }}>
                   <Suspense fallback={<div className="min-h-[60vh]" />}>
                     <Page path={path} query={query} />
                   </Suspense>
