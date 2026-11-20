@@ -75,5 +75,5 @@ export const mapsLink = (address, place) =>
  */
 export const addressProblem = (address, place) =>
   zoneOf(place) === 'grad' && !/\d|\bbb\b/i.test(address || '')
-    ? 'Upišite i broj kuće u adresu (npr. Dr Stanoja Nešića 12). Ako kuća nema broj, upišite bb.'
+    ? 'Upišite i broj kuće u adresu (npr. Hajduk Veljkova 10). Ako kuća nema broj, upišite bb.'
     : ''

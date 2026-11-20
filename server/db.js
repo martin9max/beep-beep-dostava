@@ -143,6 +143,25 @@ if (process.env.SHOP_ACCOUNTS) {
   }
 }
 
+// SHOP_PASSWORDS_RESET=<oznaka>: lozinke iz SHOP_ACCOUNTS zamenjuju postojeće (npr. kad se sve lozinke lokala menjaju).
+// Izvršava se jednom za svaku oznaku; svi uređaji lokala se odjave, pa se lokali prijavljuju novim lozinkama.
+const pwReset = process.env.SHOP_PASSWORDS_RESET
+if (pwReset && process.env.SHOP_ACCOUNTS && meta('shop_passwords_reset') !== pwReset) {
+  try {
+    const accounts = Object.entries(JSON.parse(process.env.SHOP_ACCOUNTS))
+    db.exec('BEGIN')
+    for (const [slug, [username, hash]] of accounts) {
+      db.prepare('UPDATE shop_accounts SET username = ?, password_hash = ? WHERE slug = ?').run(username, hash, slug)
+      db.prepare('DELETE FROM shop_sessions WHERE account_id = (SELECT id FROM shop_accounts WHERE slug = ?)').run(slug)
+    }
+    setMeta('shop_passwords_reset', pwReset)
+    db.exec('COMMIT')
+    console.log(`Lozinke lokala zamenjene (${accounts.length}, ${pwReset}), lokali su odjavljeni.`)
+  } catch (err) {
+    console.error('SHOP_PASSWORDS_RESET nije uspeo:', err.message)
+  }
+}
+
 // RESET_ORDERS_ONCE=<oznaka>: briše sve porudžbine i vraća brojač na početak (sledeća je #1).
 // Izvršava se jednom za svaku oznaku; nalozi kupaca i lokala ostaju.
 const reset = process.env.RESET_ORDERS_ONCE
