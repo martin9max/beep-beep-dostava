@@ -261,20 +261,20 @@
     transform: translate3d(calc(-100% / var(--copies, 2)), 0, 0);
   }
 }
-/* traka partnera: trajanje = širina kruga (--units, u širokim poljima) x vreme za jedno polje, oko 50 px/s */
+/* traka partnera: trajanje = širina kruga (--units, u širokim poljima) x vreme za jedno polje, oko 75 px/s (1,5 puta brže od prvobitnih 50) */
 .marquee {
   will-change: transform;
   backface-visibility: hidden;
-  animation: slide calc(var(--units, 8) * 5.4s) linear infinite;
+  animation: slide calc(var(--units, 8) * 3.6s) linear infinite;
 }
 @media (min-width: 640px) {
   .marquee {
-    animation-duration: calc(var(--units, 8) * 7.3s);
+    animation-duration: calc(var(--units, 8) * 4.87s);
   }
 }
 @media (min-width: 1024px) {
   .marquee {
-    animation-duration: calc(var(--units, 8) * 8.3s);
+    animation-duration: calc(var(--units, 8) * 5.53s);
   }
 }
 @media (prefers-reduced-motion: reduce) {
