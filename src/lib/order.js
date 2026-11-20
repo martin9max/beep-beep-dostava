@@ -46,7 +46,7 @@ export const rejectMessage = ({ id, shop, reason, lines, partial }) =>
 const MAX_LINK = 1250 // + dugme za SMS (kratak link) i dalje staje
 
 /** Spisak porudžbine za kupca: lokali, stavke sa cenama, dostava i ukupno (najviše `max` stavki) */
-function orderSummary({ id, shops, total, delivery }, max = Infinity) {
+function orderSummary({ shops, total, delivery }, max = Infinity) {
   const lines = []
   let shown = 0
   let hidden = 0
@@ -67,11 +67,16 @@ function orderSummary({ id, shops, total, delivery }, max = Infinity) {
   }
   if (hidden) lines.push(`i još ${hidden} ${hidden === 1 ? 'stavka' : 'stavki'}`)
   const byBill = shops.some((s) => s.lines.some((l) => l.price == null))
+  // cena same porudžbine (stavke), pa dodatna zaustavljanja, dostava i ukupno (bez broja porudžbine, kupcu ne treba)
+  const goods = Math.round(shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0) * 100) / 100
+  const stops = shops.length - 1
   return [
-    `Vaša porudžbina${id ? ` #${id}` : ''}:`,
+    'Vaša porudžbina:',
     ...lines,
+    '',
+    `Cena porudžbine: ${formatDin(goods)} din${byBill ? ' + stavke po računu' : ''}`,
+    ...(stops > 0 ? [`Dodatno zaustavljanje: ${stops} x ${EXTRA_STOP_PRICE} din = ${formatDin(stops * EXTRA_STOP_PRICE)} din`] : []),
     delivery == null ? 'Dostava: cenu javlja dostavljač' : `Dostava: ${formatDin(delivery)} din`,
-    ...(shops.length > 1 ? [`Dodatna zaustavljanja: ${shops.length - 1} x ${EXTRA_STOP_PRICE} din`] : []),
     `Ukupno: ${formatDin(total)} din${byBill ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
   ].join('\n')
 }
