@@ -9,7 +9,7 @@ import { cancelToShops, sendOwnerOrder, sendToShops } from './owner.js'
 import { checkPassword, createSession, currentUser, destroySession, hashPassword, recordFailure, tooManyAttempts } from './auth.js'
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
-import { deliveryPriceOf } from '../src/data.js'
+import { deliveryPriceOf, extraStopsPrice } from '../src/data.js'
 import { addressProblem, cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
 
 class HttpError extends Error {
@@ -258,7 +258,8 @@ const routes = {
     const delivery = deliveryPriceOf(place) // Negotin 500 din, selo km × 120 din, ostalo null
     // cene marketa imaju pare (npr. 104,99), pa se zbir zaokružuje na dve decimale
     const goods = Math.round(shops.reduce((sum, s) => sum + s.lines.reduce((t, l) => t + (l.price ?? 0) * l.qty, 0), 0) * 100) / 100
-    const total = goods + (delivery ?? 0)
+    // svaki lokal posle prvog je dodatno zaustavljanje (100 din)
+    const total = goods + (delivery ?? 0) + extraStopsPrice(shops.length)
     const customer = customerName(user, asFirm)
     const smsToken = randomBytes(12).toString('base64url')
     // zaštita od lažnih porudžbina: sumnjiva dobija upozorenje za vlasnika, a ograničen nalog ne može da poruči

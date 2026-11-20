@@ -120,7 +120,7 @@ export function TermsPage() {
             <p>
               Dostava u Negotinu košta {formatDin(DELIVERY.city)} dinara. Za sela se plaća {formatDin(DELIVERY.perKm)} dinara po kilometru od
               Negotina, a cenu vidite pri poručivanju čim izaberete mesto. Za mesta koja nisu na spisku cenu dostave javlja dostavljač pre polaska.
-              Svako dodatno zaustavljanje (npr. porudžbina iz više lokala) naplaćuje se posebno.
+              Svako dodatno zaustavljanje (npr. porudžbina iz više lokala) naplaćuje se 100 dinara.
             </p>
             <p>
               Plaćanje je gotovinom dostavljaču prilikom preuzimanja, osim ako se drugačije ne dogovorimo (npr. avans ili premium dostava iz

@@ -127,9 +127,13 @@ export const PREMIUM = {
 // više adresa u jednoj vožnji (napomena u premium kartici i u korpi)
 export const EXTRA_STOP = {
   title: 'Dodatno zaustavljanje',
-  note: 'Svako dodatno zaustavljanje se posebno naplaćuje.',
+  price: 100, // din za svako zaustavljanje posle prvog (npr. porudžbina iz dva lokala = jedno dodatno)
+  note: 'Svako dodatno zaustavljanje se naplaćuje 100 dinara.',
   hint: 'Treba da svratimo na više mesta, od jednog do drugog? Može, u istoj vožnji.',
 }
+
+/** Cena dodatnih zaustavljanja: porudžbina iz više lokala, svaki lokal posle prvog je jedno zaustavljanje. */
+export const extraStopsPrice = (stops) => Math.max(stops - 1, 0) * EXTRA_STOP.price
 
 // recenzije sa Google mapa (prepisane iz originala, samo su dodate kvačice)
 export const REVIEWS_URL = 'https://www.google.com/maps?cid=16704170277850894301'
@@ -211,7 +215,7 @@ export const FAQ_GROUPS = [
     'Cena i plaćanje',
     [
       ['Koliko košta dostava?', 'U Negotinu dostava košta 500 dinara. Za sela se plaća 120 dinara po kilometru od Negotina, a tačnu cenu vidite pri naručivanju, čim izaberete selo.'],
-      ['Može li više adresa u jednoj vožnji?', 'Može. Kurir staje gde god treba, a svako dodatno zaustavljanje se posebno naplaćuje.'],
+      ['Može li više adresa u jednoj vožnji?', 'Može. Kurir staje gde god treba, a svako dodatno zaustavljanje se naplaćuje 100 dinara.'],
     ],
   ],
   [

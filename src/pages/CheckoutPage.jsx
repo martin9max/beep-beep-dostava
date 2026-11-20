@@ -7,7 +7,7 @@ import { Qty } from '../components/MenuItem'
 import { shopBySlug, variantLabel } from '../catalog'
 import { AddressDialog, PinIcon, useDeliveryAddress } from '../components/Address'
 import { deliveryNote, fullAddress } from '../places'
-import { DELIVERY, EXTRA_STOP, PHONE, deliveryPriceOf } from '../data'
+import { DELIVERY, EXTRA_STOP, PHONE, deliveryPriceOf, extraStopsPrice } from '../data'
 import { apiCall, firmAddress, useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
 import { formatDin } from '../lib/order'
@@ -149,6 +149,8 @@ export default function CheckoutPage() {
 function Summary({ cart, place }) {
   const delivery = place ? deliveryPriceOf(place) : undefined
   const note = place ? deliveryNote(place, DELIVERY.perKm) : ''
+  const stops = cart.shops.length - 1 // svaki lokal posle prvog je dodatno zaustavljanje
+  const extra = extraStopsPrice(cart.shops.length)
   return (
     <dl className="grid gap-2 text-[15px]">
       <div className="flex justify-between">
@@ -169,9 +171,18 @@ function Summary({ cart, place }) {
           <dd className="font-semibold">{din(delivery)}</dd>
         </div>
       )}
+      {stops > 0 && (
+        <div className="flex justify-between gap-3">
+          <dt className="text-deep/75">
+            Dodatno zaustavljanje ({stops} × {din(EXTRA_STOP.price)})
+            <span className="block text-[13px] text-mute">kurir svraća u {cart.shops.length} lokala</span>
+          </dt>
+          <dd className="font-semibold">{din(extra)}</dd>
+        </div>
+      )}
       <div className="mt-2 flex items-baseline justify-between border-t border-line pt-3">
         <dt className="font-bold">Ukupno</dt>
-        <dd className="font-serif text-[26px] font-bold">{din(cart.total + (delivery ?? 0))}</dd>
+        <dd className="font-serif text-[26px] font-bold">{din(cart.total + (delivery ?? 0) + extra)}</dd>
       </div>
       {delivery === null && (
         <p className="rounded-lg bg-[#fff3c4] px-3 py-2 text-sm font-semibold text-[#7a5a00]">

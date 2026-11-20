@@ -1,5 +1,8 @@
 export const EASE = [0.2, 0.8, 0.2, 1]
 
+// cena dodatnog zaustavljanja (isto kao EXTRA_STOP.price u data.js; ovde bez uvoza, jer ovaj fajl uvozi i data.js)
+const EXTRA_STOP_PRICE = 100
+
 export const formatDin = (n) => n.toLocaleString('sr-RS')
 
 const cleanPhone = (phone) => phone.replace(/[\s\-/()]/g, '')
@@ -68,6 +71,7 @@ function orderSummary({ id, shops, total, delivery }, max = Infinity) {
     `Vaša porudžbina${id ? ` #${id}` : ''}:`,
     ...lines,
     delivery == null ? 'Dostava: cenu javlja dostavljač' : `Dostava: ${formatDin(delivery)} din`,
+    ...(shops.length > 1 ? [`Dodatna zaustavljanja: ${shops.length - 1} x ${EXTRA_STOP_PRICE} din`] : []),
     `Ukupno: ${formatDin(total)} din${byBill ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
   ].join('\n')
 }
@@ -119,7 +123,7 @@ export function formatOrder({ id, shops, customer, address, map, phone, note, to
       ...(shop.request ? [`  Napomena za lokal: ${shop.request}`] : []),
     ]),
     '',
-    ...(shops.length > 1 ? [`Više lokala: ${shops.length} (dodatna zaustavljanja: ${shops.length - 1})`] : []),
+    ...(shops.length > 1 ? [`Više lokala: ${shops.length}, dodatna zaustavljanja: ${shops.length - 1} x ${EXTRA_STOP_PRICE} din = ${formatDin((shops.length - 1) * EXTRA_STOP_PRICE)} din`] : []),
     ...(note ? [`Napomena: ${note}`] : []),
     delivery == null ? `Dostava: ${zone}, cenu javlja dostavljač kupcu` : `Dostava: ${zone}, ${formatDin(delivery)} din`,
     `Ukupno: ${formatDin(total)} din${shops.some((s) => s.lines.some((l) => l.price == null)) ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
