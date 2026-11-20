@@ -5,6 +5,7 @@ import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
 import { events, isOnline, ordersChanged } from './events.js'
 import { pushDevices } from './push.js'
+import { topPages, visitorsIn, visitsByDay } from './visits.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
@@ -167,6 +168,9 @@ async function readForm(req) {
 function page(tab, deleted, message) {
   const count = (sql) => db.prepare(sql).get().n
   const stats = [
+    ['Posetilaca danas', visitorsIn(1)],
+    ['Posetilaca 7 dana', visitorsIn(7)],
+    ['Posetilaca 30 dana', visitorsIn(30)],
     ['Korisnika', count('SELECT COUNT(*) n FROM users')],
     ['Novih danas', count("SELECT COUNT(*) n FROM users WHERE date(created_at) = date('now','localtime')")],
     ['Prijava danas', count("SELECT COUNT(*) n FROM logins WHERE success = 1 AND kind = 'prijava' AND date(created_at) = date('now','localtime')")],
@@ -179,8 +183,9 @@ function page(tab, deleted, message) {
     ['korisnici', 'Korisnici'],
     ['prijave', 'Prijave'],
     ['lokali', 'Lokali (panel)'],
+    ['posete', 'Posete'],
   ]
-  const body = { porudzbine: orders, korisnici: users, prijave: logins, lokali: shopAccounts }[tab]?.() ?? ''
+  const body = { porudzbine: orders, korisnici: users, prijave: logins, lokali: shopAccounts, posete: visits }[tab]?.() ?? ''
 
   return `<!doctype html>
 <html lang="sr-Latn">
@@ -218,6 +223,7 @@ function page(tab, deleted, message) {
   .st-proveri { background:#ffe3e3 } .flags { margin:6px 0 0; padding-left:18px; color:#9b1218; font-size:13px } .flags .info { color:#8a5a00 }
   .release { background:#1d7a46; color:#fff; border:0; border-radius:6px; padding:5px 10px; font-weight:700; cursor:pointer; margin-top:6px }
   .ss { font-size:12px; border-radius:999px; padding:1px 8px; background:#eef2fa; white-space:nowrap } .ss.prihvaćeno, .ss.spremno { background:#dff5dc; color:#1d6a3a } .ss.odbijeno { background:#ffe3e3; color:#9b1218 }
+  .bar { height:10px; border-radius:5px; background:var(--blue); min-width:2px } .barwrap { width:100%; min-width:80px }
   .trust { font-weight:700; white-space:nowrap } .trust.ok { color:#1d7a46 } .trust.info { color:#8a5a00 } .trust.check, .trust.block { color:var(--red) }
   form.inline { display:flex; gap:8px; flex-wrap:wrap; align-items:end; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px }
   form.inline label { display:grid; gap:2px; font-size:13px; color:var(--mute) } form.inline input, form.inline select { padding:7px 8px; border:1px solid var(--line); border-radius:6px }
@@ -234,6 +240,12 @@ function page(tab, deleted, message) {
     td { border: 0; padding: 6px 14px }
     td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--mute) }
     form.inline { flex-direction: column; align-items: stretch }
+    /* tabele poseta ostaju zbijene tabele i na telefonu (30 redova kao kartice bi bilo predugačko) */
+    .keep .wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line) }
+    .keep table { display: table } .keep thead { display: table-header-group } .keep tbody { display: table-row-group }
+    .keep tr { display: table-row; border: 0; border-radius: 0; margin: 0; padding: 0; background: none }
+    .keep td { display: table-cell; width: auto; padding: 6px 10px; border-bottom: 1px solid var(--line) }
+    .keep td::before { content: none !important }
   }
 </style>
 </head>
@@ -390,4 +402,34 @@ function shopAccounts() {
     )}
     <p style="color:var(--mute);font-size:14px;margin-top:10px">Telegram lokala: kad je upisan, lokal svaku novu porudžbinu dobija i na Telegram (zvoni i kad telefon spava).
     Lokal prvo pošalje bilo koju poruku botu <b>@beepbeepdostavanegotin_bot</b>, a broj (chat id) vam javlja administrator sajta.</p>`
+}
+
+// naziv strane za tabelu poseta: /lokal/kafanica -> "Meni: Kafanica"
+const pageName = (path) => {
+  if (path === '/') return 'Početna'
+  const [, first, second] = path.split('/')
+  if (first === 'lokal') return `Meni: ${shopBySlug(second)?.name ?? second}`
+  if (first === 'naruci') return `Naruči${second ? `: ${second}` : ''}`
+  return { radio: 'Radio', korpa: 'Korpa', nalog: 'Moj nalog', prijava: 'Prijava', registracija: 'Registracija', uslovi: 'Uslovi korišćenja', privatnost: 'Politika privatnosti' }[first] ?? path
+}
+
+/** Posete sajta: po danima (30 dana) i najposećenije strane. Bez kolačića, vidi server/visits.js. */
+function visits() {
+  const days = visitsByDay(30)
+  const max = Math.max(1, ...days.map((d) => d.visitors))
+  const pages = topPages(30)
+  const maxP = Math.max(1, ...pages.map((p) => p.n))
+  const bar = (n, m) => `<div class="barwrap"><div class="bar" style="width:${Math.round((n / m) * 100)}%"></div></div>`
+  const date = (d) => `${d.slice(8, 10)}.${d.slice(5, 7)}.`
+  return `<div class="keep"><p style="color:var(--mute);font-size:14px;margin:0 0 12px">Posetilac je jedan čovek (uređaj) u toku jednog dana; isti čovek dva dana se broji dvaput. Roboti (Google, Facebook...) se ne broje. Bez kolačića, IP adrese se ne čuvaju.</p>
+    <h3 style="margin:18px 0 8px">Poslednjih 30 dana</h3>
+    ${table(
+      ['Dan', 'Posetilaca', '', 'Otvaranja strana'],
+      days.map((d) => `<tr><td>${date(d.day)}</td><td><b>${d.visitors}</b></td><td>${bar(d.visitors, max)}</td><td>${d.views}</td></tr>`),
+    )}
+    <h3 style="margin:22px 0 8px">Najposećenije strane (30 dana)</h3>
+    ${table(
+      ['Strana', 'Otvaranja', ''],
+      pages.map((p) => `<tr><td>${esc(pageName(p.path))}<br><small style="color:var(--mute)">${esc(p.path)}</small></td><td><b>${p.n}</b></td><td>${bar(p.n, maxP)}</td></tr>`),
+    )}</div>`
 }

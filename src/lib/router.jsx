@@ -98,7 +98,23 @@ export function Link({ href, onClick, ...rest }) {
  */
 export function SectionLink({ hash, onClick, ...rest }) {
   const { path } = useRoute()
-  if (path === '/') return <a href={hash} onClick={onClick} {...rest} />
+  // na početnoj: sajt sam skroluje do dela (a "Početna" na sam vrh). Ne oslanja se na pregledač, jer Safari
+  // ne skroluje kad adresa već ima isti #deo (npr. drugi klik na "Početna"), pa je izgledalo da link ne radi.
+  if (path === '/')
+    return (
+      <a
+        href={hash}
+        onClick={(e) => {
+          onClick?.(e)
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+          e.preventDefault()
+          if (hash === '#pocetna') window.scrollTo({ top: 0, behavior: 'smooth' })
+          else document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+          history.replaceState(history.state, '', hash)
+        }}
+        {...rest}
+      />
+    )
   return (
     <a
       href={withBase('/' + hash)}

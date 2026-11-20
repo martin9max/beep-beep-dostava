@@ -32,9 +32,9 @@ export default function Header() {
             <Logo />
           </Link>
         ) : (
-          <a href="#pocetna" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[15px] min-[400px]:text-[17px] sm:gap-2.5 sm:text-[25px]">
+          <SectionLink hash="#pocetna" onClick={close} className="flex min-w-0 items-center gap-2 whitespace-nowrap text-[15px] min-[400px]:text-[17px] sm:gap-2.5 sm:text-[25px]">
             <Logo />
-          </a>
+          </SectionLink>
         )}
 
         <nav aria-label="Glavna navigacija" className="hidden gap-0.5 xl:flex">

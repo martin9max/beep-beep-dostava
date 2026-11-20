@@ -16,6 +16,7 @@ const { admin } = await import('./admin.js')
 const { partneri } = await import('../partneri/server.js')
 // porudžbine koje su čekale potvrdu lokala dok se server ponovo pokretao dobijaju svoj rok od 5 minuta ponovo
 const { resumePending } = await import('./owner.js')
+const { recordVisit } = await import('./visits.js')
 const { db } = await import('./db.js')
 resumePending()
 
@@ -41,6 +42,8 @@ async function staticFiles(req, res) {
   // ostale stranice (npr. /korpa, /prijava) nemaju svoj fajl: dobijaju index.html, a React prikaže pravu stranicu
   if (!info) file = path.join(dist, 'index.html')
   const ext = path.extname(file)
+  // poseta strane (za statistiku u adminu): samo kad pregledač otvara stranu, ne za slike, skripte i sl.
+  if (ext === '.html' && !path.extname(pathname) && /text\/html/.test(req.headers.accept || '')) recordVisit(req, pathname)
   res.setHeader('Content-Type', TYPES[ext] || 'application/octet-stream')
   if (pathname.startsWith('/assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
   createReadStream(file)

@@ -8,7 +8,7 @@ import { usePageTitle } from './PageShell'
 // (npr. nova usluga, plaćanje karticom, drugi hosting), treba promeniti i ovaj tekst i datum ispod.
 // Pre objave je dobro da ga pogleda pravnik; podaci o firmi se upisuju u BUSINESS.legal (src/data.js).
 
-const UPDATED = '15. novembar 2026.'
+const UPDATED = '20. novembar 2026.'
 const tel = PHONE.replace(/\s/g, '')
 const operator = BUSINESS.legal || `${SITE.name}, ${BUSINESS.address}`
 
@@ -255,6 +255,11 @@ export function PrivacyPage() {
               <li>
                 <b>Podaci o prijavama:</b> vreme prijave, registracije i odjave, IP adresa i vrsta uređaja i pregledača. Ovo služi za zaštitu
                 naloga od neovlašćenog pristupa.
+              </li>
+              <li>
+                <b>Statistika poseta:</b> koliko ljudi je dnevno otvorilo sajt i koje strane. Bez kolačića: posetilac se
+                prepoznaje samo u okviru jednog dana, po šifri koja se svaki dan menja, a IP adresa se ne čuva, pa se iz
+                statistike ne može saznati ko je posetio sajt.
               </li>
             </ul>
             <p>Ne prikupljamo podatke o platnim karticama i ne koristimo kolačiće za oglase ni za praćenje posetilaca.</p>
