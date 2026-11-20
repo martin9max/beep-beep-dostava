@@ -36,7 +36,7 @@ export function structuredData(siteUrl) {
     description: SITE.description,
     url: `${siteUrl}/`,
     telephone: `+381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`,
-    image: `${siteUrl}/og-image.png`,
+    image: `${siteUrl}/og-logo.png`,
     logo: `${siteUrl}/icon-512.png`,
     address: {
       '@type': 'PostalAddress',

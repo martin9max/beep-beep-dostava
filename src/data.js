@@ -7,8 +7,8 @@ export const PHONE = '064 44 77 2 77'
 export const SITE = {
   name: 'Beep Beep Dostava Negotin',
   title: 'Beep Beep Dostava Negotin | Hrana, lekovi, cveće, torte i sve ostalo do vrata',
-  description:
-    'Beep Beep dostava od 2020. godine: hrana, piće, namirnice, lekovi, cveće, torte i pokloni. Negotin, okolna sela i šire, sve u termo kutiji. Pozovite 064 44 77 2 77.',
+  // opis ispod naslova u Google pretrazi (i u pregledu linka pri deljenju)
+  description: 'Prva i prava dostava u Negotinu i okolini, od 5. decembra 2020. Dostava hrane, pića, namirnica, lekova, poklona i još mnogo toga.',
   city: 'Negotin',
   postalCode: '19300',
 }
