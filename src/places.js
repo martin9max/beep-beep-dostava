@@ -65,9 +65,26 @@ export function guessPlace(address) {
 export const fullAddress = (address, place) =>
   place && !normalize(address).includes(normalize(place)) ? `${address}, ${place}` : address
 
-/** Link za Google mape (kurir otvara na telefonu). */
-export const mapsLink = (address, place) =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${fullAddress(address, place)}, Srbija`)}`
+/**
+ * Link za Google mape (kurir otvara na telefonu). Ako je kupac poslao tačnu lokaciju sa telefona, pin je baš tu;
+ * inače Google traži adresu po tekstu, a za sela se dodaje "Negotin" da ne nađe istoimeno selo drugde u Srbiji
+ * (na selu ulice i brojevi često nisu na Google mapama, zato je tačna lokacija mnogo bolja).
+ */
+export const mapsLink = (address, place, coords) => {
+  if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) return coordsLink(coords.lat, coords.lng)
+  const village = zoneOf(place) === 'selo' && VILLAGES.some((v) => normalize(v) === normalize(place || ''))
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${fullAddress(address, place)}${village ? ', Negotin' : ''}, Srbija`)}`
+}
+
+/** Pin na tačnim koordinatama (lokacija sa telefona kupca). */
+export const coordsLink = (lat, lng) => `https://www.google.com/maps?q=${lat.toFixed(6)},${lng.toFixed(6)}`
+
+/** Koordinate iz pregledača: brojevi u granicama Srbije (inače se ne prihvataju). */
+export const cleanCoords = (lat, lng) => {
+  const a = Number(lat)
+  const b = Number(lng)
+  return Number.isFinite(a) && Number.isFinite(b) && a > 41.8 && a < 46.3 && b > 18.8 && b < 23.1 ? { lat: a, lng: b } : null
+}
 
 /**
  * U Negotinu adresa mora imati broj kuće (ili "bb" ako ga nema), da ga kupac ne bi upisao samo u napomenu

@@ -99,6 +99,18 @@ if (!orderColumns.includes('released')) db.exec('ALTER TABLE orders ADD COLUMN r
 // owner_sent: duga poruka vlasniku je poslata (čeka se da lokal potvrdi, vidi server/owner.js); map_link: Google mapa adrese
 if (!orderColumns.includes('owner_sent')) db.exec('ALTER TABLE orders ADD COLUMN owner_sent INTEGER NOT NULL DEFAULT 1')
 if (!orderColumns.includes('map_link')) db.exec("ALTER TABLE orders ADD COLUMN map_link TEXT NOT NULL DEFAULT ''")
+// tačna lokacija (GPS sa telefona kupca): uz porudžbinu, i sačuvana uz kućnu adresu kupca za sledeći put
+if (!orderColumns.includes('lat')) {
+  db.exec('ALTER TABLE orders ADD COLUMN lat REAL')
+  db.exec('ALTER TABLE orders ADD COLUMN lng REAL')
+}
+{
+  const cols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name)
+  if (!cols.includes('lat')) {
+    db.exec('ALTER TABLE users ADD COLUMN lat REAL')
+    db.exec('ALTER TABLE users ADD COLUMN lng REAL')
+  }
+}
 
 // panel za lokale (partneri/): nalozi lokala, njihove prijave i stanje svakog dela porudžbine po lokalu
 db.exec(`

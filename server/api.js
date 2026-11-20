@@ -10,7 +10,7 @@ import { checkPassword, createSession, currentUser, destroySession, hashPassword
 import { findItem, priceOf, shopBySlug, variantLabel } from '../src/catalog.js'
 import { etaButtons, formatOrder, isValidPhone, normalizePhone } from '../src/lib/order.js'
 import { deliveryPriceOf, extraStopsPrice } from '../src/data.js'
-import { addressProblem, cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
+import { addressProblem, cleanCoords, cleanPlace, fullAddress as joinAddress, mapsLink, zoneOf } from '../src/places.js'
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -34,6 +34,7 @@ const publicUser = (u) => ({
   address: u.address,
   place: u.place,
   addressNote: u.address_note,
+  hasLocation: u.lat != null, // tačna lokacija kuće je sačuvana (iz korpe, sa telefona)
   kind: u.kind === 'firma' ? 'firma' : 'kupac',
   company: u.company || '',
   pib: u.pib || '',
@@ -184,6 +185,8 @@ const routes = {
     db.prepare('UPDATE users SET name = ?, surname = ?, email = ?, address = ?, place = ?, address_note = ? WHERE id = ?').run(
       p.name, p.surname, p.email, p.address, p.place, p.addressNote, user.id,
     )
+    // nova adresa: stara tačna lokacija više ne važi
+    if (p.address !== user.address || p.place !== user.place) db.prepare('UPDATE users SET lat = NULL, lng = NULL WHERE id = ?').run(user.id)
 
     return { user: publicUser(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)) }
   },
@@ -251,6 +254,11 @@ const routes = {
     const addressNote = custom ? text(body.addressNote) : base.note
     if (!place) fail(400, 'Izaberite mesto za dostavu (Negotin ili selo).')
     if (custom && addressProblem(address, place)) fail(400, addressProblem(address, place))
+    // tačna lokacija: poslata sada iz korpe, ili ranije sačuvana uz kućnu adresu (samo za kućnu adresu)
+    const home = !custom && !asFirm
+    const sent = cleanCoords(body.lat, body.lng)
+    const coords = sent ?? (home && user.lat != null ? { lat: user.lat, lng: user.lng } : null)
+    if (sent && home) db.prepare('UPDATE users SET lat = ?, lng = ? WHERE id = ?').run(sent.lat, sent.lng, user.id)
     const fullAddress = joinAddress(address, place) + (addressNote ? ` (${addressNote})` : '')
     const note = text(body.note, 500)
     // cena dostave se računa iz mesta, ne iz browsera
@@ -267,8 +275,8 @@ const routes = {
     if (risk.blocked) fail(403, 'Poručivanje preko sajta je privremeno ograničeno za ovaj nalog. Pozovite nas na 064 44 77 2 77 i rado ćemo primiti porudžbinu telefonom.')
 
     const { lastInsertRowid: id } = db
-      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status, owner_sent, map_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)')
-      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), 1, 'nova', mapsLink(address, place))
+      .prepare('INSERT INTO orders (user_id, customer, phone, address, place, note, items_json, shops, total, zone, delivery, sms_token, risk, released, status, owner_sent, map_link, lat, lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)')
+      .run(user.id, customer, user.phone, fullAddress, place, note, JSON.stringify(shops), shops.length, total, zone, delivery, smsToken, JSON.stringify(risk.flags), 1, 'nova', mapsLink(address, place, coords), coords?.lat ?? null, coords?.lng ?? null)
     // svaki lokal dobija svoj deo porudžbine u panelu za lokale (vidi ga tek kad je porudžbina puštena)
     for (const shop of shops) db.prepare('INSERT INTO order_shops (order_id, slug) VALUES (?, ?)').run(id, shop.slug)
     // svaka porudžbina odmah stiže lokalima i u admin panel (vlasnik je ne potvrđuje; sumnjive dobijaju samo upozorenje)

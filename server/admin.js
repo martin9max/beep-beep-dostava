@@ -345,7 +345,7 @@ function orders() {
           <br><span class="trust ${trust.level}">${esc(trust.label)}</span> <small>(${record.delivered} preuzeto, ${record.noShows} nije)</small>
           ${flags.length ? `<ul class="flags">${flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join('')}</ul>` : ''}
           ${held ? `<form method="post" action="/admin/release"><input type="hidden" name="id" value="${o.id}"><button class="release">Proverio sam: pošalji lokalima</button></form>` : ''}</td>
-        <td>${esc(o.address)}<br><a href="${esc(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address.replace(/\s*\(.*\)$/, '') + ', Srbija')}`)}" target="_blank" rel="noopener">📍 mapa</a>${o.note ? `<br><small>Napomena: ${esc(o.note)}</small>` : ''}</td>
+        <td>${esc(o.address)}<br><a href="${esc(o.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address.replace(/\s*\(.*\)$/, '') + ', Srbija')}`)}" target="_blank" rel="noopener">📍 mapa${o.lat != null ? ' (tačna)' : ''}</a>${o.note ? `<br><small>Napomena: ${esc(o.note)}</small>` : ''}</td>
         <td>${items}${o.shops > 1 ? `<small><b>${o.shops} lokala</b>, dodatna zaustavljanja: ${o.shops - 1} x 100 din (uračunato u iznos)</small>` : ''}</td>
         <td>${formatDin(o.total)} din<br><small>${o.delivery == null ? 'dostava: javlja dostavljač' : `dostava ${formatDin(o.delivery)} din (${esc(o.place || 'grad')})`}</small></td><td>${select}</td></tr>`
     }),

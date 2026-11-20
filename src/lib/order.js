@@ -136,7 +136,7 @@ export function formatOrder({ id, shops, customer, address, map, phone, note, to
     'KUPAC',
     `Ime: ${customer}`,
     `Adresa: ${address}`,
-    ...(map ? [`Lokacija: ${map}`] : []),
+    ...(map ? [map.includes('maps?q=') ? `Lokacija (tačna, sa telefona kupca): ${map}` : `Lokacija (po adresi, proverite): ${map}`] : []),
     `Telefon: ${phone}`,
     `WhatsApp: wa.me/${toWhatsApp(phone)}`,
     '',

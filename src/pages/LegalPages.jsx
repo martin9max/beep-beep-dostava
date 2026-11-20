@@ -253,6 +253,10 @@ export function PrivacyPage() {
                 <b>Porudžbine:</b> šta ste poručili i iz kog lokala, iznos, adresa dostave, napomene i stanje porudžbine.
               </li>
               <li>
+                <b>Tačna lokacija</b> (samo ako je sami pošaljete dugmetom u korpi): koordinate sa vašeg telefona, da bi
+                dostavljač našao kuću. Za kućnu adresu je pamtimo dok je ne promenite, da ne morate da je šaljete svaki put.
+              </li>
+              <li>
                 <b>Podaci o prijavama:</b> vreme prijave, registracije i odjave, IP adresa i vrsta uređaja i pregledača. Ovo služi za zaštitu
                 naloga od neovlašćenog pristupa.
               </li>

@@ -213,6 +213,9 @@ function DeliveryForm({ cart, onDone }) {
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // tačna lokacija sa telefona (za sela i adrese koje Google ne nalazi tačno)
+  const [coords, setCoords] = useState(null)
+  const savedHome = !isTemp && base === home && user?.hasLocation
 
   const submit = async (e) => {
     e.preventDefault()
@@ -220,7 +223,7 @@ function DeliveryForm({ cart, onDone }) {
     if (!current?.place) return setDialog(true)
     setBusy(true)
     try {
-      const body = { items: cart.items, requests: cart.requests, note, deliverTo: firm ? deliverTo : undefined, ...(isTemp ? current : {}) }
+      const body = { items: cart.items, requests: cart.requests, note, deliverTo: firm ? deliverTo : undefined, ...(isTemp ? current : {}), ...(coords ?? {}) }
       const order = await apiCall('/api/orders', { method: 'POST', body })
       cart.clear()
       setTempAddress(null)
@@ -300,6 +303,7 @@ function DeliveryForm({ cart, onDone }) {
           )}
         </div>
       </div>
+      <LocationButton coords={coords} setCoords={setCoords} saved={savedHome} />
       <AddressDialog open={dialog} onClose={() => setDialog(false)} />
 
       <Field
@@ -323,6 +327,61 @@ function DeliveryForm({ cart, onDone }) {
         <p className="text-center text-sm text-mute">Pozvaćemo vas da potvrdimo porudžbinu.</p>
       </div>
     </form>
+  )
+}
+
+/**
+ * "Pošalji tačnu lokaciju": GPS sa telefona kupca, da dostavljač dobije pin tačno na kuću (na selu ulice i brojevi
+ * često nisu na Google mapama). Za kućnu adresu sajt je zapamti, pa sledeći put ne mora ponovo.
+ */
+function LocationButton({ coords, setCoords, saved }) {
+  const [state, setState] = useState('') // '', 'trazim', 'greska', 'odbijeno'
+  if (typeof navigator !== 'undefined' && !navigator.geolocation) return null
+  const ask = () => {
+    setState('trazim')
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setCoords({ lat: p.coords.latitude, lng: p.coords.longitude })
+        setState('')
+      },
+      (err) => setState(err.code === 1 ? 'odbijeno' : 'greska'),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    )
+  }
+  return (
+    <div className="mt-3 rounded-xl border border-line bg-white p-4">
+      {coords ? (
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] font-semibold text-[#1d6a3a]">
+          ✅ Tačna lokacija je dodata
+          <a href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-ink underline underline-offset-2">
+            pogledaj na mapi
+          </a>
+          <button type="button" onClick={() => setCoords(null)} className="text-sm font-semibold text-mute underline underline-offset-2">
+            ukloni
+          </button>
+        </p>
+      ) : (
+        <>
+          {saved && <p className="mb-2 text-[15px] font-semibold text-[#1d6a3a]">✅ Tačna lokacija vaše kuće je sačuvana od ranije.</p>}
+          <button
+            type="button"
+            onClick={ask}
+            disabled={state === 'trazim'}
+            className="inline-flex items-center gap-2 rounded-lg border-2 border-ink px-4 py-2 text-[15px] font-bold text-ink transition hover:bg-ink hover:text-white disabled:opacity-60"
+          >
+            <PinIcon className="h-4 w-4" />
+            {state === 'trazim' ? 'Tražim lokaciju...' : saved ? 'Pošalji novu tačnu lokaciju' : 'Pošalji tačnu lokaciju'}
+          </button>
+          <p className="mt-2 text-[13px] leading-snug text-mute">
+            Preporučeno za sela: dostavljač dobija pin tačno na vašu kuću. Pritisnite ako ste sada na adresi za dostavu.
+          </p>
+          {state === 'odbijeno' && (
+            <p className="mt-2 text-sm font-semibold text-red">Pregledač nije dozvolio lokaciju. Dozvolite je u podešavanjima ili opišite kuću u napomeni.</p>
+          )}
+          {state === 'greska' && <p className="mt-2 text-sm font-semibold text-red">Lokacija nije pronađena. Pokušajte ponovo napolju ili opišite kuću u napomeni.</p>}
+        </>
+      )}
+    </div>
   )
 }
 
