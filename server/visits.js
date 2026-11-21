@@ -12,6 +12,13 @@ db.exec(`
     visitor  TEXT NOT NULL,
     PRIMARY KEY (day, visitor)
   );
+  -- odakle su posetioci došli (jednom po posetiocu dnevno: Google, Instagram, direktno...)
+  CREATE TABLE IF NOT EXISTS visit_sources (
+    day     TEXT NOT NULL,
+    source  TEXT NOT NULL,
+    n       INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, source)
+  );
   -- koliko puta je strana otvorena tog dana
   CREATE TABLE IF NOT EXISTS page_views (
     day   TEXT NOT NULL,
@@ -35,8 +42,35 @@ function saltFor(day) {
   return db.prepare('SELECT value FROM app_meta WHERE key = ?').get(key).value
 }
 
+/**
+ * Odakle je posetilac došao. Instagram i Facebook otvaraju link u svom pregledaču i često ne kažu odakle je
+ * posetilac, pa se prepoznaju po pregledaču; ostalo po strani sa koje je došao (Referer) ili po ?utm_source=.
+ */
+function sourceOf(req, url) {
+  const ua = req.headers['user-agent'] || ''
+  if (/Instagram/i.test(ua)) return 'Instagram'
+  if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'Facebook'
+  if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return 'TikTok'
+  const utm = (url.searchParams.get('utm_source') || '').toLowerCase()
+  let host = ''
+  try {
+    host = new URL(req.headers.referer || '').hostname.replace(/^www\./, '')
+  } catch {}
+  const from = host || utm
+  if (!from) return 'Direktno'
+  if (/beepbeepdostava/.test(from)) return 'Sa sajta'
+  if (/(^|\.)google\./.test(from) || from === 'google') return 'Google pretraga'
+  if (/instagram/.test(from)) return 'Instagram'
+  if (/facebook|fb\.com|fb\.me/.test(from)) return 'Facebook'
+  if (/whatsapp|wa\.me/.test(from)) return 'WhatsApp'
+  if (/viber/.test(from)) return 'Viber'
+  if (/tiktok/.test(from)) return 'TikTok'
+  if (/bing|yahoo|duckduckgo|yandex|ecosia/.test(from)) return 'Druge pretrage'
+  return 'Drugi sajtovi'
+}
+
 /** Zabeleži posetu strane (poziva se kad server šalje HTML strane). */
-export function recordVisit(req, pathname) {
+export function recordVisit(req, pathname, url = new URL(req.url, 'http://x')) {
   try {
     if (req.method !== 'GET') return
     const ua = req.headers['user-agent'] || ''
@@ -47,7 +81,10 @@ export function recordVisit(req, pathname) {
     const day = today()
     const visitor = createHash('sha256').update(`${saltFor(day)}|${ip}|${ua}`).digest('base64url').slice(0, 22)
     const path = pathname.replace(/\/+$/, '') || '/'
-    db.prepare('INSERT OR IGNORE INTO visitors (day, visitor) VALUES (?, ?)').run(day, visitor)
+    // nov posetilac danas: zabeleži i odakle je došao (prva strana koju je otvorio)
+    if (db.prepare('INSERT OR IGNORE INTO visitors (day, visitor) VALUES (?, ?)').run(day, visitor).changes) {
+      db.prepare('INSERT INTO visit_sources (day, source, n) VALUES (?, ?, 1) ON CONFLICT(day, source) DO UPDATE SET n = n + 1').run(day, sourceOf(req, url))
+    }
     db.prepare('INSERT INTO page_views (day, path, n) VALUES (?, ?, 1) ON CONFLICT(day, path) DO UPDATE SET n = n + 1').run(day, path)
   } catch (err) {
     console.error('Poseta nije zabeležena:', err.message)
@@ -77,3 +114,7 @@ export function visitsByDay(days = 30) {
 /** Najposećenije strane u poslednjih `days` dana. */
 export const topPages = (days = 30, limit = 15) =>
   db.prepare(`SELECT path, SUM(n) n FROM page_views WHERE day > date('now', 'localtime', ?) GROUP BY path ORDER BY n DESC LIMIT ?`).all(`-${days} days`, limit)
+
+/** Odakle su posetioci došli u poslednjih `days` dana. */
+export const sources = (days = 30) =>
+  db.prepare(`SELECT source, SUM(n) n FROM visit_sources WHERE day > date('now', 'localtime', ?) GROUP BY source ORDER BY n DESC`).all(`-${days} days`)

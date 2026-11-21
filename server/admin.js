@@ -5,7 +5,7 @@ import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
 import { events, isOnline, ordersChanged } from './events.js'
 import { pushDevices } from './push.js'
-import { topPages, visitorsIn, visitsByDay } from './visits.js'
+import { sources, topPages, visitorsIn, visitsByDay } from './visits.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
@@ -404,6 +404,8 @@ function shopAccounts() {
     Lokal prvo pošalje bilo koju poruku botu <b>@beepbeepdostavanegotin_bot</b>, a broj (chat id) vam javlja administrator sajta.</p>`
 }
 
+const SOURCE_LABEL = { 'Google pretraga': '🔎 Google pretraga', Instagram: '📸 Instagram', Facebook: '📘 Facebook', TikTok: '🎵 TikTok', WhatsApp: '💬 WhatsApp', Viber: '💜 Viber', Direktno: '➡️ Direktno', 'Sa sajta': '↩️ Sa sajta', 'Druge pretrage': '🔍 Druge pretrage', 'Drugi sajtovi': '🌐 Drugi sajtovi' }
+
 // naziv strane za tabelu poseta: /lokal/kafanica -> "Meni: Kafanica"
 const pageName = (path) => {
   if (path === '/') return 'Početna'
@@ -422,7 +424,17 @@ function visits() {
   const bar = (n, m) => `<div class="barwrap"><div class="bar" style="width:${Math.round((n / m) * 100)}%"></div></div>`
   const date = (d) => `${d.slice(8, 10)}.${d.slice(5, 7)}.`
   return `<div class="keep"><p style="color:var(--mute);font-size:14px;margin:0 0 12px">Posetilac je jedan čovek (uređaj) u toku jednog dana; isti čovek dva dana se broji dvaput. Roboti (Google, Facebook...) se ne broje. Bez kolačića, IP adrese se ne čuvaju.</p>
-    <h3 style="margin:18px 0 8px">Poslednjih 30 dana</h3>
+    <h3 style="margin:18px 0 8px">Odakle dolaze (30 dana)</h3>
+    ${(() => {
+      const list = sources(30)
+      const total = list.reduce((t, x) => t + x.n, 0) || 1
+      const maxS = Math.max(1, ...list.map((x) => x.n))
+      return list.length
+        ? table(['Izvor', 'Posetilaca', '', 'Udeo'], list.map((x) => `<tr><td>${esc(SOURCE_LABEL[x.source] ?? x.source)}</td><td><b>${x.n}</b></td><td>${bar(x.n, maxS)}</td><td>${Math.round((x.n / total) * 100)}%</td></tr>`))
+        : '<div class="wrap"><p class="empty">Izvori se beleže od sada; prvi se pojave posle sledećih poseta.</p></div>'
+    })()}
+    <p style="color:var(--mute);font-size:13px;margin:6px 0 0">„Direktno“ su ukucana adresa, sačuvan link, QR kod i linkovi iz WhatsApp-a i Vibera (oni ne javljaju odakle je posetilac došao).</p>
+    <h3 style="margin:22px 0 8px">Poslednjih 30 dana</h3>
     ${table(
       ['Dan', 'Posetilaca', '', 'Otvaranja strana'],
       days.map((d) => `<tr><td>${date(d.day)}</td><td><b>${d.visitors}</b></td><td>${bar(d.visitors, max)}</td><td>${d.views}</td></tr>`),
