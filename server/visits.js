@@ -118,3 +118,14 @@ export const topPages = (days = 30, limit = 15) =>
 /** Odakle su posetioci došli u poslednjih `days` dana. */
 export const sources = (days = 30) =>
   db.prepare(`SELECT source, SUM(n) n FROM visit_sources WHERE day > date('now', 'localtime', ?) GROUP BY source ORDER BY n DESC`).all(`-${days} days`)
+
+/** Odakle su posetioci došli, po danima: { '2026-11-22': [{ source, n }, ...] } (najviše prvo). */
+export function sourcesByDay(days = 30) {
+  const out = {}
+  for (const r of db
+    .prepare(`SELECT day, source, n FROM visit_sources WHERE day > date('now', 'localtime', ?) ORDER BY day, n DESC`)
+    .all(`-${days} days`)) {
+    ;(out[r.day] ??= []).push({ source: r.source, n: r.n })
+  }
+  return out
+}

@@ -5,7 +5,7 @@ import { hashPassword } from './auth.js'
 import { customerRecord, trustOf } from './risk.js'
 import { events, isOnline, ordersChanged } from './events.js'
 import { pushDevices } from './push.js'
-import { sources, topPages, visitorsIn, visitsByDay } from './visits.js'
+import { sources, sourcesByDay, topPages, visitorsIn, visitsByDay } from './visits.js'
 import { SHOPS, shopBySlug } from '../src/catalog.js'
 import { formatDin } from '../src/lib/order.js'
 import { fullAddress, mapsLink } from '../src/places.js'
@@ -223,6 +223,7 @@ function page(tab, deleted, message) {
   .st-proveri { background:#ffe3e3 } .flags { margin:6px 0 0; padding-left:18px; color:#9b1218; font-size:13px } .flags .info { color:#8a5a00 }
   .release { background:#1d7a46; color:#fff; border:0; border-radius:6px; padding:5px 10px; font-weight:700; cursor:pointer; margin-top:6px }
   .ss { font-size:12px; border-radius:999px; padding:1px 8px; background:#eef2fa; white-space:nowrap } .ss.prihvaćeno, .ss.spremno { background:#dff5dc; color:#1d6a3a } .ss.odbijeno { background:#ffe3e3; color:#9b1218 }
+  .src { display:inline-block; white-space:nowrap; background:#eef2fa; border-radius:999px; padding:1px 8px; margin:1px 2px 1px 0; font-size:13px }
   .bar { height:10px; border-radius:5px; background:var(--blue); min-width:2px } .barwrap { width:100%; min-width:80px }
   .trust { font-weight:700; white-space:nowrap } .trust.ok { color:#1d7a46 } .trust.info { color:#8a5a00 } .trust.check, .trust.block { color:var(--red) }
   form.inline { display:flex; gap:8px; flex-wrap:wrap; align-items:end; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px }
@@ -435,10 +436,16 @@ function visits() {
     })()}
     <p style="color:var(--mute);font-size:13px;margin:6px 0 0">„Direktno“ su ukucana adresa, sačuvan link, QR kod i linkovi iz WhatsApp-a i Vibera (oni ne javljaju odakle je posetilac došao).</p>
     <h3 style="margin:22px 0 8px">Poslednjih 30 dana</h3>
-    ${table(
-      ['Dan', 'Posetilaca', '', 'Otvaranja strana'],
-      days.map((d) => `<tr><td>${date(d.day)}</td><td><b>${d.visitors}</b></td><td>${bar(d.visitors, max)}</td><td>${d.views}</td></tr>`),
-    )}
+    ${(() => {
+      // odakle su došli tog dana (beleži se od uvođenja izvora; ranije posete nemaju izvor)
+      const byDay = sourcesByDay(30)
+      const from = (day) =>
+        (byDay[day] ?? []).map((x) => `<span class="src">${esc(SOURCE_LABEL[x.source] ?? x.source)} <b>${x.n}</b></span>`).join(' ') || '<span style="color:var(--mute)">nije zabeleženo</span>'
+      return table(
+        ['Dan', 'Posetilaca', '', 'Odakle su došli', 'Otvaranja strana'],
+        days.map((d) => `<tr><td>${date(d.day)}</td><td><b>${d.visitors}</b></td><td>${bar(d.visitors, max)}</td><td>${d.visitors ? from(d.day) : ''}</td><td>${d.views}</td></tr>`),
+      )
+    })()}
     <h3 style="margin:22px 0 8px">Najposećenije strane (30 dana)</h3>
     ${table(
       ['Strana', 'Otvaranja', ''],
