@@ -83,6 +83,19 @@ export async function admin(req, res, next) {
     return res.end()
   }
 
+  // brisanje porudžbine: nestaje iz baze, iz panela svih lokala iz te porudžbine i iz naloga kupca
+  if (req.method === 'POST' && url.pathname === '/admin/delete-order') {
+    const form = await readForm(req)
+    const id = Number(form.get('id'))
+    const slugs = slugsOf(id)
+    db.prepare('DELETE FROM order_shops WHERE order_id = ?').run(id)
+    const gone = db.prepare('DELETE FROM orders WHERE id = ?').run(id).changes
+    ordersChanged(slugs) // otvoreni paneli lokala odmah sklanjaju porudžbinu
+    res.statusCode = 303
+    res.setHeader('Location', `/admin?tab=porudzbine${gone ? `&poruka=${encodeURIComponent(`Porudžbina #${id} je obrisana.`)}` : ''}`)
+    return res.end()
+  }
+
   // promena statusa porudžbine (ako vlasnik ručno skine "na proveri", porudžbina se pušta lokalima)
   if (req.method === 'POST' && url.pathname === '/admin/status') {
     const form = await readForm(req)
@@ -338,7 +351,9 @@ function orders() {
         .join('')
       const select = `<form method="post" action="/admin/status"><input type="hidden" name="id" value="${o.id}">
         <select name="status" onchange="this.form.submit()">${STATUSES.map((s) => `<option${s === o.status ? ' selected' : ''}>${s}</option>`).join('')}</select>
-        <noscript><button>Sačuvaj</button></noscript></form>`
+        <noscript><button>Sačuvaj</button></noscript></form>
+        <form method="post" action="/admin/delete-order" style="margin-top:8px" onsubmit="return confirm(${esc(JSON.stringify(`Obrisati porudžbinu #${o.id}? Nestaje i iz panela lokala i iz naloga kupca. Ovo se ne može vratiti.`))})">
+          <input type="hidden" name="id" value="${o.id}"><button class="del">Obriši</button></form>`
       const record = customerRecord(o.user_id, o.phone)
       const trust = trustOf(record)
       return `<tr class="st-${held ? 'proveri' : o.status === 'nova' ? 'nova' : o.status === 'otkazana' ? 'otkazana' : ''}"><td>${o.id}</td><td>${esc(o.created_at)}</td>
