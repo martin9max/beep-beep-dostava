@@ -52,21 +52,44 @@ function sourceOf(req, url) {
   if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'Facebook'
   if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return 'TikTok'
   const utm = (url.searchParams.get('utm_source') || '').toLowerCase()
-  let host = ''
+  let ref = null
   try {
-    host = new URL(req.headers.referer || '').hostname.replace(/^www\./, '')
+    ref = new URL(req.headers.referer || '')
   } catch {}
+  // Android aplikacije šalju "android-app://ime.aplikacije/"
+  if (ref?.protocol === 'android-app:') {
+    const app = ref.hostname
+    const APPS = {
+      'com.google.android.gm': 'Gmail',
+      'com.google.android.googlequicksearchbox': 'Google pretraga',
+      'com.google.android.apps.maps': 'Google mape',
+      'org.telegram.messenger': 'Telegram',
+      'com.facebook.orca': 'Messenger',
+      'com.facebook.katana': 'Facebook',
+      'com.instagram.android': 'Instagram',
+      'com.whatsapp': 'WhatsApp',
+      'com.viber.voip': 'Viber',
+      'com.zhiliaoapp.musically': 'TikTok',
+    }
+    return APPS[app] ?? `Aplikacija: ${app}`.slice(0, 80)
+  }
+  const host = (ref?.hostname || '').replace(/^www\./, '').toLowerCase()
   const from = host || utm
   if (!from) return 'Direktno'
   if (/beepbeepdostava/.test(from)) return 'Sa sajta'
-  if (/(^|\.)google\./.test(from) || from === 'google') return 'Google pretraga'
+  if (/^mail\.google\./.test(from) || from === 'gmail') return 'Gmail'
+  if (/^maps\.google\./.test(from) || /^google\.[a-z.]+$/.test(from) && ref?.pathname.startsWith('/maps')) return 'Google mape'
+  if (/(^|\.)google\.[a-z.]+$/.test(from) || from === 'google') return 'Google pretraga'
   if (/instagram/.test(from)) return 'Instagram'
+  if (/messenger\.com|^m\.me$/.test(from)) return 'Messenger'
   if (/facebook|fb\.com|fb\.me/.test(from)) return 'Facebook'
   if (/whatsapp|wa\.me/.test(from)) return 'WhatsApp'
   if (/viber/.test(from)) return 'Viber'
+  if (/telegram|^t\.me$/.test(from)) return 'Telegram'
   if (/tiktok/.test(from)) return 'TikTok'
   if (/bing|yahoo|duckduckgo|yandex|ecosia/.test(from)) return 'Druge pretrage'
-  return 'Drugi sajtovi'
+  // ostali sajtovi: čuva se samo ime sajta (domen), npr. "Sajt: lamoara.rs"
+  return `Sajt: ${from}`.slice(0, 80)
 }
 
 /** Zabeleži posetu strane (poziva se kad server šalje HTML strane). */

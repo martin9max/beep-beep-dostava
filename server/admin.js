@@ -420,7 +420,10 @@ function shopAccounts() {
     Lokal prvo pošalje bilo koju poruku botu <b>@beepbeepdostavanegotin_bot</b>, a broj (chat id) vam javlja administrator sajta.</p>`
 }
 
-const SOURCE_LABEL = { 'Google pretraga': '🔎 Google pretraga', Instagram: '📸 Instagram', Facebook: '📘 Facebook', TikTok: '🎵 TikTok', WhatsApp: '💬 WhatsApp', Viber: '💜 Viber', Direktno: '➡️ Direktno', 'Sa sajta': '↩️ Sa sajta', 'Druge pretrage': '🔍 Druge pretrage', 'Drugi sajtovi': '🌐 Drugi sajtovi' }
+const SOURCE_LABEL = { 'Google mape': '📍 Google mape', Gmail: '✉️ Gmail', Messenger: '💬 Messenger', Telegram: '✈️ Telegram', 'Google pretraga': '🔎 Google pretraga', Instagram: '📸 Instagram', Facebook: '📘 Facebook', TikTok: '🎵 TikTok', WhatsApp: '💬 WhatsApp', Viber: '💜 Viber', Direktno: '➡️ Direktno', 'Sa sajta': '↩️ Sa sajta', 'Druge pretrage': '🔍 Druge pretrage', 'Drugi sajtovi': '🌐 Drugi sajtovi' }
+
+// "Sajt: lamoara.rs" -> "🌐 lamoara.rs", "Aplikacija: com.nesto" -> "📱 com.nesto"
+const sourceLabel = (src) => SOURCE_LABEL[src] ?? (src.startsWith('Sajt: ') ? `🌐 ${src.slice(6)}` : src.startsWith('Aplikacija: ') ? `📱 ${src.slice(12)}` : src)
 
 // naziv strane za tabelu poseta: /lokal/kafanica -> "Meni: Kafanica"
 const pageName = (path) => {
@@ -446,7 +449,7 @@ function visits() {
       const total = list.reduce((t, x) => t + x.n, 0) || 1
       const maxS = Math.max(1, ...list.map((x) => x.n))
       return list.length
-        ? table(['Izvor', 'Posetilaca', '', 'Udeo'], list.map((x) => `<tr><td>${esc(SOURCE_LABEL[x.source] ?? x.source)}</td><td><b>${x.n}</b></td><td>${bar(x.n, maxS)}</td><td>${Math.round((x.n / total) * 100)}%</td></tr>`))
+        ? table(['Izvor', 'Posetilaca', '', 'Udeo'], list.map((x) => `<tr><td>${esc(sourceLabel(x.source))}</td><td><b>${x.n}</b></td><td>${bar(x.n, maxS)}</td><td>${Math.round((x.n / total) * 100)}%</td></tr>`))
         : '<div class="wrap"><p class="empty">Izvori se beleže od sada; prvi se pojave posle sledećih poseta.</p></div>'
     })()}
     <p style="color:var(--mute);font-size:13px;margin:6px 0 0">„Direktno“ su ukucana adresa, sačuvan link, QR kod i linkovi iz WhatsApp-a i Vibera (oni ne javljaju odakle je posetilac došao).</p>
@@ -455,7 +458,7 @@ function visits() {
       // odakle su došli tog dana (beleži se od uvođenja izvora; ranije posete nemaju izvor)
       const byDay = sourcesByDay(30)
       const from = (day) =>
-        (byDay[day] ?? []).map((x) => `<span class="src">${esc(SOURCE_LABEL[x.source] ?? x.source)} <b>${x.n}</b></span>`).join(' ') || '<span style="color:var(--mute)">nije zabeleženo</span>'
+        (byDay[day] ?? []).map((x) => `<span class="src">${esc(sourceLabel(x.source))} <b>${x.n}</b></span>`).join(' ') || '<span style="color:var(--mute)">nije zabeleženo</span>'
       return table(
         ['Dan', 'Posetilaca', '', 'Odakle su došli', 'Otvaranja strana'],
         days.map((d) => `<tr><td>${date(d.day)}</td><td><b>${d.visitors}</b></td><td>${bar(d.visitors, max)}</td><td>${d.visitors ? from(d.day) : ''}</td><td>${d.views}</td></tr>`),
