@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Button from './Button'
 import Field, { FormError } from './Field'
-import { CITY, VILLAGES, deliveryPrice, fullAddress, isKnownPlace, zoneOf } from '../places'
+import { CITY, PLACE_NOTE, VILLAGES, deliveryPrice, fullAddress, isKnownPlace, zoneOf } from '../places'
 import { DELIVERY, deliveryPriceOf } from '../data'
 import { useAuth } from '../lib/auth'
 import { useCart } from '../lib/cart'
@@ -57,7 +57,9 @@ export function PlaceField({ value, onChange, name = 'place' }) {
           <optgroup label="Sela">
             {VILLAGES.map((v) => (
               <option key={v} value={v}>
-                {v} {deliveryPrice(v, DELIVERY) ? `(${formatDin(deliveryPrice(v, DELIVERY))} din)` : '(cenu javlja dostavljač)'}
+                {v}
+                {PLACE_NOTE[v] ? `, ${PLACE_NOTE[v]}` : ''}{' '}
+                {deliveryPrice(v, DELIVERY) ? `(${formatDin(deliveryPrice(v, DELIVERY))} din)` : '(cenu javlja dostavljač)'}
               </option>
             ))}
           </optgroup>
