@@ -8,7 +8,7 @@ export const SITE = {
   name: 'Beep Beep Dostava Negotin',
   title: 'Beep Beep Dostava Negotin | Hrana, lekovi, cveće, torte i sve ostalo do vrata',
   // opis ispod naslova u Google pretrazi (i u pregledu linka pri deljenju)
-  description: 'Prva i prava dostava u Negotinu i okolini, od 5. decembra 2020. Dostava hrane, pića, namirnica, lekova, poklona i još mnogo toga.',
+  description: 'Dostava Negotin: Beep Beep donosi hranu, piće, namirnice, lekove, cveće i poklone na vašu adresu u Negotinu i okolnim selima. Prva i prava dostava od 2020.',
   city: 'Negotin',
   postalCode: '19300',
 }

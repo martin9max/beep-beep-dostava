@@ -21,7 +21,7 @@ export default function Footer() {
             </span>
           </SectionLink>
           <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed">
-            Prva i prava dostava u Negotinu i okolini, od 5. decembra 2020. Dostava hrane, pića, namirnica, lekova, poklona i
+            Dostava Negotin i okolina: prva i prava dostava, od 5. decembra 2020. Dostava hrane, pića, namirnica, lekova, poklona i
             još mnogo toga.
           </p>
           <a href={tel} className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-bold text-red transition hover:bg-white/90">
