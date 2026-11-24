@@ -45,8 +45,12 @@ export const rejectMessage = ({ id, shop, reason, lines, partial }) =>
 // pa jedan link sme imati najviše ovoliko; kod velike porudžbine spisak se skraćuje ("i još N stavki")
 const MAX_LINK = 1250 // + dugme za SMS (kratak link) i dalje staje
 
-/** Spisak porudžbine za kupca: lokali, stavke sa cenama, dostava i ukupno (najviše `max` stavki) */
-function orderSummary({ shops, total, delivery }, max = Infinity) {
+/**
+ * Spisak porudžbine za kupca: lokali, stavke sa cenama, dostava i ukupno (najviše `max` stavki).
+ * `whatsapp`: red "Ukupno" je podebljan (*tekst* u WhatsApp-u); SMS ne zna za to, pa tamo ostaje običan.
+ */
+function orderSummary({ shops, total, delivery }, max = Infinity, whatsapp = false) {
+  const bold = (text) => (whatsapp ? `*${text}*` : text)
   const lines = []
   let shown = 0
   let hidden = 0
@@ -77,23 +81,24 @@ function orderSummary({ shops, total, delivery }, max = Infinity) {
     `Cena porudžbine: ${formatDin(goods)} din${byBill ? ' + stavke po računu' : ''}`,
     ...(stops > 0 ? [`Dodatno zaustavljanje: ${stops} x ${EXTRA_STOP_PRICE} din = ${formatDin(stops * EXTRA_STOP_PRICE)} din`] : []),
     delivery == null ? 'Dostava: cenu javlja dostavljač' : `Dostava: ${formatDin(delivery)} din`,
-    `Ukupno: ${formatDin(total)} din${byBill ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`,
+    bold(`Ukupno: ${formatDin(total)} din${byBill ? ' + stavke po računu' : ''}${delivery == null ? ' + dostava' : ''}`),
   ].join('\n')
 }
 
 /**
  * Poruka kupcu kad vlasnik javi za koliko minuta stiže porudžbina.
  * Sa `order` ({ id, shops, total, delivery }) na početku je i spisak onoga što je kupac poručio.
+ * `whatsapp`: poruka ide preko WhatsApp-a (podebljan red "Ukupno"); bez toga je za SMS.
  */
-export const etaMessage = (minutes, order, max) =>
-  `${order ? orderSummary(order, max) + '\n\n' : ''}Poštovani/a,\nVaša porudžbina će Vam biti isporučena za ${minutes} min. Hvala Vam na pozivu i ukazanom poverenju.\nVaša Beep Beep Dostava Negotin 😊`
+export const etaMessage = (minutes, order, max, whatsapp = false) =>
+  `${order ? orderSummary(order, max, whatsapp) + '\n\n' : ''}Poštovani/a,\nVaša porudžbina će Vam biti isporučena za ${minutes} min. Hvala Vam na pozivu i ukazanom poverenju.\nVaša Beep Beep Dostava Negotin 😊`
 
 /**
  * Dugmad ispod porudžbine na Telegramu: klik otvara WhatsApp sa kupcem i gotovom porukom
  * (spisak porudžbine + za koliko minuta stiže), vlasnik samo pritisne „pošalji“.
  */
 export function etaButtons(phone, order, smsUrl, minutes = [10, 15, 20, 30, 45, 60]) {
-  const link = (m, max) => `https://wa.me/${toWhatsApp(phone)}?text=${encodeURIComponent(etaMessage(m, order, max))}`
+  const link = (m, max) => `https://wa.me/${toWhatsApp(phone)}?text=${encodeURIComponent(etaMessage(m, order, max, true))}`
   // koliko stavki staje u link (proverava se na najdužem, sa dvocifrenim minutima)
   let max = order ? order.shops.reduce((n, s) => n + s.lines.length, 0) : 0
   while (max > 0 && link(60, max).length > MAX_LINK) max--

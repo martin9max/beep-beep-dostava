@@ -1461,6 +1461,21 @@ export const SHOPS = [...SHOP_LIST].sort((a, b) => (b.slug === 'kafanica') - (a.
 
 export const shopBySlug = (slug) => SHOPS.find((s) => s.slug === slug)
 
+// grupe lokala na strani "Dostava hrane" (redosled grupa i lokala u njima je redosled na sajtu);
+// lokal sa hranom koji nije ni u jednoj grupi ide u "Ostali lokali" na kraju
+export const SHOP_GROUPS = [
+  { title: 'Restorani', slugs: ['kafanica', 'la-moara'] },
+  { title: 'Picerije', slugs: ['viking', 'picerija-castelo', 'life-picerija', 'pastizza', 'bajka'] },
+  { title: 'Torte i kolači', slugs: ['tortica-989', 'poslasticarnica'] }, // vide se samo u Deserti
+]
+
+/** Lokali podeljeni u grupe: [{ title, shops }], samo grupe koje imaju bar jedan od datih lokala. */
+export function groupShops(shops) {
+  const groups = SHOP_GROUPS.map((g) => ({ title: g.title, shops: g.slugs.map((slug) => shops.find((s) => s.slug === slug)).filter(Boolean) }))
+  const rest = shops.filter((s) => !SHOP_GROUPS.some((g) => g.slugs.includes(s.slug)))
+  return [...groups, { title: 'Ostali lokali', shops: rest }].filter((g) => g.shops.length)
+}
+
 /** Kategorije u kojima lokal ima bar jednu stavku. */
 /** Kategorije stavke. Slatke palačinke (sve koje nisu slane) su i u "Palačinke" i u "Deserti". */
 export const itemCategories = (section, item) => {

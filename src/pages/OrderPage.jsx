@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { CATEGORIES, SHOPS, shopCategories } from '../catalog'
+import { CATEGORIES, SHOPS, groupShops, shopCategories } from '../catalog'
 import { SERVICES } from '../data'
 import { Link, navigate } from '../lib/router'
 import Thumb, { hasImage, logoOf } from '../components/Thumb'
@@ -75,11 +75,17 @@ export default function OrderPage({ service, category }) {
               </button>
             )}
           </div>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {shops.map((shop) => (
-              <ShopCard key={shop.slug} shop={shop} category={selected} />
-            ))}
-          </ul>
+          {/* hrana: lokali po grupama (Restorani, Picerije...), ostale usluge jedan spisak */}
+          {(active.key === 'food' ? groupShops(shops) : [{ title: null, shops }]).map((group) => (
+            <div key={group.title ?? 'svi'} className="mt-6 first:mt-0">
+              {group.title && <h3 className="mb-3 text-[20px] font-bold text-ink">{group.title}</h3>}
+              <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {group.shops.map((shop) => (
+                  <ShopCard key={shop.slug} shop={shop} category={selected} />
+                ))}
+              </ul>
+            </div>
+          ))}
           {!shops.length && <p className="rounded-xl border border-dashed border-line p-8 text-center text-mute">Za ovu kategoriju još nema lokala.</p>}
         </section>
       </MaybeGate>

@@ -26,19 +26,24 @@ export const KM = {
   Kusjak: null, // nema ga na mapi: upisati kilometre (dok je null, cenu javlja dostavljač)
 }
 
+// Sela sa stalnom cenom dostave (vlasnik je odredio), umesto km × cena po km
+export const FIXED_PRICE = { Badnjevo: 500, 'Miloševo': 600, Samarinovac: 720, Vidrovac: 850 }
+
 /**
- * Cena dostave za mesto: Negotin fiksno, selo sa spiska km × cena po km,
+ * Cena dostave za mesto: Negotin fiksno, selo sa stalnom cenom (FIXED_PRICE) ta cena, ostala sela km × cena po km,
  * drugo mesto (ili selo bez upisanih km) null = cenu javlja dostavljač.
  */
 export function deliveryPrice(place, { city, perKm }) {
   if (!place) return undefined
   if (zoneOf(place) === 'grad') return city
+  if (FIXED_PRICE[cleanPlace(place)]) return FIXED_PRICE[cleanPlace(place)]
   const km = KM[cleanPlace(place)]
   return km ? km * perKm : null
 }
 
-/** Opis cene za prikaz: "23 km × 120 din". */
+/** Opis cene za prikaz: "23 km × 120 din" (za selo sa stalnom cenom ništa). */
 export const deliveryNote = (place, perKm) => {
+  if (FIXED_PRICE[cleanPlace(place)]) return ''
   const km = KM[cleanPlace(place)]
   return km ? `${km} km × ${perKm} din` : ''
 }
