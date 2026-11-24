@@ -1,9 +1,8 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { motion, useScroll } from 'framer-motion'
+import { useScroll } from 'framer-motion'
 import Button from '../components/Button'
 import Partners from './Partners'
 import HeroStreet from './HeroStreet'
-import { EASE } from '../lib/order'
 import { Link } from '../lib/router'
 import arriveSound from '../assets/sounds/stigao.mp3'
 
@@ -18,12 +17,6 @@ const LINES = [
   ['Beep Beep dostava', 'text-white'],
   ['do vaših vrata', 'text-red'],
 ]
-
-const fadeUp = (delay) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.7, ease: EASE },
-})
 
 export default function Hero() {
   const ref = useRef(null)
@@ -120,32 +113,29 @@ export default function Hero() {
                 {LINES.map(([line, color], i) => (
                   // dodatni prostor oko reda da obrub, nagnuta slova i senka ne budu odsečeni
                   <span key={line} className="-mx-[.12em] -mb-[.2em] block overflow-hidden px-[.12em] pb-[.2em] pt-[.04em]">
-                    <motion.span
-                      className={`hero-title block ${color}`}
-                      initial={{ y: '105%' }}
-                      animate={{ y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease: EASE }}
-                    >
+                    {/* CSS animacija (index.css): tekst je u HTML-u vidljiv i bez JavaScripta, za Google i brži prikaz */}
+                    <span className={`hero-title hero-line-in block ${color}`} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
                       {line}
-                    </motion.span>
+                    </span>
                   </span>
                 ))}
+                <span className="sr-only"> u Negotinu i okolini</span>
               </h1>
               {/* dva reda: prvi krupno i podebljano, drugi običan; oba sa crnom ivicom i senkom (hero-sub u index.css) */}
-              <motion.p className="hero-sub mt-3 leading-tight text-white sm:mt-5" {...fadeUp(0.5)}>
+              <p className="hero-sub hero-fade-in mt-3 leading-tight text-white sm:mt-5" style={{ animationDelay: '0.5s' }}>
                 <span className="block text-[clamp(13px,4vw,17px)] font-extrabold sm:text-[22px] lg:text-[26px]">Prva i prava dostava u Negotinu i okolini.</span>
                 <span className="mt-1.5 block text-[clamp(13px,3.8vw,15px)] font-semibold text-white/95 sm:mt-2 sm:text-lg lg:text-xl">
                   Dostava hrane, pića, namirnica, lekova, poklona i još mnogo toga.
                 </span>
-              </motion.p>
-              <motion.div className="pointer-events-auto mt-4 flex gap-3 sm:mt-6" {...fadeUp(0.65)}>
+              </p>
+              <div className="hero-fade-in pointer-events-auto mt-4 flex gap-3 sm:mt-6" style={{ animationDelay: '0.65s' }}>
                 <Button as={Link} href="/registracija" arrow className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
                   Registracija
                 </Button>
                 <Button as="a" href="#usluge" variant="light" className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
                   Naše usluge
                 </Button>
-              </motion.div>
+              </div>
             </div>
 
             {/* telefon i tablet: prostor za trokolicu */}

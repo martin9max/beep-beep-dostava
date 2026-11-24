@@ -7,6 +7,16 @@ import { usePageTitle } from './PageShell'
 import BackButton from '../components/BackButton'
 import BusinessGate from '../components/BusinessGate'
 
+// glavni naslov strane usluge: reči po kojima ljudi traže (npr. "dostava hrane Negotin")
+const H1 = {
+  food: 'Dostava hrane u Negotinu',
+  market: 'Dostava namirnica i pića u Negotinu',
+  meds: 'Dostava lekova u Negotinu',
+  flowers: 'Dostava cveća u Negotinu',
+  gifts: 'Dostava torti i poklona u Negotinu',
+  other: 'Usluge za firme u Negotinu',
+}
+
 const TAB_LABELS = { food: 'Hrana', market: 'Namirnice', meds: 'Lekovi', flowers: 'Cveće', gifts: 'Torte i pokloni', other: 'Za firme' }
 
 /** /naruci/<usluga>?k=<kategorija>: kategorije sa slikama i lokali koji ih imaju. */
@@ -23,9 +33,9 @@ export default function OrderPage({ service, category }) {
   return (
     <div className="mx-auto max-w-[1120px] px-5 pb-40 pt-6 sm:px-6 md:pt-8">
       <BackButton href="/#usluge" label="Nazad" />
-      <h1 className="mt-4 text-[clamp(30px,4vw,44px)] font-bold tracking-tight">Šta vam treba?</h1>
+      <h1 className="mt-4 text-[clamp(30px,4vw,44px)] font-bold tracking-tight">{H1[active.key] ?? 'Šta vam treba?'}</h1>
       <p className="mt-1 max-w-[60ch] text-deep/75">
-        Izaberite iz jednog ili više lokala, sve stiže u jednoj vožnji.
+        Šta vam treba? Izaberite iz jednog ili više lokala, sve stiže u jednoj vožnji, na adresu u Negotinu ili okolnim selima.
       </p>
 
       {/* usluge */}

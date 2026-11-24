@@ -1,16 +1,20 @@
 import { useEffect } from 'react'
 import { SITE } from '../data'
+import { pageMeta } from '../seo'
 import { isOrderingPath, useRoute } from '../lib/router'
 
 /** Naslov taba u browseru za podstranice. */
 export function usePageTitle(title) {
+  const path = useRoute().path
   useEffect(() => {
-    document.title = title ? `${title} | ${SITE.name}` : SITE.title
+    // strane koje Google vidi zadržavaju isti naslov kao u gotovom HTML-u (seo.js), da ga JavaScript ne pregazi
+    const seoTitle = pageMeta(path)?.title
+    document.title = seoTitle ?? (title ? `${title} | ${SITE.name}` : SITE.title)
     // povratak na početnu bez ponovnog učitavanja: vraća se naslov sajta
     return () => {
       document.title = SITE.title
     }
-  }, [title])
+  }, [title, path])
 }
 
 /** Okvir za podstranice: prostor ispod fiksnog zaglavlja. */

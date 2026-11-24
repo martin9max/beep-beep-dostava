@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { prerenderToNodeStream } from 'react-dom/static'
 import App from './App'
-import { FAQ, PHONE, SITE } from './data'
+import { BUSINESS, FAQ, PHONE, SERVICES, SITE, SOCIAL } from './data'
+import { VILLAGES } from './places'
 import { setServerHref } from './lib/router'
 
 export { indexedPaths, pageMeta } from './seo'
@@ -33,6 +34,9 @@ export function structuredData(siteUrl) {
     '@type': 'LocalBusiness',
     '@id': `${siteUrl}/#firma`,
     name: SITE.name,
+    alternateName: ['Beep Beep Dostava', 'Beep Beep dostava Negotin', 'Beep Beep', 'Dostava Negotin Beep Beep'],
+    foundingDate: '2020-12-05',
+    sameAs: Object.values(SOCIAL).filter(Boolean),
     description: SITE.description,
     url: `${siteUrl}/`,
     telephone: `+381${PHONE.replace(/\s/g, '').replace(/^0/, '')}`,
@@ -40,14 +44,23 @@ export function structuredData(siteUrl) {
     logo: `${siteUrl}/icon-512.png`,
     address: {
       '@type': 'PostalAddress',
+      ...(BUSINESS.address && { streetAddress: BUSINESS.address.replace(/,\s*Negotin$/, '') }),
       addressLocality: SITE.city,
       postalCode: SITE.postalCode,
       addressCountry: 'RS',
     },
     areaServed: [
       { '@type': 'City', name: SITE.city },
-      { '@type': 'Place', name: 'Okolna sela Negotina' },
+      ...VILLAGES.map((name) => ({ '@type': 'Place', name })),
     ],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Dostava u Negotinu',
+      itemListElement: SERVICES.map((s) => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: s.title, serviceType: 'Dostava', areaServed: SITE.city, url: `${siteUrl}/naruci/${s.key}` },
+      })),
+    },
     currenciesAccepted: 'RSD',
   }
   const faq = {
@@ -59,5 +72,16 @@ export function structuredData(siteUrl) {
       acceptedAnswer: { '@type': 'Answer', text: answer },
     })),
   }
-  return [business, faq]
+  // naziv sajta koji Google prikazuje iznad rezultata (umesto samo "beepbeepdostava.rs")
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteUrl}/#sajt`,
+    name: 'Beep Beep Dostava',
+    alternateName: ['Beep Beep Dostava Negotin', 'beepbeepdostava.rs'],
+    url: `${siteUrl}/`,
+    inLanguage: 'sr-Latn-RS',
+    publisher: { '@id': `${siteUrl}/#firma` },
+  }
+  return [business, website, faq]
 }

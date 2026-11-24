@@ -166,6 +166,21 @@
   }
 }
 
+/* ulazak naslova i podnaslova na početnom ekranu, bez JavaScripta (tekst je odmah u HTML-u) */
+@keyframes hero-line-in {
+  from { transform: translateY(105%); }
+  to { transform: none; }
+}
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-line-in { animation: hero-line-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.hero-fade-in { animation: hero-fade-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-line-in, .hero-fade-in { animation: none; }
+}
+
 /* crveni red naslova na početnom ekranu: crvena slova sa belom "senkom" ispod, kao slojeviti natpis */
 /* naslov na početnom ekranu: debela kosa slova, tamnoplavi obrub i "3D" senka ispod (kao na letku) */
 .hero-title {

@@ -20,6 +20,13 @@ export const BUSINESS = {
   legal: '', // npr. 'Beep Beep doo, PIB 123456789, MB 12345678, Hajduk Veljkova 10, Negotin'
 }
 
+// Profili na društvenim mrežama: idu u podnožje sajta i u podatke za Google (sameAs).
+// Prazno polje se ne prikazuje.
+export const SOCIAL = {
+  facebook: 'https://www.facebook.com/beepbeepdostavanegotin',
+  instagram: '', // npr. 'https://www.instagram.com/...'
+}
+
 // cena dostave: u Negotinu fiksno, za sela po kilometru (kilometri su u places.js, KM);
 // za mesto van spiska cenu javlja dostavljač
 export const DELIVERY = {

@@ -1,4 +1,4 @@
-import { BUSINESS, NAV, PHONE, SERVICES } from '../data'
+import { BUSINESS, NAV, PHONE, SERVICES, SOCIAL } from '../data'
 import logo from '../assets/logo.png'
 import { Link, SectionLink, useRoute } from '../lib/router'
 
@@ -63,6 +63,20 @@ export default function Footer() {
               Pišite na WhatsApp
             </a>
           </li>
+          {SOCIAL.facebook && (
+            <li>
+              <a href={SOCIAL.facebook} target="_blank" rel="noopener" className="footer-link">
+                Facebook
+              </a>
+            </li>
+          )}
+          {SOCIAL.instagram && (
+            <li>
+              <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-link">
+                Instagram
+              </a>
+            </li>
+          )}
           <li>Negotin, okolna sela i šire</li>
           {BUSINESS.hours && <li>{BUSINESS.hours}</li>}
         </FooterList>
