@@ -26,7 +26,11 @@ export default function OrderPage({ service, category }) {
   const selected = categories.find((c) => c.key === category)
   usePageTitle(`Naruči: ${active.title}`)
 
-  const shops = SHOPS.filter((s) => s.service === active.key && (!selected || shopCategories(s).has(selected.key)))
+  // u Hrana > Deserti su i poslastičarnice i torte (desserts: true), iako su u usluzi "Torte i pokloni"
+  const dessertsHere = active.key === 'food' && selected?.key === 'desert'
+  const shops = SHOPS.filter(
+    (s) => (s.service === active.key || (dessertsHere && s.desserts)) && (!selected || shopCategories(s).has(selected.key)),
+  )
 
   const pick = (key) => navigate(`/naruci/${active.key}${key && key !== category ? `?k=${key}` : ''}`, { replace: true, scroll: false })
 

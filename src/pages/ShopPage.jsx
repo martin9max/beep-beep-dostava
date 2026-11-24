@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CATEGORIES, itemCategory, shopBySlug } from '../catalog'
+import { CATEGORIES, itemCategories, shopBySlug } from '../catalog'
 import { useCart } from '../lib/cart'
 import { isBusiness, useAuth } from '../lib/auth'
 import { Link } from '../lib/router'
@@ -49,7 +49,7 @@ export default function ShopPage({ slug, category }) {
   // sa ?k=pica stranica odmah skroluje do pica
   useEffect(() => {
     if (!shop || !category) return
-    const i = shop.menu.findIndex((s) => s.cat === category || s.items.some((it) => itemCategory(s, it) === category))
+    const i = shop.menu.findIndex((s) => s.cat === category || s.items.some((it) => itemCategories(s, it).includes(category)))
     if (i > 0) setTimeout(() => scrollToSection(i), 50)
   }, [shop, category])
 

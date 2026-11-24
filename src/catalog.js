@@ -16,6 +16,7 @@
 //   note: '32 cm / 48 cm'            sitan tekst ispod naslova (veličine, gramaža, salata po izboru)
 //   extras: ['masline', 'jaje']      dodaci po želji; kupac ih upiše u napomenu za lokal
 // Stavka može imati weight: '360 g' (prikazuje se pored naziva).
+// Lokal sa desserts: true (torte, kolači) se vidi i u Hrana > Deserti, iako je u drugoj usluzi.
 // Lokal sa realMenu: true ima pravi meni (sa cenovnika ili sajta lokala).
 // stripe: ['#178a45', '#fff', '#e3131c'] je traka u bojama lokala na vrhu njegovog menija.
 // logo: 'Pastizza' je ime fajla u src/assets/partners; logo stoji na kartici lokala i na vrhu menija.
@@ -1356,6 +1357,8 @@ const SHOP_LIST = [
   {
     // torte po narudžbini; cena po parčetu (cenovnik od vlasnice, novembar 2026)
     slug: 'tortica-989',
+    // torte i kolači se vide i u Hrana > Deserti
+    desserts: true,
     name: 'Tortica 989',
     logo: 'Tortica 989',
     realMenu: true,
@@ -1384,6 +1387,8 @@ const SHOP_LIST = [
   },
   {
     slug: 'poslasticarnica',
+    // torte i kolači se vide i u Hrana > Deserti
+    desserts: true,
     name: 'Poslastičarnica',
     service: 'gifts',
     emoji: '🎂',
@@ -1457,8 +1462,16 @@ export const SHOPS = [...SHOP_LIST].sort((a, b) => (b.slug === 'kafanica') - (a.
 export const shopBySlug = (slug) => SHOPS.find((s) => s.slug === slug)
 
 /** Kategorije u kojima lokal ima bar jednu stavku. */
+/** Kategorije stavke. Slatke palačinke (sve koje nisu slane) su i u "Palačinke" i u "Deserti". */
+export const itemCategories = (section, item) => {
+  const cat = item.cat || section.cat
+  if (cat === 'palacinke' && !/slan/i.test(`${section.title} ${item.name}`)) return [cat, 'desert']
+  return cat ? [cat] : []
+}
+
+/** Kategorije u kojima lokal ima bar jednu stavku (torte i kolači, `desserts: true`, su i u "Deserti"). */
 export const shopCategories = (shop) =>
-  new Set(shop.menu.flatMap((section) => section.items.map((item) => item.cat || section.cat)).filter(Boolean))
+  new Set([...shop.menu.flatMap((section) => section.items.flatMap((item) => itemCategories(section, item))), ...(shop.desserts ? ['desert'] : [])])
 
 export const itemCategory = (section, item) => item.cat || section.cat
 
