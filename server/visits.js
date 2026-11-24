@@ -92,6 +92,27 @@ function sourceOf(req, url) {
   return `Sajt: ${from}`.slice(0, 80)
 }
 
+// lokalne adrese (localhost, 127.0.0.1, kućna mreža): to su probe sajta na računaru, ne pravi posetioci
+const LOCAL = /^(localhost|127\.|0\.0\.0\.0|\[?::1\]?|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|\.local$|\.localhost$/i
+const hostOf = (v) => {
+  try {
+    return new URL(v).hostname
+  } catch {
+    return ''
+  }
+}
+
+/** Posete koje se ne broje: admin (uređaj na kom je otvoren /admin) i probe sa lokalnog računara. */
+function notCounted(req) {
+  if (/(?:^|;\s*)bb_admin=1/.test(req.headers.cookie || '')) return true
+  if (req.headers.authorization) return true
+  if (LOCAL.test((req.headers.host || '').replace(/:\d+$/, ''))) return true
+  return LOCAL.test(hostOf(req.headers.referer || ''))
+}
+
+// ranije zabeležene posete sa localhosta (probe) se brišu iz izvora
+db.prepare("DELETE FROM visit_sources WHERE source LIKE 'Sajt: localhost%' OR source LIKE 'Sajt: 127.%' OR source LIKE 'Sajt: 192.168.%'").run()
+
 /** Zabeleži posetu strane (poziva se kad server šalje HTML strane). */
 export function recordVisit(req, pathname, url = new URL(req.url, 'http://x')) {
   try {
@@ -100,6 +121,7 @@ export function recordVisit(req, pathname, url = new URL(req.url, 'http://x')) {
     if (!ua || BOTS.test(ua)) return
     // pregledač ponekad unapred učita stranu koju korisnik možda neće otvoriti: to nije poseta
     if (/prefetch|prerender/i.test(req.headers['sec-purpose'] || req.headers.purpose || '')) return
+    if (notCounted(req)) return
     const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || ''
     const day = today()
     const visitor = createHash('sha256').update(`${saltFor(day)}|${ip}|${ua}`).digest('base64url').slice(0, 22)

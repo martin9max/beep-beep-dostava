@@ -44,6 +44,10 @@ export async function admin(req, res, next) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Beep Beep admin", charset="UTF-8"')
     return res.end('Potrebna je prijava.')
   }
+  // ovaj uređaj je adminov: njegove posete sajtu se ne broje u statistici (vidi server/visits.js), godinu dana
+  if (!/(?:^|;\s*)bb_admin=1/.test(req.headers.cookie || '')) {
+    res.setHeader('Set-Cookie', 'bb_admin=1; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax' + (req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''))
+  }
 
   // stalna veza sa stranicom porudžbina: nova porudžbina se pojavi odmah, bez osvežavanja
   if (url.pathname === '/admin/stream') {
