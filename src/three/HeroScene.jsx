@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Trike, { BOX } from './Trike'
@@ -69,12 +69,7 @@ function Scene({ progress, compact, trikeSize, lower, onArrive }) {
   // scena se crta samo kad se nešto menja (skrol ili ulazak), ne 60-120 puta u sekundi bez potrebe
   useEffect(() => progress.on('change', () => invalidate()), [progress, invalidate])
 
-  const firstFrame = useRef(false)
   useFrame((state, delta) => {
-    if (!firstFrame.current) {
-      firstFrame.current = true
-      ;(window.__bb3d ??= []).push(`prvi kadar ${Math.round(performance.now() / 100) / 10}s`)
-    }
     const t = state.clock.elapsedTime
     if (start.current === null) start.current = t
     // posle pauze delta može biti velika; ograničena je da pokret ostane gladak
@@ -225,76 +220,15 @@ function StudioEnvironment() {
   return null
 }
 
-/**
- * Provera da li je trokolica stvarno nacrtana: 4 s posle pokretanja (ulazak traje ~2,6 s) scena se nacrta
- * još jednom i pročitaju se pikseli platna. Ako je platno prazno (neki pregledači, npr. Safari na nekim
- * Mac računarima, pokrenu 3D bez greške, a ne nacrtaju ništa), javlja se onResult(false), pa se umesto
- * 3D prikazuje slika trokolice. onResult(true) kad je nacrtana.
- */
-function DrawCheck({ onResult }) {
-  const { gl, scene, camera } = useThree()
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const ctx = gl.getContext()
-        const w = ctx.drawingBufferWidth
-        const h = ctx.drawingBufferHeight
-        if (!w || !h) return onResult(false, 'platno bez veličine')
-        gl.render(scene, camera)
-        const px = new Uint8Array(w * h * 4)
-        ctx.readPixels(0, 0, w, h, ctx.RGBA, ctx.UNSIGNED_BYTE, px)
-        let drawn = 0
-        for (let i = 3; i < px.length; i += 4 * 7) if (px[i] > 0) drawn++
-        onResult(drawn > 50, `${w}x${h}, obojenih tačaka ${drawn}`)
-      } catch (err) {
-        onResult(false, 'greška: ' + err.message)
-      }
-    }, 4000)
-    return () => clearTimeout(timer)
-  }, [gl, scene, camera, onResult])
-  return null
-}
-
-export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive, onResult }) {
-  // pregledač ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini, a Safari 26 na Mac-u
-  // odmah posle prvog kadra zbog "studijskih" svetala). Tada se platno pravi iznova (novi key) u
-  // rezervnom načinu: bez studijskih svetala, bez zaglađivanja ivica, manja rezolucija. Ako se grafika
-  // izgubi i tada, odustaje se i prikazuje se slika trokolice (onResult(false)), bez beskonačnog kruga.
-  // Safari na Mac-u (ne iPhone/iPad) odmah ide u rezervni način; ?safe3d da se rezervni način vidi i u drugim pregledačima
-  const [gen, setGen] = useState(() => {
-    const ua = navigator.userAgent
-    const macSafari = /Macintosh/.test(ua) && /Version\/[\d.]+ Safari/.test(ua) && !/Chrome|Chromium|Edg|Firefox/.test(ua) && navigator.maxTouchPoints < 2
-    return macSafari || location.search.includes('safe3d') ? 1 : 0
-  })
-  const safe = gen > 0
-  const onCreated = ({ gl, size }) => {
-    ;(window.__bb3d ??= []).push(`platno${safe ? ' (rezervno)' : ''} ${Math.round(size.width)}x${Math.round(size.height)} ${Math.round(performance.now() / 100) / 10}s`)
-    const lost = (e) => {
-      e.preventDefault()
-      ;(window.__bb3d ??= []).push(`grafika izgubljena ${Math.round(performance.now() / 100) / 10}s`)
-      if (gen >= 2) onResult?.(false, 'grafika se gasi i u rezervnom načinu')
-      else setTimeout(() => setGen((g) => g + 1), 300)
-    }
-    gl.domElement.addEventListener('webglcontextlost', lost, { once: true })
-  }
+export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
   return (
-    <Canvas
-      key={gen}
-      onCreated={onCreated}
-      frameloop={active ? 'demand' : 'never'}
-      dpr={safe ? 1 : [1, 1.5]}
-      camera={{ position: [0, 1.3, 8], fov: 30 }}
-      gl={{ antialias: !safe, alpha: true, powerPreference: safe ? 'low-power' : 'default' }}
-    >
-      <ambientLight intensity={safe ? 0.9 : 0.35} />
-      {/* u rezervnom načinu nebo/zemlja svetlo umesto studijskih odsjaja, da farba ne bude tamna */}
-      {safe && <hemisphereLight args={['#ffffff', '#8a7a66', 1.2]} />}
+    <Canvas frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
+      <ambientLight intensity={0.35} />
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
       <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
-      {onResult && <DrawCheck onResult={onResult} />}
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
-      {!safe && <StudioEnvironment />}
+      <StudioEnvironment />
     </Canvas>
   )
 }
