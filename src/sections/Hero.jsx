@@ -7,6 +7,10 @@ import arriveSound from '../assets/sounds/stigao.mp3'
 
 // Fotografija ulice u pozadini (trokolica vozi po putu sa slike)
 import HERO_BG from '../assets/photos/hero-bg.webp'
+// slike trokolice iz 3D modela (u konačnom položaju): prikazuju se kad pregledač nema 3D (WebGL),
+// npr. kad je na računaru isključeno hardversko ubrzanje
+import TRIKE_IMG from '../assets/trokolica.webp'
+import TRIKE_IMG_PHONE from '../assets/trokolica-telefon.webp'
 
 // three.js se učitava odvojeno, tekst se prikazuje odmah
 const HeroScene = lazy(() => import('../three/HeroScene'))
@@ -14,6 +18,7 @@ const HeroScene = lazy(() => import('../three/HeroScene'))
 /**
  * Ako 3D scena pukne (npr. telefon nema WebGL ili ga je ugasio), pukne samo ona, a ne ceo sajt.
  * Posle greške pokušava još jednom (posle 1,5 s), jer je greška često prolazna (grafika zauzeta pri učitavanju).
+ * Ako ni tada ne uspe, poziva onFail (umesto 3D se prikazuje slika trokolice).
  */
 class SceneGuard extends Component {
   state = { failed: false, tries: 0 }
@@ -23,6 +28,7 @@ class SceneGuard extends Component {
   componentDidCatch(err) {
     console.warn('3D trokolica nije pokrenuta:', err?.message)
     if (this.state.tries < 1) this.timer = setTimeout(() => this.setState((s) => ({ failed: false, tries: s.tries + 1 })), 1500)
+    else this.props.onFail?.()
   }
   componentWillUnmount() {
     clearTimeout(this.timer)
@@ -56,7 +62,12 @@ export default function Hero() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
   // 3D scena postoji samo u browseru (ne pri prerenderu za pretraživače)
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(hasWebGL()), [])
+  const [noGL, setNoGL] = useState(false)
+  useEffect(() => {
+    const gl = hasWebGL()
+    setMounted(gl)
+    setNoGL(!gl)
+  }, [])
   // kad se odskroluje ispod početnog ekrana, 3D scena se pauzira (inače koči ostale sekcije)
   const [visible, setVisible] = useState(true)
   useEffect(() => {
@@ -98,8 +109,17 @@ export default function Hero() {
       events.forEach((e) => addEventListener(e, retry, true))
     })
   }
-  const scene = mounted && (
-    <SceneGuard>
+  // bez 3D: ista trokolica kao slika, na istom mestu na putu (pozicija je izmerena na 3D sceni)
+  const still = noGL && (
+    <img
+      src={compact ? TRIKE_IMG_PHONE : TRIKE_IMG}
+      alt=""
+      className="absolute"
+      style={compact ? { left: '21.6%', bottom: '0.9%', width: '58.3%' } : { left: '37.4%', bottom: '0', width: '26.2%' }}
+    />
+  )
+  const scene = mounted && !noGL && (
+    <SceneGuard onFail={() => setNoGL(true)}>
       <Suspense fallback={null}>
         {/* na fotografiji ulice trokolica je manja i niže, da stoji u traci na putu kao pravo vozilo */}
         <HeroScene progress={scrollYProgress} active={visible} compact={compact} size={compact ? 0.85 : 0.72} lower={0.04} onArrive={playArrive} />
@@ -133,6 +153,7 @@ export default function Hero() {
           {!compact && (
             <div className="pointer-events-none absolute inset-0" aria-hidden="true">
               {scene}
+              {still}
             </div>
           )}
 
@@ -172,6 +193,7 @@ export default function Hero() {
             {compact && (
               <div className="relative -mx-5 min-h-0 flex-1 sm:-mx-10" aria-hidden="true">
                 {scene}
+                {still}
               </div>
             )}
           </div>
