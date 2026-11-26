@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Trike, { BOX } from './Trike'
@@ -220,15 +220,83 @@ function StudioEnvironment() {
   return null
 }
 
+/**
+ * Pojednostavljuje materijale posle učitavanja trokolice (nivo 2 i 3), za pregledače koji gase 3D grafiku
+ * na teškim materijalima (Safari 26 na nekim Mac računarima). Oblik i animacija ostaju isti.
+ * 2: bez laka (clearcoat), bez reljefa (bumpMap), obično filtriranje tekstura
+ * 3: najprostiji materijali (Lambert), samo boja i slike
+ */
+function Simplify({ level }) {
+  const { scene, invalidate } = useThree()
+  useLayoutEffect(() => {
+    if (level < 2) return
+    scene.traverse((o) => {
+      if (!o.isMesh || !o.material || o.material.isMeshBasicMaterial || o.userData.simplified === level) return
+      o.userData.simplified = level
+      const old = o.material
+      const base = { color: old.color, map: old.map, transparent: old.transparent, opacity: old.opacity, alphaTest: old.alphaTest, side: old.side }
+      if (old.map) old.map.anisotropy = 1
+      const next =
+        level >= 3
+          ? new THREE.MeshLambertMaterial({ ...base, emissive: old.emissive, emissiveIntensity: old.emissiveIntensity })
+          : new THREE.MeshStandardMaterial({ ...base, roughness: old.roughness, metalness: old.metalness, emissive: old.emissive, emissiveIntensity: old.emissiveIntensity })
+      o.material = next
+    })
+    invalidate()
+  })
+  return null
+}
+
+// nivo koji je na ovom računaru proradio (pamti se), da sledeći put krene odmah od njega
+const LEVEL_KEY = 'bb3d-nivo'
+const savedLevel = () => {
+  try {
+    // ?nivo3d=2 u adresi: proba određenog nivoa
+    const forced = new URLSearchParams(location.search).get('nivo3d')
+    return Number(forced ?? localStorage.getItem(LEVEL_KEY)) || 0
+  } catch {
+    return 0
+  }
+}
+
 export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
+  // Kad pregledač ugasi 3D grafiku (Safari 26 na nekim Mac-ovima to radi odmah posle prvog kadra),
+  // trokolica se pokreće ponovo, svaki put jednostavnija: 1 bez studijskih svetala, 2 bez laka i reljefa,
+  // 3 najprostiji materijali. Posle nivoa 3 se ne pokušava više (nema beskonačnog kruga).
+  const [level, setLevel] = useState(savedLevel)
+  const onCreated = ({ gl }) => {
+    gl.domElement.addEventListener(
+      'webglcontextlost',
+      (e) => {
+        e.preventDefault()
+        if (level >= 3) return
+        try {
+          localStorage.setItem(LEVEL_KEY, String(level + 1))
+        } catch {}
+        setTimeout(() => setLevel(level + 1), 300)
+      },
+      { once: true },
+    )
+  }
+  const simple = level > 0
   return (
-    <Canvas frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
-      <ambientLight intensity={0.35} />
+    <Canvas
+      key={level}
+      onCreated={onCreated}
+      frameloop={active ? 'demand' : 'never'}
+      dpr={simple ? 1 : [1, 1.5]}
+      camera={{ position: [0, 1.3, 8], fov: 30 }}
+      gl={{ antialias: !simple, alpha: true }}
+    >
+      <ambientLight intensity={simple ? 0.9 : 0.35} />
+      {/* bez studijskih svetala: nebo/zemlja svetlo, da farba ne bude tamna */}
+      {simple && <hemisphereLight args={['#ffffff', '#8a7a66', 1.2]} />}
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
       <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
+      <Simplify level={level} />
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
-      <StudioEnvironment />
+      {!simple && <StudioEnvironment />}
     </Canvas>
   )
 }
