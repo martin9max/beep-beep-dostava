@@ -256,26 +256,45 @@ function DrawCheck({ onResult }) {
 }
 
 export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive, onResult }) {
-  // telefon ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini): tada se platno
-  // pravi iznova (novi key), da se trokolica vrati umesto da ostane prazno
-  const [gen, setGen] = useState(0)
+  // pregledač ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini, a Safari 26 na Mac-u
+  // odmah posle prvog kadra zbog "studijskih" svetala). Tada se platno pravi iznova (novi key) u
+  // rezervnom načinu: bez studijskih svetala, bez zaglađivanja ivica, manja rezolucija. Ako se grafika
+  // izgubi i tada, odustaje se i prikazuje se slika trokolice (onResult(false)), bez beskonačnog kruga.
+  // Safari na Mac-u (ne iPhone/iPad) odmah ide u rezervni način; ?safe3d da se rezervni način vidi i u drugim pregledačima
+  const [gen, setGen] = useState(() => {
+    const ua = navigator.userAgent
+    const macSafari = /Macintosh/.test(ua) && /Version\/[\d.]+ Safari/.test(ua) && !/Chrome|Chromium|Edg|Firefox/.test(ua) && navigator.maxTouchPoints < 2
+    return macSafari || location.search.includes('safe3d') ? 1 : 0
+  })
+  const safe = gen > 0
   const onCreated = ({ gl, size }) => {
-    ;(window.__bb3d ??= []).push(`platno ${Math.round(size.width)}x${Math.round(size.height)} ${Math.round(performance.now() / 100) / 10}s`)
+    ;(window.__bb3d ??= []).push(`platno${safe ? ' (rezervno)' : ''} ${Math.round(size.width)}x${Math.round(size.height)} ${Math.round(performance.now() / 100) / 10}s`)
     const lost = (e) => {
       e.preventDefault()
-      setTimeout(() => setGen((g) => g + 1), 300)
+      ;(window.__bb3d ??= []).push(`grafika izgubljena ${Math.round(performance.now() / 100) / 10}s`)
+      if (gen >= 2) onResult?.(false, 'grafika se gasi i u rezervnom načinu')
+      else setTimeout(() => setGen((g) => g + 1), 300)
     }
     gl.domElement.addEventListener('webglcontextlost', lost, { once: true })
   }
   return (
-    <Canvas key={gen} onCreated={onCreated} frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
-      <ambientLight intensity={0.35} />
+    <Canvas
+      key={gen}
+      onCreated={onCreated}
+      frameloop={active ? 'demand' : 'never'}
+      dpr={safe ? 1 : [1, 1.5]}
+      camera={{ position: [0, 1.3, 8], fov: 30 }}
+      gl={{ antialias: !safe, alpha: true, powerPreference: safe ? 'low-power' : 'default' }}
+    >
+      <ambientLight intensity={safe ? 0.9 : 0.35} />
+      {/* u rezervnom načinu nebo/zemlja svetlo umesto studijskih odsjaja, da farba ne bude tamna */}
+      {safe && <hemisphereLight args={['#ffffff', '#8a7a66', 1.2]} />}
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
       <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
       {onResult && <DrawCheck onResult={onResult} />}
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
-      <StudioEnvironment />
+      {!safe && <StudioEnvironment />}
     </Canvas>
   )
 }
