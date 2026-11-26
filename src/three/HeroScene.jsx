@@ -220,7 +220,37 @@ function StudioEnvironment() {
   return null
 }
 
-export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
+/**
+ * Provera da li je trokolica stvarno nacrtana: 4 s posle pokretanja (ulazak traje ~2,6 s) scena se nacrta
+ * još jednom i pročitaju se pikseli platna. Ako je platno prazno (neki pregledači, npr. Safari na nekim
+ * Mac računarima, pokrenu 3D bez greške, a ne nacrtaju ništa), javlja se onResult(false), pa se umesto
+ * 3D prikazuje slika trokolice. onResult(true) kad je nacrtana.
+ */
+function DrawCheck({ onResult }) {
+  const { gl, scene, camera } = useThree()
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const ctx = gl.getContext()
+        const w = ctx.drawingBufferWidth
+        const h = ctx.drawingBufferHeight
+        if (!w || !h) return onResult(false, 'platno bez veličine')
+        gl.render(scene, camera)
+        const px = new Uint8Array(w * h * 4)
+        ctx.readPixels(0, 0, w, h, ctx.RGBA, ctx.UNSIGNED_BYTE, px)
+        let drawn = 0
+        for (let i = 3; i < px.length; i += 4 * 7) if (px[i] > 0) drawn++
+        onResult(drawn > 50, `${w}x${h}, obojenih tačaka ${drawn}`)
+      } catch (err) {
+        onResult(false, 'greška: ' + err.message)
+      }
+    }, 4000)
+    return () => clearTimeout(timer)
+  }, [gl, scene, camera, onResult])
+  return null
+}
+
+export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive, onResult }) {
   // telefon ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini): tada se platno
   // pravi iznova (novi key), da se trokolica vrati umesto da ostane prazno
   const [gen, setGen] = useState(0)
@@ -237,6 +267,7 @@ export default function HeroScene({ progress, active = true, compact = false, si
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />
       <Scene progress={progress} compact={compact} trikeSize={size} lower={lower} onArrive={onArrive} />
+      {onResult && <DrawCheck onResult={onResult} />}
       {/* "studijska" svetla za odsjaje na farbi, bez preuzimanja HDR fajlova */}
       <StudioEnvironment />
     </Canvas>

@@ -1,5 +1,6 @@
-import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { useScroll } from 'framer-motion'
+import { Component, Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { motion, useScroll } from 'framer-motion'
+import { EASE } from '../lib/order'
 import Button from '../components/Button'
 import Partners from './Partners'
 import { Link } from '../lib/router'
@@ -51,6 +52,13 @@ const hasWebGL = () => {
     return false
   }
 }
+
+// ulazak teksta preko framer-motion (kao do 24.11): sa CSS animacijom Safari na računaru nije prikazivao 3D trokolicu
+const fadeUp = (delay) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.7, ease: EASE },
+})
 
 const LINES = [
   ['Beep Beep dostava', 'text-white'],
@@ -118,11 +126,31 @@ export default function Hero() {
       style={compact ? { left: '21.6%', bottom: '0.9%', width: '58.3%' } : { left: '37.4%', bottom: '0', width: '26.2%' }}
     />
   )
+  // provera da je 3D trokolica stvarno nacrtana; ako nije (ili se 3D ne javi za 9 s), prikazuje se slika
+  const [debug, setDebug] = useState('')
+  const drawResult = useRef(null)
+  const onResult = useCallback((ok, info) => {
+    drawResult.current = ok
+    setDebug(`3D: ${ok ? 'nacrtano' : 'NIJE nacrtano'} (${info})`)
+    if (!ok) setNoGL(true)
+  }, [])
+  useEffect(() => {
+    if (!mounted) return
+    const timer = setTimeout(() => {
+      if (drawResult.current === null) {
+        setDebug('3D: nije se javio za 9 s')
+        setNoGL(true)
+      }
+    }, 9000)
+    return () => clearTimeout(timer)
+  }, [mounted])
+  const [showDebug, setShowDebug] = useState(false)
+  useEffect(() => setShowDebug(location.search.includes('debug')), [])
   const scene = mounted && !noGL && (
     <SceneGuard onFail={() => setNoGL(true)}>
       <Suspense fallback={null}>
         {/* na fotografiji ulice trokolica je manja i niže, da stoji u traci na putu kao pravo vozilo */}
-        <HeroScene progress={scrollYProgress} active={visible} compact={compact} size={compact ? 0.85 : 0.72} lower={0.04} onArrive={playArrive} />
+        <HeroScene progress={scrollYProgress} active={visible} compact={compact} size={compact ? 0.85 : 0.72} lower={0.04} onArrive={playArrive} onResult={onResult} />
       </Suspense>
     </SceneGuard>
   )
@@ -133,6 +161,12 @@ export default function Hero() {
           a početni ekran dobija skoro ceo prostor */}
       <div className="hero-pin sticky top-0 flex flex-col gap-3 px-3 pb-3 pt-[84px] sm:px-5 sm:pt-[88px]">
         <div className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] bg-ink text-white">
+          {/* dijagnostika (adresa sa ?debug): šta se desilo sa 3D trokolicom */}
+          {showDebug && (
+            <div className="absolute bottom-2 right-2 z-30 max-w-[90%] rounded bg-black/80 px-2 py-1 font-mono text-[11px] text-white">
+              {`WebGL: ${mounted || noGL ? (noGL && !debug ? 'NEMA' : 'ima') : '...'} | ${debug || 'čekam proveru...'} | ${navigator.userAgent.replace(/^.*?\) /, '')}`}
+            </div>
+          )}
           {/* pozadina */}
           <>
               {/* kadar: dole je uvek put (tu vozi trokolica); na računaru se vidi pojas sa radnjama i putem,
@@ -164,29 +198,33 @@ export default function Hero() {
                 {LINES.map(([line, color], i) => (
                   // dodatni prostor oko reda da obrub, nagnuta slova i senka ne budu odsečeni
                   <span key={line} className="-mx-[.12em] -mb-[.2em] block overflow-hidden px-[.12em] pb-[.2em] pt-[.04em]">
-                    {/* CSS animacija (index.css): tekst je u HTML-u vidljiv i bez JavaScripta, za Google i brži prikaz */}
-                    <span className={`hero-title hero-line-in block ${color}`} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
+                    <motion.span
+                      className={`hero-title block ${color}`}
+                      initial={{ y: '105%' }}
+                      animate={{ y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease: EASE }}
+                    >
                       {line}
-                    </span>
+                    </motion.span>
                   </span>
                 ))}
                 <span className="sr-only"> u Negotinu i okolini</span>
               </h1>
               {/* dva reda: prvi krupno i podebljano, drugi običan; oba sa crnom ivicom i senkom (hero-sub u index.css) */}
-              <p className="hero-sub hero-fade-in mt-3 leading-tight text-white sm:mt-5" style={{ animationDelay: '0.5s' }}>
+              <motion.p className="hero-sub mt-3 leading-tight text-white sm:mt-5" {...fadeUp(0.5)}>
                 <span className="block text-[clamp(13px,4vw,17px)] font-extrabold sm:text-[22px] lg:text-[26px]">Prva i prava dostava u Negotinu i okolini.</span>
                 <span className="mt-1.5 block text-[clamp(13px,3.8vw,15px)] font-semibold text-white/95 sm:mt-2 sm:text-lg lg:text-xl">
                   Dostava hrane, pića, namirnica, lekova, poklona i još mnogo toga.
                 </span>
-              </p>
-              <div className="hero-fade-in pointer-events-auto mt-4 flex gap-3 sm:mt-6" style={{ animationDelay: '0.65s' }}>
+              </motion.p>
+              <motion.div className="pointer-events-auto mt-4 flex gap-3 sm:mt-6" {...fadeUp(0.65)}>
                 <Button as={Link} href="/registracija" arrow className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
                   Registracija
                 </Button>
                 <Button as="a" href="#usluge" variant="light" className="flex-1 px-4 py-3 sm:min-w-[150px] sm:flex-none sm:px-6 sm:py-3.5">
                   Naše usluge
                 </Button>
-              </div>
+              </motion.div>
             </div>
 
             {/* telefon i tablet: prostor za trokolicu */}
