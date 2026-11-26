@@ -69,7 +69,12 @@ function Scene({ progress, compact, trikeSize, lower, onArrive }) {
   // scena se crta samo kad se nešto menja (skrol ili ulazak), ne 60-120 puta u sekundi bez potrebe
   useEffect(() => progress.on('change', () => invalidate()), [progress, invalidate])
 
+  const firstFrame = useRef(false)
   useFrame((state, delta) => {
+    if (!firstFrame.current) {
+      firstFrame.current = true
+      ;(window.__bb3d ??= []).push(`prvi kadar ${Math.round(performance.now() / 100) / 10}s`)
+    }
     const t = state.clock.elapsedTime
     if (start.current === null) start.current = t
     // posle pauze delta može biti velika; ograničena je da pokret ostane gladak
@@ -254,7 +259,8 @@ export default function HeroScene({ progress, active = true, compact = false, si
   // telefon ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini): tada se platno
   // pravi iznova (novi key), da se trokolica vrati umesto da ostane prazno
   const [gen, setGen] = useState(0)
-  const onCreated = ({ gl }) => {
+  const onCreated = ({ gl, size }) => {
+    ;(window.__bb3d ??= []).push(`platno ${Math.round(size.width)}x${Math.round(size.height)} ${Math.round(performance.now() / 100) / 10}s`)
     const lost = (e) => {
       e.preventDefault()
       setTimeout(() => setGen((g) => g + 1), 300)

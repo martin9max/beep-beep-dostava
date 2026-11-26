@@ -14,7 +14,17 @@ import TRIKE_IMG from '../assets/trokolica.webp'
 import TRIKE_IMG_PHONE from '../assets/trokolica-telefon.webp'
 
 // three.js se učitava odvojeno, tekst se prikazuje odmah
-const HeroScene = lazy(() => import('../three/HeroScene'))
+// koraci pokretanja 3D scene (za dijagnostiku na adresi sa ?debug): window.__bb3d
+const mark3d = (step) => {
+  if (typeof window !== 'undefined') (window.__bb3d ??= []).push(`${step} ${Math.round(performance.now() / 100) / 10}s`)
+}
+const HeroScene = lazy(() => {
+  mark3d('preuzimam')
+  return import('../three/HeroScene').then(
+    (m) => (mark3d('preuzet'), m),
+    (err) => (mark3d('greška preuzimanja: ' + err.message), Promise.reject(err)),
+  )
+})
 
 /**
  * Ako 3D scena pukne (npr. telefon nema WebGL ili ga je ugasio), pukne samo ona, a ne ceo sajt.
@@ -138,14 +148,20 @@ export default function Hero() {
     if (!mounted) return
     const timer = setTimeout(() => {
       if (drawResult.current === null) {
-        setDebug('3D: nije se javio za 9 s')
+        setDebug('3D: nije se javio za 6 s')
         setNoGL(true)
       }
-    }, 9000)
+    }, 6000)
     return () => clearTimeout(timer)
   }, [mounted])
   const [showDebug, setShowDebug] = useState(false)
   useEffect(() => setShowDebug(location.search.includes('debug')), [])
+  const [, tick] = useState(0)
+  useEffect(() => {
+    if (!showDebug) return
+    const id = setInterval(() => tick((n) => n + 1), 500)
+    return () => clearInterval(id)
+  }, [showDebug])
   const scene = mounted && !noGL && (
     <SceneGuard onFail={() => setNoGL(true)}>
       <Suspense fallback={null}>
@@ -164,7 +180,7 @@ export default function Hero() {
           {/* dijagnostika (adresa sa ?debug): šta se desilo sa 3D trokolicom */}
           {showDebug && (
             <div className="absolute bottom-2 right-2 z-30 max-w-[90%] rounded bg-black/80 px-2 py-1 font-mono text-[11px] text-white">
-              {`WebGL: ${mounted || noGL ? (noGL && !debug ? 'NEMA' : 'ima') : '...'} | ${debug || 'čekam proveru...'} | ${navigator.userAgent.replace(/^.*?\) /, '')}`}
+              {`WebGL: ${mounted || noGL ? (noGL && !debug ? 'NEMA' : 'ima') : '...'} | ${debug || 'čekam proveru...'} | koraci: ${(window.__bb3d || []).join(', ') || 'nijedan'} | ${navigator.userAgent.replace(/^.*?\) /, '')}`}
             </div>
           )}
           {/* pozadina */}
