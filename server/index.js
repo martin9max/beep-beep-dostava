@@ -46,6 +46,8 @@ async function staticFiles(req, res) {
   if (ext === '.html' && !path.extname(pathname) && /text\/html/.test(req.headers.accept || '')) recordVisit(req, pathname)
   res.setHeader('Content-Type', TYPES[ext] || 'application/octet-stream')
   if (pathname.startsWith('/assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+  // strane (HTML) pregledač uvek proverava, da posle objave odmah dobije novu verziju sajta (Safari je inače držao staru)
+  else if (ext === '.html') res.setHeader('Cache-Control', 'no-cache')
   createReadStream(file)
     .on('error', () => {
       // fajl ne može da se pročita: greška umesto pada servera
