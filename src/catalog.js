@@ -83,7 +83,7 @@ const SHOP_LIST = [
     slug: 'pastizza',
     name: 'Pastizza',
     realMenu: true,
-    // logo iz src/assets/partners/Pastizza.jpg (isti kao u traci "Naši partneri")
+    // logo iz src/assets/partners/Pastizza.webp (isti kao u traci "Naši partneri")
     logo: 'Pastizza',
     // zelena, bela, crvena kao na njihovom cenovniku (traka na vrhu menija kad nema logoa)
     stripe: ['#178a45', '#ffffff', '#e3131c'],

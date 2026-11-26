@@ -51,7 +51,6 @@ Sajt mora ići preko **https** (kolačić za prijavu je `Secure`). Iza proksija 
   cene u `DELIVERY` u `src/data.js`), i to se dodaje u ukupno. Mesto van spiska: cenu javlja dostavljač. Na stranicama za naručivanje ispod zaglavlja stalno stoji
   „Dostava na: … · Promeni adresu“ (`src/components/Address.jsx`); privremena adresa važi samo za tu porudžbinu.
   U admin panelu i Telegram poruci uz adresu ide link za Google mape.
-- **Promptovi za slike:** `PROMPTOVI-ZA-SLIKE.md`
 - **Radio** (dugme u zaglavlju): stanice su u `src/data.js`, `RADIO` (YouTube video ili plejlista po žanru).
 - `/prijava`, `/registracija`, `/nalog` – nalog kupca i istorija porudžbina
 - **Meniji, cene, lokali i kategorije:** `src/catalog.js`. Trenutne cene su PRIMER, zamenite pravim.
@@ -67,7 +66,7 @@ Sajt mora ići preko **https** (kolačić za prijavu je `Secure`). Iza proksija 
 - `src/lib/order.js` – validacija telefona i tekst porudžbine
 - `src/lib/` – i ruter (`router.jsx`), prijava (`auth.jsx`) i korpa (`cart.jsx`)
 - `src/pages/` – podstranice (naručivanje, meni lokala, korpa, prijava, nalog)
-- `src/assets/photos/` – fotografije (vidi README u tom folderu i `PROMPTOVI-ZA-SLIKE.md`)
+- `src/assets/photos/` – fotografije (vidi README u tom folderu)
 - `src/index.css` – Tailwind tema (boje, fontovi) i stilovi dugmadi
 
 ## 3D trokolica na početnom ekranu

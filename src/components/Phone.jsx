@@ -53,7 +53,7 @@ export default function Phone({ href }) {
               <div className="relative mt-6 grid h-[104px] w-[104px] place-items-center">
                 <span className="phone-ring" />
                 <span className="phone-ring [animation-delay:.6s]" />
-                <img src={LOGO} alt="" width="104" height="104" className="relative h-full w-full rounded-full ring-4 ring-white/90" />
+                <img src={LOGO} alt="" width="104" height="104" loading="lazy" className="relative h-full w-full rounded-full ring-4 ring-white/90" />
               </div>
 
               <p className="mt-6 text-xl font-bold leading-tight">Beep Beep Dostava</p>
@@ -80,7 +80,7 @@ export default function Phone({ href }) {
                 <i className="block rounded-full bg-[#0a0f1f] ring-2 ring-white/20" />
                 <i className="m-auto block h-3 w-3 rounded-full bg-[#fff3c4]" />
               </div>
-              <img src={LOGO} alt="" width="120" height="120" className="h-[120px] w-[120px] rounded-full ring-[5px] ring-white shadow-[0_12px_30px_-10px_rgba(0,0,0,.6)]" />
+              <img src={LOGO} alt="" width="120" height="120" loading="lazy" className="h-[120px] w-[120px] rounded-full ring-[5px] ring-white shadow-[0_12px_30px_-10px_rgba(0,0,0,.6)]" />
               <p className="mt-5 text-[22px] font-extrabold uppercase leading-none tracking-tight text-white">Beep Beep</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[.3em] text-white/75">dostava</p>
             </div>

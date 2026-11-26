@@ -105,7 +105,19 @@ export default function Partners({ className = '' }) {
             >
               <PartnerLink link={partner.link} name={partner.name} hidden={i >= ITEMS.length}>
                 {partner.src ? (
-                  <img src={partner.src} alt={partner.name} decoding="sync" draggable="false" className="h-full w-full object-cover" />
+                  // prva 4 logoa se vide odmah; ostali se preuzimaju kad se približe ekranu, posle slike ulice i 3D trokolice
+                  // (fetchPriority "low": ne otimaju internet glavnom delu strane, naročito na telefonu)
+                  <img
+                    src={partner.src}
+                    alt={partner.name}
+                    decoding="sync"
+                    draggable="false"
+                    fetchPriority={i < 4 ? 'auto' : 'low'}
+                    loading={i < 4 ? undefined : 'lazy'}
+                    width={partner.narrow ? 520 : 576}
+                    height={partner.narrow ? 400 : 224}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="text-sm font-semibold text-mute">{partner.name}</span>
                 )}

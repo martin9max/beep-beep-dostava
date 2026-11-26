@@ -22,8 +22,9 @@ const SERVICE_SEO = {
 }
 
 /** Strane koje Google treba da vidi (idu u sitemap i dobijaju svoj gotov HTML). */
+// usluge za firme (/lokal/kurir) vide samo prijavljene firme, pa ta strana ne ide u pretragu
 export function indexedPaths() {
-  return ['/', ...SERVICES.map((s) => `/naruci/${s.key}`), ...SHOPS.map((s) => `/lokal/${s.slug}`), '/radio', '/uslovi', '/privatnost']
+  return ['/', ...SERVICES.map((s) => `/naruci/${s.key}`), ...SHOPS.filter((s) => s.service !== 'other').map((s) => `/lokal/${s.slug}`), '/radio', '/uslovi', '/privatnost']
 }
 
 /** { title, description, path } za stranu, ili null ako strana ne postoji. path je glavna adresa (canonical). */

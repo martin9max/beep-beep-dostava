@@ -191,7 +191,7 @@ function Summary({ cart, place }) {
       )}
       {delivery === undefined && (
         <p className="text-sm text-mute">
-          Dostava: {din(DELIVERY.city)} u Negotinu, za sela {DELIVERY.perKm} din po kilometru.
+          Dostava: {din(DELIVERY.city)} u Negotinu, za sela cena zavisi od mesta (vidi se kad ga izaberete).
         </p>
       )}
     </dl>

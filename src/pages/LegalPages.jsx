@@ -8,7 +8,7 @@ import { usePageTitle } from './PageShell'
 // (npr. nova usluga, plaćanje karticom, drugi hosting), treba promeniti i ovaj tekst i datum ispod.
 // Pre objave je dobro da ga pogleda pravnik; podaci o firmi se upisuju u BUSINESS.legal (src/data.js).
 
-const UPDATED = '20. novembar 2026.'
+const UPDATED = '26. novembar 2026.'
 const tel = PHONE.replace(/\s/g, '')
 const operator = BUSINESS.legal || `${SITE.name}, ${BUSINESS.address}`
 
@@ -118,8 +118,8 @@ export function TermsPage() {
               cena se zna tek po računu, i to piše uz artikal.
             </p>
             <p>
-              Dostava u Negotinu košta {formatDin(DELIVERY.city)} dinara. Za sela se plaća {formatDin(DELIVERY.perKm)} dinara po kilometru od
-              Negotina, a cenu vidite pri poručivanju čim izaberete mesto. Za mesta koja nisu na spisku cenu dostave javlja dostavljač pre polaska.
+              Dostava u Negotinu košta {formatDin(DELIVERY.city)} dinara. Za sela cena zavisi od mesta (za većinu sela{' '}
+              {formatDin(DELIVERY.perKm)} dinara po kilometru od Negotina, a za neka sela je stalna), i vidite je pri poručivanju čim izaberete mesto. Za mesta koja nisu na spisku cenu dostave javlja dostavljač pre polaska.
               Svako dodatno zaustavljanje (npr. porudžbina iz više lokala) naplaćuje se 100 dinara.
             </p>
             <p>
@@ -261,7 +261,8 @@ export function PrivacyPage() {
                 naloga od neovlašćenog pristupa.
               </li>
               <li>
-                <b>Statistika poseta:</b> koliko ljudi je dnevno otvorilo sajt i koje strane. Bez kolačića: posetilac se
+                <b>Statistika poseta:</b> koliko ljudi je dnevno otvorilo sajt, koje strane i odakle su došli (npr. Google, Instagram ili
+                ime sajta sa kog je kliknut link). Bez kolačića: posetilac se
                 prepoznaje samo u okviru jednog dana, po šifri koja se svaki dan menja, a IP adresa se ne čuva, pa se iz
                 statistike ne može saznati ko je posetio sajt.
               </li>
@@ -317,6 +318,9 @@ export function PrivacyPage() {
             <p>
               Koristimo samo jedan neophodan kolačić: onaj koji pamti da ste prijavljeni (važi 60 dana ili do odjave). Bez njega prijava ne bi
               radila, pa za njega nije potreban pristanak.
+            </p>
+            <p>
+              Lokali i administrator sajta imaju svoj kolačić za prijavu u svoj panel. Običnim posetiocima se on ne postavlja.
             </p>
             <p>
               U vašem pregledaču (ne kod nas) čuvaju se sadržaj korpe i privremena adresa za dostavu, da ne nestanu ako zatvorite stranicu.

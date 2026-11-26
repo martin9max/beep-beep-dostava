@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Trike, { BOX } from './Trike'
@@ -221,8 +221,18 @@ function StudioEnvironment() {
 }
 
 export default function HeroScene({ progress, active = true, compact = false, size = 1, lower = 0, onArrive }) {
+  // telefon ponekad oduzme grafiku stranici (malo memorije, aplikacija u pozadini): tada se platno
+  // pravi iznova (novi key), da se trokolica vrati umesto da ostane prazno
+  const [gen, setGen] = useState(0)
+  const onCreated = ({ gl }) => {
+    const lost = (e) => {
+      e.preventDefault()
+      setTimeout(() => setGen((g) => g + 1), 300)
+    }
+    gl.domElement.addEventListener('webglcontextlost', lost, { once: true })
+  }
   return (
-    <Canvas frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
+    <Canvas key={gen} onCreated={onCreated} frameloop={active ? 'demand' : 'never'} dpr={[1, 1.5]} camera={{ position: [0, 1.3, 8], fov: 30 }} gl={{ antialias: true, alpha: true }}>
       <ambientLight intensity={0.35} />
       <directionalLight position={[4, 6, 5]} intensity={1.8} />
       <directionalLight position={[-5, 3, -2]} intensity={0.5} color="#ffd5c8" />

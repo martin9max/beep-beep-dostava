@@ -1,17 +1,50 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useScroll } from 'framer-motion'
 import Button from '../components/Button'
 import Partners from './Partners'
-import HeroStreet from './HeroStreet'
 import { Link } from '../lib/router'
 import arriveSound from '../assets/sounds/stigao.mp3'
 
-// Fotografija u pozadini: src/assets/photos/hero-bg.webp (ako ima licencu sa potpisom, dodajte i potpis autora).
-// Dok je nema, pozadina je nacrtana ulica sa radnjama i putem (HeroStreet).
-const HERO_BG = Object.values(import.meta.glob('../assets/photos/hero-bg.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' }))[0]
+// Fotografija ulice u pozadini (trokolica vozi po putu sa slike)
+import HERO_BG from '../assets/photos/hero-bg.webp'
 
 // three.js se učitava odvojeno, tekst se prikazuje odmah
 const HeroScene = lazy(() => import('../three/HeroScene'))
+
+/**
+ * Ako 3D scena pukne (npr. telefon nema WebGL ili ga je ugasio), pukne samo ona, a ne ceo sajt.
+ * Posle greške pokušava još jednom (posle 1,5 s), jer je greška često prolazna (grafika zauzeta pri učitavanju).
+ */
+class SceneGuard extends Component {
+  state = { failed: false, tries: 0 }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidCatch(err) {
+    console.warn('3D trokolica nije pokrenuta:', err?.message)
+    if (this.state.tries < 1) this.timer = setTimeout(() => this.setState((s) => ({ failed: false, tries: s.tries + 1 })), 1500)
+  }
+  componentWillUnmount() {
+    clearTimeout(this.timer)
+  }
+  render() {
+    return this.state.failed ? null : (
+      <div key={this.state.tries} className="h-full w-full">
+        {this.props.children}
+      </div>
+    )
+  }
+}
+
+/** Da li pregledač može da crta 3D (WebGL). Bez toga se scena ni ne preuzima. */
+const hasWebGL = () => {
+  try {
+    const c = document.createElement('canvas')
+    return Boolean(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
 
 const LINES = [
   ['Beep Beep dostava', 'text-white'],
@@ -23,7 +56,7 @@ export default function Hero() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
   // 3D scena postoji samo u browseru (ne pri prerenderu za pretraživače)
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  useEffect(() => setMounted(hasWebGL()), [])
   // kad se odskroluje ispod početnog ekrana, 3D scena se pauzira (inače koči ostale sekcije)
   const [visible, setVisible] = useState(true)
   useEffect(() => {
@@ -66,10 +99,12 @@ export default function Hero() {
     })
   }
   const scene = mounted && (
-    <Suspense fallback={null}>
-      {/* na fotografiji ulice trokolica je manja i niže, da stoji u traci na putu kao pravo vozilo */}
-      <HeroScene progress={scrollYProgress} active={visible} compact={compact} size={HERO_BG ? (compact ? 0.85 : 0.72) : 1} lower={HERO_BG ? 0.04 : 0} onArrive={playArrive} />
-    </Suspense>
+    <SceneGuard>
+      <Suspense fallback={null}>
+        {/* na fotografiji ulice trokolica je manja i niže, da stoji u traci na putu kao pravo vozilo */}
+        <HeroScene progress={scrollYProgress} active={visible} compact={compact} size={compact ? 0.85 : 0.72} lower={0.04} onArrive={playArrive} />
+      </Suspense>
+    </SceneGuard>
   )
 
   return (
@@ -79,8 +114,7 @@ export default function Hero() {
       <div className="hero-pin sticky top-0 flex flex-col gap-3 px-3 pb-3 pt-[84px] sm:px-5 sm:pt-[88px]">
         <div className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] bg-ink text-white">
           {/* pozadina */}
-          {HERO_BG ? (
-            <>
+          <>
               {/* kadar: dole je uvek put (tu vozi trokolica); na računaru se vidi pojas sa radnjama i putem,
                   na telefonu cela visina slike (nebo iza teksta), isečak oko picerije i apoteke */}
               <img
@@ -92,11 +126,7 @@ export default function Hero() {
               />
               {/* blago zatamnjenje samo iza teksta (gore levo), ostatak slike ostaje svetao */}
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,36,72,.62)_0%,rgba(8,36,72,.3)_30%,rgba(8,36,72,0)_52%)] lg:bg-[radial-gradient(70%_80%_at_0%_0%,rgba(8,36,72,.72)_0%,rgba(8,36,72,.4)_40%,rgba(8,36,72,0)_68%)]" />
-            </>
-          ) : (
-            // bez fotografije: nacrtana ulica sa radnjama, trotoarom i putem po kojem vozi trokolica
-            <HeroStreet progress={scrollYProgress} compact={compact} />
-          )}
+          </>
 
 
           {/* 3D trokolica preko celog kadra (računar) */}
