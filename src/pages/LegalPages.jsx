@@ -8,7 +8,7 @@ import { usePageTitle } from './PageShell'
 // (npr. nova usluga, plaćanje karticom, drugi hosting), treba promeniti i ovaj tekst i datum ispod.
 // Pre objave je dobro da ga pogleda pravnik; podaci o firmi se upisuju u BUSINESS.legal (src/data.js).
 
-const UPDATED = '26. novembar 2026.'
+const UPDATED = '27. novembar 2026.'
 const tel = PHONE.replace(/\s/g, '')
 const operator = BUSINESS.legal || `${SITE.name}, ${BUSINESS.address}`
 
@@ -225,7 +225,7 @@ export function PrivacyPage() {
   return (
     <LegalPage
       title="Politika privatnosti"
-      intro="Ovde piše koje vaše podatke prikupljamo, zašto, koliko ih čuvamo, kome ih dajemo i koja prava imate. Prikupljamo samo ono što je potrebno da bismo vam dostavili porudžbinu."
+      intro="Ovde piše koje vaše podatke prikupljamo, zašto, koliko ih čuvamo, kome ih dajemo i koja prava imate, u skladu sa Zakonom o zaštiti podataka o ličnosti („Službeni glasnik RS“, br. 87/2018). Prikupljamo samo ono što je potrebno da bismo vam dostavili porudžbinu."
       sections={[
         [
           'Ko obrađuje podatke',
@@ -236,6 +236,25 @@ export function PrivacyPage() {
             <p>
               Za sva pitanja o podacima javite nam se <Contact />.
             </p>
+          </>,
+        ],
+        [
+          'Osnovni pojmovi',
+          <>
+            <ul className="list-disc pl-5">
+              <li>
+                <b>Podatak o ličnosti</b> je svaki podatak po kome se vi možete prepoznati, npr. ime, broj telefona, adresa ili lokacija.
+              </li>
+              <li>
+                <b>Obrada</b> je sve što se sa podatkom radi: prikupljanje, čuvanje, korišćenje, slanje drugome i brisanje.
+              </li>
+              <li>
+                <b>Rukovalac</b> je onaj ko odlučuje zašto i kako se podaci obrađuju (Beep Beep Dostava).
+              </li>
+              <li>
+                <b>Obrađivač</b> je onaj ko podatke obrađuje po našem nalogu, npr. firma čiji server koristimo.
+              </li>
+            </ul>
           </>,
         ],
         [
@@ -280,6 +299,33 @@ export function PrivacyPage() {
               <li>za evidenciju koju propisuje zakon, npr. za knjigovodstvo (zakonska obaveza).</li>
             </ul>
             <p>Vaše podatke ne prodajemo i ne koristimo ih za reklamne poruke bez vašeg pristanka.</p>
+          </>,
+        ],
+        [
+          'Kako prikupljamo podatke',
+          <>
+            <ul className="list-disc pl-5">
+              <li>od vas, kada otvorite nalog, pošaljete porudžbinu ili izmenite podatke u delu Moj nalog;</li>
+              <li>od vas, kada nas pozovete ili nam pišete (telefon, SMS, WhatsApp, Viber);</li>
+              <li>sa vašeg telefona, samo kada sami pritisnete dugme za slanje tačne lokacije u korpi;</li>
+              <li>automatski, pri prijavi na nalog (vreme, IP adresa, uređaj) i za statistiku poseta, kako je opisano iznad.</li>
+            </ul>
+            <p>Bez imena, telefona i adrese ne možemo da primimo i dostavimo porudžbinu. Tačnu lokaciju niste dužni da pošaljete.</p>
+          </>,
+        ],
+        [
+          'Automatska provera porudžbina',
+          <>
+            <p>
+              Radi zaštite od lažnih porudžbina, sajt sam proverava svaku novu porudžbinu: da li je kupac ranije preuzimao porudžbine, koliko je
+              porudžbina poslao u kratkom roku i kolika je prva porudžbina. Ako nešto deluje neuobičajeno, porudžbina se obeležava, a o njoj odlučuje
+              čovek (vlasnik ili dostavljač), najčešće posle poziva kupcu.
+            </p>
+            <p>
+              Jedina odluka koju sajt donosi sam: ako kupac tri puta ne preuzme poručeno, poručivanje preko sajta za taj nalog se ograničava, a
+              poručivanje telefonom ostaje moguće. Možete tražiti da tu odluku preispita čovek i da iznesete svoj stav, tako što nam se javite{' '}
+              <Contact />. Podatke ne koristimo za profilisanje radi reklama.
+            </p>
           </>,
         ],
         [
@@ -355,7 +401,9 @@ export function PrivacyPage() {
               </li>
               <li>tražite brisanje podataka i naloga;</li>
               <li>tražite ograničenje obrade i podnesete prigovor na obradu;</li>
-              <li>dobijete svoje podatke u obliku koji može da se prenese drugome.</li>
+              <li>dobijete svoje podatke u obliku koji može da se prenese drugome;</li>
+              <li>povučete pristanak u svakom trenutku (npr. za tačnu lokaciju), bez uticaja na ono što je urađeno pre povlačenja;</li>
+              <li>tražite da odluku koju je sajt doneo sam preispita čovek (vidi „Automatska provera porudžbina“).</li>
             </ul>
             <p>
               Zahtev nam pošaljite <Contact />. Odgovaramo bez odlaganja, a najkasnije u roku od 30 dana.
@@ -367,6 +415,15 @@ export function PrivacyPage() {
                 www.poverenik.rs
               </a>
               ).
+            </p>
+          </>,
+        ],
+        [
+          'Maloletna lica',
+          <>
+            <p>
+              Nalog mogu da otvore i porudžbine da šalju osobe starije od 15 godina. Za mlađe od 15 godina nalog otvara i porudžbinu šalje
+              roditelj ili staratelj. Ako saznamo da je nalog otvorilo dete mlađe od 15 godina bez saglasnosti roditelja, brišemo ga.
             </p>
           </>,
         ],
